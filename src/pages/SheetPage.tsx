@@ -1,31 +1,75 @@
 
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 import ProblemDashboard from "@/components/ProblemDashboard";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
-import CourseStatsCard from "@/components/CourseStatsCard";
-import ProgressOverviewCard from "@/components/ProgressOverviewCard";
-import CourseActionButtons from "@/components/CourseActionButtons";
-import { useState } from "react";
-import { 
-  BookOpen, 
-  Video, 
-  Trophy, 
-  Target
-} from "lucide-react";
+import CourseBreadcrumb from "@/components/CourseBreadcrumb";
+import CoursePageToolbar from "@/components/CoursePageToolbar";
+import CourseProgressStats from "@/components/CourseProgressStats";
+
+interface AdvancedFilters {
+  difficulty: string;
+  status: string;
+  hasArticle: boolean;
+  hasVideo: boolean;
+  hasPractice: boolean;
+  searchQuery: string;
+}
 
 const SheetPage = () => {
   const { sheetId } = useParams<{ sheetId: string }>();
   const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [stepsCollapsed, setStepsCollapsed] = useState(false);
-  const [lecturesCollapsed, setLecturesCollapsed] = useState(false);
+  const [allStepsCollapsed, setAllStepsCollapsed] = useState(false);
+  const [allLecturesCollapsed, setAllLecturesCollapsed] = useState(false);
+  const [filters, setFilters] = useState<AdvancedFilters>({
+    difficulty: "all",
+    status: "all",
+    hasArticle: false,
+    hasVideo: false,
+    hasPractice: false,
+    searchQuery: ""
+  });
 
-  const handleExpandSidebar = () => {
-    setSidebarCollapsed(false);
+  const getBreadcrumbItems = () => {
+    const sheetNames: { [key: string]: string } = {
+      'striver-a2z': 'Striver A2Z Sheet',
+      'striver-sde': 'Striver SDE Sheet',
+      'striver-79': 'Striver 79 Sheet',
+      'blind-75': 'Blind 75 Sheet',
+      'neetcode-150': 'NeetCode 150',
+      'top-interview': 'Top Interview Questions'
+    };
+
+    return [
+      { label: 'Home', href: '/dashboard' },
+      { label: 'DSA Sheets', href: '/dsa-sheets' },
+      { label: sheetNames[sheetId || ''] || sheetId || 'Sheet' }
+    ];
+  };
+
+  const handleRevisionModeToggle = () => {
+    console.log("Revision mode toggled");
+  };
+
+  const handleCollapseAllSteps = () => {
+    setAllStepsCollapsed(true);
+  };
+
+  const handleExpandAllSteps = () => {
+    setAllStepsCollapsed(false);
+  };
+
+  const handleCollapseAllLectures = () => {
+    setAllLecturesCollapsed(true);
+  };
+
+  const handleExpandAllLectures = () => {
+    setAllLecturesCollapsed(false);
   };
 
   if (loading) {
@@ -74,66 +118,54 @@ const SheetPage = () => {
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
-              onExpandSidebar={handleExpandSidebar}
             />
             <UserMenu />
           </div>
         </div>
         
-        {/* Main Content */}
+        {/* Main Content with proper spacing */}
         <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <CourseStatsCard
-                title="Total Points"
-                value={0}
-                icon={<Target className="w-5 h-5 text-white" />}
-                color="bg-blue-600"
-              />
-              <CourseStatsCard
-                title="Articles Read"
-                value={0}
-                icon={<BookOpen className="w-5 h-5 text-white" />}
-                color="bg-green-600"
-              />
-              <CourseStatsCard
-                title="Videos Watched"
-                value={2}
-                icon={<Video className="w-5 h-5 text-white" />}
-                color="bg-purple-600"
-              />
-              <CourseStatsCard
-                title="Awards Earned"
-                value={0}
-                icon={<Trophy className="w-5 h-5 text-white" />}
-                color="bg-yellow-600"
+          <div className="max-w-7xl mx-auto">
+            {/* Breadcrumb with proper spacing */}
+            <div className="mb-8 mt-4">
+              <CourseBreadcrumb 
+                items={getBreadcrumbItems()}
+                showBackButton={true}
+                backUrl="/dsa-sheets"
               />
             </div>
 
-            {/* Progress Overview */}
-            <ProgressOverviewCard
-              totalProgress={0}
-              totalCompleted={0}
-              totalProblems={455}
-              progressItems={[
-                { label: "Easy", completed: 0, total: 131, color: "green" },
-                { label: "Medium", completed: 0, total: 187, color: "yellow" },
-                { label: "Hard", completed: 0, total: 136, color: "red" }
-              ]}
+            {/* Course Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                {getBreadcrumbItems()[2]?.label}
+              </h1>
+              <p className="text-gray-400 text-lg">
+                Complete this curated set of coding problems to master data structures and algorithms
+              </p>
+            </div>
+
+            {/* Progress Stats */}
+            <CourseProgressStats
+              totalProblems={180}
+              solvedProblems={45}
+              attemptedProblems={23}
+              averageTime={28}
+              streak={5}
+              completionRate={25}
             />
 
-            {/* Course Action Buttons */}
-            <CourseActionButtons
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              stepsCollapsed={stepsCollapsed}
-              lecturesCollapsed={lecturesCollapsed}
-              onToggleSteps={() => setStepsCollapsed(!stepsCollapsed)}
-              onToggleLectures={() => setLecturesCollapsed(!lecturesCollapsed)}
-              revisionCount={0}
-              onRevision={() => console.log("Revision clicked")}
-              onAdvancedFilter={() => console.log("Advanced filter clicked")}
+            {/* Course Toolbar */}
+            <CoursePageToolbar
+              onRevisionModeToggle={handleRevisionModeToggle}
+              onCollapseAllSteps={handleCollapseAllSteps}
+              onExpandAllSteps={handleExpandAllSteps}
+              onCollapseAllLectures={handleCollapseAllLectures}
+              onExpandAllLectures={handleExpandAllLectures}
+              allStepsCollapsed={allStepsCollapsed}
+              allLecturesCollapsed={allLecturesCollapsed}
+              filters={filters}
+              onFiltersChange={setFilters}
             />
             
             <ProblemDashboard 
