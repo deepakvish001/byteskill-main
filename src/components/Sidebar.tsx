@@ -1,4 +1,5 @@
-import { ChevronDown, ChevronRight, FileText, Users, BookOpen, Cpu, Settings, Trophy, Target, TrendingUp, Star, Code, GitBranch, ChevronLeft, Menu, Award, Calendar, Brain, Timer, Bookmark, PenTool, MessageCircle, Lightbulb, History, GraduationCap } from "lucide-react";
+
+import { ChevronDown, ChevronRight, FileText, Users, BookOpen, Cpu, Settings, Trophy, Target, TrendingUp, Star, Code, GitBranch, ChevronLeft, Menu, Award, Calendar, Brain, Timer, Bookmark, PenTool, MessageCircle, Lightbulb, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,21 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
     navigate("/courses");
   };
 
+  const handleDSASheetsClick = () => {
+    onSheetChange("dsa-sheets");
+    navigate("/dsa-sheets");
+  };
+
+  const handleInterviewPrepClick = () => {
+    onSheetChange("interview-prep");
+    navigate("/interview-prep");
+  };
+
+  const handleCoreCSClick = () => {
+    onSheetChange("core-cs");
+    navigate("/core-cs");
+  };
+
   const menuItems = [
     {
       id: "dashboard",
@@ -67,7 +83,8 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
         { id: "blind-75", label: "Blind 75 Sheet", progress: 67 },
         { id: "neetcode-150", label: "NeetCode 150", progress: 34 },
         { id: "top-interview", label: "Top Interview Questions", progress: 89 }
-      ]
+      ],
+      action: handleDSASheetsClick
     },
     {
       id: "courses",
@@ -91,7 +108,8 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
         { id: "company-specific", label: "Company Specific", action: () => handleCourseClick("company-specific") },
         { id: "salary-negotiation", label: "Salary Negotiation", badge: "Pro", action: () => handleCourseClick("salary-negotiation") },
         { id: "resume-review", label: "Resume Review", badge: "Pro" }
-      ]
+      ],
+      action: handleInterviewPrepClick
     },
     {
       id: "core-subjects",
@@ -102,28 +120,8 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
         { id: "operating-system", label: "Operating Systems", progress: 23, action: () => handleCourseClick("operating-system") },
         { id: "computer-networks", label: "Computer Networks", progress: 67, action: () => handleCourseClick("computer-networks") },
         { id: "oops", label: "Object Oriented Programming", progress: 89, action: () => handleCourseClick("oops") }
-      ]
-    },
-    {
-      id: "history",
-      label: "Study History",
-      icon: History,
-      items: [],
-      badge: "Track"
-    },
-    {
-      id: "achievements",
-      label: "Achievements",
-      icon: Trophy,
-      items: [],
-      badge: "15"
-    },
-    {
-      id: "ai-mentor",
-      label: "AI Mentor",
-      icon: Brain,
-      items: [],
-      badge: "Beta"
+      ],
+      action: handleCoreCSClick
     }
   ];
 

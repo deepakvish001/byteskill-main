@@ -12,6 +12,9 @@ import UserDashboard from "./pages/UserDashboard";
 import SheetPage from "./pages/SheetPage";
 import CoursePage from "./pages/CoursePage";
 import CoursesOverview from "./pages/CoursesOverview";
+import DSASheetsPage from "./pages/DSASheetsPage";
+import InterviewPrepPage from "./pages/InterviewPrepPage";
+import CoreCSPage from "./pages/CoreCSPage";
 import PublicProfile from "./pages/PublicProfile";
 import AuthPage from "./components/auth/AuthPage";
 import UserProfile from "./components/profile/UserProfile";
@@ -51,6 +54,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CoursesOverview />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dsa-sheets" 
+              element={
+                <ProtectedRoute>
+                  <DSASheetsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/interview-prep" 
+              element={
+                <ProtectedRoute>
+                  <InterviewPrepPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/core-cs" 
+              element={
+                <ProtectedRoute>
+                  <CoreCSPage />
                 </ProtectedRoute>
               } 
             />
