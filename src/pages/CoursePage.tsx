@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +22,7 @@ import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
 import CourseBreadcrumb from "@/components/CourseBreadcrumb";
-import ProblemTable from "@/components/ProblemTable";
+import CourseContent from "@/components/CourseContent";
 
 interface Course {
   id: string;
@@ -258,8 +257,8 @@ const CoursePage = () => {
               </div>
             </div>
 
-            {/* Course Content - Using ProblemTable component style */}
-            <ProblemTable 
+            {/* Course Content - Using CourseContent component */}
+            <CourseContent 
               selectedSheet={courseId || ""}
               searchQuery={searchQuery}
               isEnrolled={!!enrollment}
