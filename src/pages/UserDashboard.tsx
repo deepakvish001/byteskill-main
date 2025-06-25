@@ -35,10 +35,10 @@ const UserDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black flex relative overflow-hidden">
-      {/* Fixed Sidebar - Responsive */}
+    <div className="min-h-screen bg-black flex">
+      {/* Fixed Sidebar */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
-        sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
+        sidebarCollapsed ? 'w-20' : 'w-72'
       }`}>
         <Sidebar 
           selectedSheet={selectedSheet} 
@@ -48,15 +48,15 @@ const UserDashboard = () => {
         />
       </div>
       
-      {/* Main Content Area - Responsive */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'
+      {/* Main Content Area */}
+      <div className={`flex-1 transition-all duration-300 ${
+        sidebarCollapsed ? 'ml-20' : 'ml-72'
       }`}>
-        {/* Fixed Header - Responsive */}
-        <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
-          left: sidebarCollapsed ? '4rem' : '16rem',
+        {/* Fixed Header */}
+        <div className="fixed top-0 right-0 z-30 h-16 bg-black border-b border-gray-800" style={{
+          left: sidebarCollapsed ? '5rem' : '18rem',
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between h-full px-4">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
@@ -66,8 +66,8 @@ const UserDashboard = () => {
           </div>
         </div>
         
-        {/* Main Content with responsive padding */}
-        <main className="flex-1 pt-16 sm:pt-20 bg-black min-h-screen">
+        {/* Main Content */}
+        <main className="pt-16 bg-black min-h-screen">
           <Dashboard />
         </main>
       </div>
