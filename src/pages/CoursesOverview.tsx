@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -160,26 +159,22 @@ const CoursesOverview = () => {
         <div className="fixed top-0 right-0 z-30 bg-black border-b border-gray-800 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between px-4 py-3">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
+              onExpandSidebar={() => setSidebarCollapsed(false)}
             />
             <UserMenu />
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-40 */}
-        <main className="flex-1 pt-40 p-6 bg-black min-h-screen">
+        {/* Main Content */}
+        <main className="flex-1 pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
-            {/* Breadcrumb - Now visible with proper spacing */}
-            <div className="bg-black mb-6">
-              <CourseBreadcrumb items={breadcrumbItems} />
-            </div>
-
             {/* Page Header */}
-            <div className="text-center mb-8 bg-black">
+            <div className="text-center mb-8">
               <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                 All Courses
               </h1>
@@ -201,7 +196,7 @@ const CoursesOverview = () => {
               </div>
             </div>
 
-            {/* Course Cards Grid - Same design as DSA Sheets */}
+            {/* Course Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);

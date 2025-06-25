@@ -198,31 +198,23 @@ const CoursePage = () => {
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900">
+          <div className="flex items-center justify-between px-4 py-3 bg-black border-b border-gray-800">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
+              onExpandSidebar={() => setSidebarCollapsed(false)}
             />
             <UserMenu />
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-35 */}
-        <main className="flex-1 pt-35 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content */}
+        <main className="flex-1 pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Breadcrumb - Now visible with proper spacing */}
-            <div className="mb-6">
-              <CourseBreadcrumb 
-                items={getBreadcrumbItems()}
-                showBackButton={true}
-                backUrl={getBackUrl()}
-              />
-            </div>
-
             {/* Course Header */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-6">
                 <div>
                   <h1 className="text-3xl font-bold text-white mb-2">{course?.title}</h1>
                   <p className="text-gray-400 text-lg">{course?.description}</p>
@@ -261,7 +253,7 @@ const CoursePage = () => {
               )}
             </div>
 
-            {/* Course Content - Using CourseContent component */}
+            {/* Course Content */}
             <CourseContent 
               selectedSheet={courseId || ""}
               searchQuery={searchQuery}
