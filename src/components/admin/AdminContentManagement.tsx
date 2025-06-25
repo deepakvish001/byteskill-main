@@ -153,7 +153,7 @@ const AdminContentManagement = ({ category, searchQuery }: AdminContentManagemen
               <TableRow>
                 <TableHead>Course</TableHead>
                 <TableHead>Difficulty</TableHead>
-                <TableHead>Topics</TableHead>
+                <TableHead>Tags</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Premium</TableHead>
                 <TableHead>Actions</TableHead>
@@ -181,14 +181,14 @@ const AdminContentManagement = ({ category, searchQuery }: AdminContentManagemen
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {course.topics?.slice(0, 3).map((topic: string, index: number) => (
+                        {course.tags?.slice(0, 3).map((tag: string, index: number) => (
                           <Badge key={index} variant="outline" className="text-xs">
-                            {topic}
+                            {tag}
                           </Badge>
                         ))}
-                        {course.topics?.length > 3 && (
+                        {course.tags?.length > 3 && (
                           <Badge variant="outline" className="text-xs">
-                            +{course.topics.length - 3}
+                            +{course.tags.length - 3}
                           </Badge>
                         )}
                       </div>

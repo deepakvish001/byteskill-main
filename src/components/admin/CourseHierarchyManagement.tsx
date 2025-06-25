@@ -130,31 +130,55 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
     },
   });
 
-  // Reorder mutations
-  const reorderMutation = useMutation({
-    mutationFn: async ({ table, items }: { table: string; items: any[] }) => {
-      const updates = items.map((item, index) => ({
-        id: item.id,
-        [table === 'course_modules' ? 'module_order' : 
-          table === 'course_chapters' ? 'chapter_order' : 'content_order']: index + 1
-      }));
-
-      for (const update of updates) {
+  // Reorder mutations - separate for each table type
+  const reorderModulesMutation = useMutation({
+    mutationFn: async (modules: any[]) => {
+      for (let i = 0; i < modules.length; i++) {
         const { error } = await supabase
-          .from(table)
-          .update({ 
-            [table === 'course_modules' ? 'module_order' : 
-              table === 'course_chapters' ? 'chapter_order' : 'content_order']: update[table === 'course_modules' ? 'module_order' : 
-                table === 'course_chapters' ? 'chapter_order' : 'content_order']
-          })
-          .eq('id', update.id);
+          .from('course_modules')
+          .update({ module_order: i + 1 })
+          .eq('id', modules[i].id);
         
         if (error) throw error;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-hierarchy', courseId] });
-      toast({ title: "Order updated successfully" });
+      toast({ title: "Module order updated successfully" });
+    },
+  });
+
+  const reorderChaptersMutation = useMutation({
+    mutationFn: async (chapters: any[]) => {
+      for (let i = 0; i < chapters.length; i++) {
+        const { error } = await supabase
+          .from('course_chapters')
+          .update({ chapter_order: i + 1 })
+          .eq('id', chapters[i].id);
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course-hierarchy', courseId] });
+      toast({ title: "Chapter order updated successfully" });
+    },
+  });
+
+  const reorderContentMutation = useMutation({
+    mutationFn: async (content: any[]) => {
+      for (let i = 0; i < content.length; i++) {
+        const { error } = await supabase
+          .from('course_content')
+          .update({ content_order: i + 1 })
+          .eq('id', content[i].id);
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course-hierarchy', courseId] });
+      toast({ title: "Content order updated successfully" });
     },
   });
 
@@ -300,7 +324,7 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
                       disabled={moduleIndex === 0}
                       onClick={() => {
                         const newOrder = moveItem(courseData.modules, moduleIndex, moduleIndex - 1);
-                        reorderMutation.mutate({ table: 'course_modules', items: newOrder });
+                        reorderModulesMutation.mutate(newOrder);
                       }}
                     >
                       <ArrowUp className="w-3 h-3" />
@@ -311,7 +335,7 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
                       disabled={moduleIndex === courseData.modules.length - 1}
                       onClick={() => {
                         const newOrder = moveItem(courseData.modules, moduleIndex, moduleIndex + 1);
-                        reorderMutation.mutate({ table: 'course_modules', items: newOrder });
+                        reorderModulesMutation.mutate(newOrder);
                       }}
                     >
                       <ArrowDown className="w-3 h-3" />
