@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, Circle, Clock, ChevronDown, ChevronRight, Plus, Star, Play, Youtube, FileText, Lock, ExternalLink, BookOpen, Filter, Trophy, Calendar, Target, Bookmark, RotateCcw, Timer, Award, TrendingUp } from "lucide-react";
+import { CheckCircle2, Circle, Clock, ChevronDown, ChevronRight, Plus, Star, Play, Youtube, FileText, Lock, ExternalLink, BookOpen, Filter, Trophy, Calendar, Target, Bookmark, RotateCcw, Timer, Award, TrendingUp, Zap, Brain, Code, Lightbulb } from "lucide-react";
 
 interface ProblemDashboardProps {
   selectedSheet: string;
@@ -69,30 +68,61 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     );
   };
 
+  const getStatusCheckbox = (problemId: string, status: string) => {
+    const isChecked = checkedProblems[problemId] || status === "solved";
+    
+    if (isChecked) {
+      return (
+        <div className="group cursor-pointer">
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-green-400/50">
+            <CheckCircle2 className="w-4 h-4 text-white" />
+          </div>
+        </div>
+      );
+    }
+    
+    if (status === "attempted") {
+      return (
+        <div className="group cursor-pointer">
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-yellow-400/50">
+            <div className="w-3 h-3 bg-white rounded-full" />
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="group cursor-pointer">
+        <div className="w-6 h-6 rounded-lg border-2 border-gray-600 hover:border-gray-400 transition-all duration-300 hover:scale-110 bg-gray-900/50">
+        </div>
+      </div>
+    );
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "Easy":
-        return "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30 shadow-lg shadow-green-500/10";
+        return "bg-gradient-to-r from-green-400/20 to-emerald-400/20 text-green-300 border border-green-400/40 shadow-lg shadow-green-400/20";
       case "Medium":
-        return "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 border border-yellow-500/30 shadow-lg shadow-yellow-500/10";
+        return "bg-gradient-to-r from-yellow-400/20 to-orange-400/20 text-yellow-300 border border-yellow-400/40 shadow-lg shadow-yellow-400/20";
       case "Hard":
-        return "bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/10";
+        return "bg-gradient-to-r from-red-400/20 to-pink-400/20 text-red-300 border border-red-400/40 shadow-lg shadow-red-400/20";
       default:
-        return "bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-400 border border-gray-500/30";
+        return "bg-gradient-to-r from-gray-400/20 to-slate-400/20 text-gray-300 border border-gray-400/40";
     }
   };
 
   const handleResourceClick = (type: string, problemTitle: string) => {
     const urls = {
-      video: `https://youtube.com/search?q=${encodeURIComponent(problemTitle + " tutorial")}`,
-      article: `https://takeuforward.org/search?q=${encodeURIComponent(problemTitle)}`,
-      notes: `https://docs.google.com/document/new`,
-      practice: `https://leetcode.com/problems/${problemTitle.toLowerCase().replace(/\s+/g, '-')}/`
+      video: `https://youtube.com/search?q=${encodeURIComponent(problemTitle + " coding tutorial solution")}`,
+      article: `https://takeuforward.org/data-structure/${encodeURIComponent(problemTitle.toLowerCase().replace(/\s+/g, '-'))}`,
+      notes: `https://docs.google.com/document/create?title=${encodeURIComponent(problemTitle + " - Notes")}`,
+      practice: `https://leetcode.com/problems/${problemTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}/`
     };
     window.open(urls[type as keyof typeof urls], '_blank');
   };
 
-  // Enhanced mock data with more realistic structure
+  // Enhanced mock data with proper article links
   const courseData = {
     title: "Striver's A2Z DSA Course/Sheet",
     description: "This course is made for people who want to learn DSA from A to Z for free in a well-organized and structured manner. The entire course is free and will always remain free.",
@@ -120,13 +150,13 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
             problems: [
               { id: "p1", title: "User Input / Output", status: "solved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, timeSpent: 15, rating: 4.5 },
               { id: "p2", title: "Data Types", status: "solved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, timeSpent: 20, rating: 4.2 },
-              { id: "p3", title: "If Else statements", status: "solved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true, timeSpent: 10, rating: 4.0 },
-              { id: "p4", title: "Switch Statement", status: "attempted", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true, timeSpent: 25, rating: 3.8 },
-              { id: "p5", title: "What are arrays, strings?", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true, rating: 4.3 },
-              { id: "p6", title: "For loops", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true, rating: 4.1 },
-              { id: "p7", title: "While loops", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true, rating: 3.9 },
-              { id: "p8", title: "Functions (Pass by Reference and Value)", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true, rating: 4.4 },
-              { id: "p9", title: "Time Complexity", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true, rating: 4.6 }
+              { id: "p3", title: "If Else statements", status: "solved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, timeSpent: 10, rating: 4.0 },
+              { id: "p4", title: "Switch Statement", status: "attempted", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, timeSpent: 25, rating: 3.8 },
+              { id: "p5", title: "What are arrays, strings?", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, rating: 4.3 },
+              { id: "p6", title: "For loops", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, rating: 4.1 },
+              { id: "p7", title: "While loops", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, rating: 3.9 },
+              { id: "p8", title: "Functions (Pass by Reference and Value)", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, rating: 4.4 },
+              { id: "p9", title: "Time Complexity", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: true, hasNotes: true, rating: 4.6 }
             ]
           },
           {
@@ -271,53 +301,77 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
             </p>
           </div>
 
-          {/* Enhanced Progress Overview */}
+          {/* Enhanced Progress Overview with Better Colors and Icons */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-gradient-to-br from-orange-500/10 via-gray-900 to-black border border-orange-500/20 hover:border-orange-400/40 transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent mb-2">
+            <Card className="bg-gradient-to-br from-orange-500/20 via-red-500/10 to-pink-500/20 border border-orange-400/40 hover:border-orange-300/60 transition-all duration-300 group backdrop-blur-sm overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-400/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 rounded-full bg-gradient-to-r from-orange-500 to-red-500 shadow-lg">
+                    <Trophy className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-orange-300 to-red-300 bg-clip-text text-transparent mb-2">
                   {courseData.totalProgress.solved + Object.values(checkedProblems).filter(Boolean).length} / {courseData.totalProgress.total}
                 </div>
-                <div className="text-sm text-gray-400 mb-3">Total Progress</div>
+                <div className="text-sm text-gray-300 mb-3 font-medium">Total Progress</div>
                 <Progress 
                   value={calculateProgress()} 
                   className="w-full h-3 bg-gray-800/50"
                 />
-                <div className="text-xl font-bold text-orange-400 mt-3">{Math.round(calculateProgress())}%</div>
+                <div className="text-xl font-bold text-orange-300 mt-3">{Math.round(calculateProgress())}%</div>
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-green-500/10 via-gray-900 to-black border border-green-500/20 hover:border-green-400/40 transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-2">
+            <Card className="bg-gradient-to-br from-green-500/20 via-emerald-500/10 to-teal-500/20 border border-green-400/40 hover:border-green-300/60 transition-all duration-300 group backdrop-blur-sm overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg">
+                    <Zap className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent mb-2">
                   {courseData.difficulties.easy.solved} / {courseData.difficulties.easy.total}
                 </div>
-                <div className="text-sm text-gray-400 mb-3">Easy Problems</div>
-                <div className="text-lg text-green-400 font-semibold">
+                <div className="text-sm text-gray-300 mb-3 font-medium">Easy Problems</div>
+                <div className="text-lg text-green-300 font-semibold">
                   {Math.round((courseData.difficulties.easy.solved / courseData.difficulties.easy.total) * 100)}% completed
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-yellow-500/10 via-gray-900 to-black border border-yellow-500/20 hover:border-yellow-400/40 transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-2">
+            <Card className="bg-gradient-to-br from-yellow-500/20 via-orange-500/10 to-amber-500/20 border border-yellow-400/40 hover:border-yellow-300/60 transition-all duration-300 group backdrop-blur-sm overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 shadow-lg">
+                    <Brain className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent mb-2">
                   {courseData.difficulties.medium.solved} / {courseData.difficulties.medium.total}
                 </div>
-                <div className="text-sm text-gray-400 mb-3">Medium Problems</div>
-                <div className="text-lg text-yellow-400 font-semibold">
+                <div className="text-sm text-gray-300 mb-3 font-medium">Medium Problems</div>
+                <div className="text-lg text-yellow-300 font-semibold">
                   {Math.round((courseData.difficulties.medium.solved / courseData.difficulties.medium.total) * 100)}% completed
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-red-500/10 via-gray-900 to-black border border-red-500/20 hover:border-red-400/40 transition-all duration-300 group backdrop-blur-sm">
-              <CardContent className="p-6 text-center">
-                <div className="text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent mb-2">
+            <Card className="bg-gradient-to-br from-red-500/20 via-pink-500/10 to-rose-500/20 border border-red-400/40 hover:border-red-300/60 transition-all duration-300 group backdrop-blur-sm overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-400/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+              <CardContent className="p-6 text-center relative z-10">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 rounded-full bg-gradient-to-r from-red-500 to-pink-500 shadow-lg">
+                    <Code className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-red-300 to-pink-300 bg-clip-text text-transparent mb-2">
                   {courseData.difficulties.hard.solved} / {courseData.difficulties.hard.total}
                 </div>
-                <div className="text-sm text-gray-400 mb-3">Hard Problems</div>
-                <div className="text-lg text-red-400 font-semibold">
+                <div className="text-sm text-gray-300 mb-3 font-medium">Hard Problems</div>
+                <div className="text-lg text-red-300 font-semibold">
                   {Math.round((courseData.difficulties.hard.solved / courseData.difficulties.hard.total) * 100)}% completed
                 </div>
               </CardContent>
@@ -497,7 +551,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                                 onChange={() => toggleProblem(problem.id)}
                                 className="w-4 h-4 text-orange-400 bg-black border-gray-600 rounded focus:ring-orange-400 focus:ring-2 transition-all duration-200" 
                               />
-                              {getStatusIcon(problem.id, problem.status)}
+                              {getStatusCheckbox(problem.id, problem.status)}
                             </div>
                             
                             <div className="col-span-2">
@@ -545,7 +599,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                                   className="p-2 rounded-lg bg-green-500/20 hover:bg-green-500/40 transition-all duration-200 group/btn border border-green-500/30 hover:scale-110"
                                   title="Take Notes"
                                 >
-                                  <Plus className="w-4 h-4 text-green-400 group-hover/btn:text-green-300" />
+                                  <Lightbulb className="w-4 h-4 text-green-400 group-hover/btn:text-green-300" />
                                 </button>
                               )}
                             </div>
