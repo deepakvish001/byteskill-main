@@ -1,5 +1,5 @@
 
-import { Search, Menu, BookOpen, Trophy } from "lucide-react";
+import { Search, Menu, BookOpen, Trophy, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -7,16 +7,17 @@ interface HeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   sidebarCollapsed: boolean;
+  onExpandSidebar?: () => void;
 }
 
-const Header = ({ searchQuery, onSearchChange, sidebarCollapsed }: HeaderProps) => {
+const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onExpandSidebar }: HeaderProps) => {
   return (
     <header className="w-full bg-black border-b border-gray-800 px-3 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3 sm:space-x-6">
           {/* Show logo/branding only when sidebar is collapsed */}
           {sidebarCollapsed && (
-            <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
                 <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 sm:p-3 rounded-xl shadow-2xl">
@@ -34,6 +35,15 @@ const Header = ({ searchQuery, onSearchChange, sidebarCollapsed }: HeaderProps) 
                   </span>
                 </div>
               </div>
+              {/* Expand Sidebar Button */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onExpandSidebar}
+                className="text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl p-2 ml-2"
+              >
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
             </div>
           )}
         </div>

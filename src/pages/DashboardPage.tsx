@@ -12,6 +12,10 @@ const DashboardPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState("dashboard");
 
+  const handleExpandSidebar = () => {
+    setSidebarCollapsed(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -58,6 +62,7 @@ const DashboardPage = () => {
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
+              onExpandSidebar={handleExpandSidebar}
             />
             <UserMenu />
           </div>
