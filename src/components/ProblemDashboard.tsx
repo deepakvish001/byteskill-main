@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, Check, X } from "lucide-react";
+import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, CheckCircle2, Circle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -136,21 +137,11 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
   const getStatusIndicator = (status: string) => {
     switch (status) {
       case "Solved":
-        return (
-          <div className="flex items-center justify-center w-6 h-6 rounded border-2 border-green-500 bg-green-500">
-            <Check className="w-4 h-4 text-white" />
-          </div>
-        );
+        return <CheckCircle2 className="w-5 h-5 text-green-400 fill-current" />;
       case "Attempted":
-        return (
-          <div className="flex items-center justify-center w-6 h-6 rounded border-2 border-yellow-500 bg-yellow-500">
-            <X className="w-4 h-4 text-white" />
-          </div>
-        );
+        return <Circle className="w-5 h-5 text-yellow-400" />;
       default:
-        return (
-          <div className="w-6 h-6 rounded border-2 border-gray-500 bg-gray-900"></div>
-        );
+        return <Circle className="w-5 h-5 text-gray-500" />;
     }
   };
 
