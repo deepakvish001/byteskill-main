@@ -26,13 +26,11 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
     description: '',
     difficulty: 'beginner',
     estimated_hours: 0,
-    topics: [] as string[],
-    tags: [] as string[],
-    is_premium: false,
     is_published: false,
+    is_premium: false,
+    tags: [] as string[],
   });
 
-  const [newTopic, setNewTopic] = useState('');
   const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
@@ -42,10 +40,9 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
         description: course.description || '',
         difficulty: course.difficulty || 'beginner',
         estimated_hours: course.estimated_hours || 0,
-        topics: course.topics || [],
+        is_published: course.is_published ?? false,
+        is_premium: course.is_premium ?? false,
         tags: course.tags || [],
-        is_premium: course.is_premium || false,
-        is_published: course.is_published || false,
       });
     }
   }, [course]);
@@ -59,24 +56,21 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
           .eq('id', course.id);
         if (error) throw error;
       } else {
-        // Generate unique course_id
-        const courseId = `${category}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        // Generate course_id
+        const courseId = `${category}-${Date.now()}`;
         
         const { error } = await supabase
           .from('courses')
           .insert({
             ...data,
             course_id: courseId,
-            category,
+            category: category,
           });
         if (error) throw error;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-dsa-sheets'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-interview-prep'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-core-cs'] });
+      queryClient.invalidateQueries({ queryKey: [`admin-${category}`] });
       toast({ title: `Course ${course ? 'updated' : 'created'} successfully` });
       onClose();
     },
@@ -91,28 +85,7 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim()) {
-      toast({ title: 'Please enter a course title', variant: 'destructive' });
-      return;
-    }
     mutation.mutate(formData);
-  };
-
-  const addTopic = () => {
-    if (newTopic.trim() && !formData.topics.includes(newTopic.trim())) {
-      setFormData({
-        ...formData,
-        topics: [...formData.topics, newTopic.trim()]
-      });
-      setNewTopic('');
-    }
-  };
-
-  const removeTopic = (topic: string) => {
-    setFormData({
-      ...formData,
-      topics: formData.topics.filter(t => t !== topic)
-    });
   };
 
   const addTag = () => {
@@ -133,18 +106,34 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto">
       <div className="space-y-4">
-        <div>
-          <Label htmlFor="title" className="text-white">Course Title</Label>
-          <Input
-            id="title"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Enter course title"
-            required
-            className="bg-gray-800 border-gray-700 text-white"
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="title" className="text-white">Course Title</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="Enter course title"
+              required
+              className="bg-gray-800 border-gray-700 text-white"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="difficulty" className="text-white">Difficulty</Label>
+            <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
+              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="beginner">Beginner</SelectItem>
+                <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="advanced">Advanced</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div>
@@ -159,58 +148,18 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="difficulty" className="text-white">Difficulty Level</Label>
-            <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
-              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="beginner">Beginner</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="advanced">Advanced</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="estimated_hours" className="text-white">Estimated Hours</Label>
-            <Input
-              id="estimated_hours"
-              type="number"
-              value={formData.estimated_hours}
-              onChange={(e) => setFormData({ ...formData, estimated_hours: parseInt(e.target.value) || 0 })}
-              min="0"
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-        </div>
-
-        {/* Topics */}
         <div>
-          <Label className="text-white">Topics</Label>
-          <div className="flex gap-2 mb-2">
-            <Input
-              value={newTopic}
-              onChange={(e) => setNewTopic(e.target.value)}
-              placeholder="Add a topic"
-              className="bg-gray-800 border-gray-700 text-white"
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTopic())}
-            />
-            <Button type="button" onClick={addTopic}>Add</Button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {formData.topics.map((topic, index) => (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                {topic}
-                <X className="w-3 h-3 cursor-pointer" onClick={() => removeTopic(topic)} />
-              </Badge>
-            ))}
-          </div>
+          <Label htmlFor="estimated_hours" className="text-white">Estimated Hours</Label>
+          <Input
+            id="estimated_hours"
+            type="number"
+            value={formData.estimated_hours}
+            onChange={(e) => setFormData({ ...formData, estimated_hours: parseInt(e.target.value) || 0 })}
+            min="0"
+            className="bg-gray-800 border-gray-700 text-white"
+          />
         </div>
 
-        {/* Tags */}
         <div>
           <Label className="text-white">Tags</Label>
           <div className="flex gap-2 mb-2">
@@ -225,7 +174,7 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
           </div>
           <div className="flex flex-wrap gap-2">
             {formData.tags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="flex items-center gap-1">
+              <Badge key={index} variant="secondary" className="flex items-center gap-1">
                 {tag}
                 <X className="w-3 h-3 cursor-pointer" onClick={() => removeTag(tag)} />
               </Badge>
@@ -236,20 +185,20 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
         <div className="flex space-x-6">
           <div className="flex items-center space-x-2">
             <Switch
-              id="is_premium"
-              checked={formData.is_premium}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_premium: checked })}
-            />
-            <Label htmlFor="is_premium" className="text-white">Premium Course</Label>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
               id="is_published"
               checked={formData.is_published}
               onCheckedChange={(checked) => setFormData({ ...formData, is_published: checked })}
             />
             <Label htmlFor="is_published" className="text-white">Published</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is_premium"
+              checked={formData.is_premium}
+              onCheckedChange={(checked) => setFormData({ ...formData, is_premium: checked })}
+            />
+            <Label htmlFor="is_premium" className="text-white">Premium</Label>
           </div>
         </div>
       </div>
