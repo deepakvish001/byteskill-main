@@ -1,137 +1,67 @@
-
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { 
-  FileText, 
-  Clock, 
-  Search,
-  CheckCircle,
-  Target,
-  Star,
-  Play
-} from "lucide-react";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import UserMenu from "@/components/UserMenu";
-
-interface Course {
-  id: string;
-  course_id: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  total_lessons: number;
-  estimated_hours: number;
-  tags: string[];
-  is_premium: boolean;
-}
-
-interface Enrollment {
-  course_id: string;
-  progress_percentage: number;
-}
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { BookOpen, Clock, Trophy, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
+import UserMenu from '@/components/UserMenu';
 
 const DSASheetsPage = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filterQuery, setFilterQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('all');
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
-
-  const fetchData = async () => {
-    try {
-      // Fetch DSA sheet courses
-      const { data: coursesData, error: coursesError } = await supabase
+  // Fetch courses from Supabase
+  const { data: courses, isLoading, error } = useQuery({
+    queryKey: ['courses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('courses')
         .select('*')
-        .eq('category', 'dsa-sheet')
-        .order('created_at', { ascending: false });
+        .eq('category', 'dsa-sheet');
 
-      if (coursesError) throw coursesError;
-      setCourses(coursesData || []);
-
-      // Fetch user enrollments if logged in
-      if (user) {
-        const { data: enrollmentsData, error: enrollmentsError } = await supabase
-          .from('course_enrollments')
-          .select('course_id, progress_percentage')
-          .eq('user_id', user.id);
-
-        if (enrollmentsError) {
-          console.error('Error fetching enrollments:', enrollmentsError);
-        } else {
-          setEnrollments(enrollmentsData || []);
-        }
+      if (error) {
+        throw new Error(error.message);
       }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data;
+    },
+  });
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return 'bg-green-500/20 text-green-400 border-green-500/50';
-      case 'intermediate': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-      case 'advanced': return 'bg-red-500/20 text-red-400 border-red-500/50';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
-    }
-  };
+  // Function to filter courses based on difficulty
+  const filteredCourses = React.useMemo(() => {
+    if (!courses) return [];
 
+    let filtered = courses;
+
+    if (selectedFilter !== 'all') {
+      filtered = courses.filter(
+        (course) => course.difficulty === selectedFilter
+      );
+    }
+
+    if (searchQuery) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter((course) =>
+        course.title.toLowerCase().includes(lowerCaseQuery)
+      );
+    }
+
+    return filtered;
+  }, [courses, selectedFilter, searchQuery]);
+
+  // Mock function to get enrollment status (replace with actual logic)
   const getEnrollmentStatus = (courseId: string) => {
-    return enrollments.find(e => e.course_id === courseId);
+    // Replace this with actual logic to fetch enrollment status
+    return {
+      course_id: courseId,
+      progress_percentage: Math.floor(Math.random() * 100), // Mock progress
+    };
   };
-
-  const handleEnrollment = async (courseId: string) => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('course_enrollments')
-        .insert({
-          user_id: user.id,
-          course_id: courseId
-        });
-
-      if (error) throw error;
-      
-      // Refresh enrollments
-      fetchData();
-    } catch (error) {
-      console.error('Error enrolling:', error);
-    }
-  };
-
-  const filteredCourses = courses.filter(course => 
-    course.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
-    course.description?.toLowerCase().includes(filterQuery.toLowerCase()) ||
-    course.tags.some(tag => tag.toLowerCase().includes(filterQuery.toLowerCase()))
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-black flex">
@@ -167,144 +97,122 @@ const DSASheetsPage = () => {
         
         {/* Main Content */}
         <main className="pt-16 p-6 bg-black min-h-screen">
-          <div className="max-w-7xl mx-auto space-y-6">
+          <div className="max-w-7xl mx-auto space-y-8">
             {/* Page Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                 DSA Practice Sheets
               </h1>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Master Data Structures and Algorithms with curated problem sets from top competitive programmers
+                Master Data Structures and Algorithms with our curated problem sheets
               </p>
             </div>
 
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mb-8">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-                <Input
-                  placeholder="Search DSA sheets, algorithms, or data structures..."
-                  value={filterQuery}
-                  onChange={(e) => setFilterQuery(e.target.value)}
-                  className="pl-12 bg-black border-gray-800 text-white placeholder-gray-500 h-12 text-lg focus:border-blue-500"
-                />
-              </div>
+            {/* Filter Pills */}
+            <div className="flex flex-wrap gap-2 justify-center mb-8">
+              {['All', 'Beginner', 'Intermediate', 'Advanced'].map((filter) => (
+                <Button
+                  key={filter}
+                  variant={selectedFilter === filter.toLowerCase() ? 'default' : 'outline'}
+                  onClick={() => setSelectedFilter(filter.toLowerCase())}
+                  className="text-sm"
+                >
+                  {filter}
+                </Button>
+              ))}
             </div>
 
             {/* Course Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);
-                const cardColors = [
-                  'from-blue-600 to-blue-800',
-                  'from-teal-600 to-cyan-700', 
-                  'from-purple-600 to-violet-800',
-                  'from-cyan-500 to-blue-600'
-                ];
-                const cardColor = cardColors[filteredCourses.indexOf(course) % cardColors.length];
-                
-                return (
-                  <Card key={course.id} className={`group bg-gradient-to-br ${cardColor} border-0 text-white relative overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer`}>
-                    {/* Free Badge */}
-                    {!course.is_premium && (
-                      <div className="absolute top-3 right-3 z-10">
-                        <Badge className="bg-green-500/90 text-white border-0 text-xs font-bold px-2 py-1">
-                          FREE
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    {/* Enrolled Badge */}
-                    {enrollment && (
-                      <div className="absolute top-3 left-3 z-10">
-                        <Badge className="bg-white/20 text-white border-0 text-xs font-bold px-2 py-1">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          ENROLLED
-                        </Badge>
-                      </div>
-                    )}
+                const progressPercentage = enrollment?.progress_percentage || 0;
 
-                    <CardHeader className="pb-4 bg-transparent relative z-10">
-                      <div className="flex items-center justify-center mb-4">
-                        <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                          <FileText className="w-8 h-8 text-white" />
-                        </div>
+                return (
+                  <Card key={course.course_id} className="bg-gray-900 border-gray-700 hover:border-blue-500 transition-all duration-300 group">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between mb-2">
+                        <Badge variant={course.difficulty === 'beginner' ? 'secondary' : 
+                                     course.difficulty === 'intermediate' ? 'default' : 'destructive'}>
+                          {course.difficulty}
+                        </Badge>
+                        {course.is_premium && (
+                          <Badge variant="outline" className="border-yellow-500 text-yellow-500">
+                            Premium
+                          </Badge>
+                        )}
                       </div>
-                      
-                      <CardTitle className="text-white text-xl font-bold text-center mb-2">
+                      <CardTitle className="text-white text-lg group-hover:text-blue-400 transition-colors">
                         {course.title}
                       </CardTitle>
-                      
-                      <CardDescription className="text-white/80 text-sm text-center leading-relaxed">
+                      <CardDescription className="text-gray-400 text-sm line-clamp-2">
                         {course.description}
                       </CardDescription>
-                      
-                      <div className="flex items-center justify-center mt-3">
-                        <Badge className={`${getDifficultyColor(course.difficulty)} text-xs font-medium border`}>
-                          {course.difficulty.toUpperCase()}
-                        </Badge>
-                      </div>
                     </CardHeader>
                     
-                    <CardContent className="pt-0 bg-transparent relative z-10">
-                      <div className="flex items-center justify-center space-x-6 mb-6 text-white/80">
-                        <div className="flex items-center space-x-1 text-sm">
-                          <Target className="w-4 h-4" />
-                          <span>{course.total_lessons} Qs</span>
+                    <CardContent className="space-y-4">
+                      {/* Progress Bar (if enrolled) */}
+                      {enrollment && (
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Progress</span>
+                            <span className="text-blue-400">{progressPercentage}%</span>
+                          </div>
+                          <Progress value={progressPercentage} className="h-2" />
                         </div>
-                        <div className="flex items-center space-x-1 text-sm">
+                      )}
+                      
+                      {/* Course Stats */}
+                      <div className="grid grid-cols-2 gap-4 text-sm text-gray-400">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="w-4 h-4" />
+                          <span>{course.total_lessons} problems</span>
+                        </div>
+                        <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
                           <span>{course.estimated_hours}h</span>
                         </div>
-                        <div className="flex items-center space-x-1 text-sm">
-                          <Star className="w-4 h-4 text-yellow-400" />
-                          <span>4.8</span>
-                        </div>
                       </div>
                       
-                      {enrollment && (
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between text-sm mb-2 text-white/80">
-                            <span>Progress</span>
-                            <span className="font-bold text-white">{enrollment.progress_percentage}%</span>
-                          </div>
-                          <div className="w-full bg-white/20 rounded-full h-2">
-                            <div 
-                              className="bg-white h-2 rounded-full transition-all duration-500" 
-                              style={{ width: `${enrollment.progress_percentage}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="space-y-2">
-                        <Button 
-                          onClick={() => navigate(`/sheet/${course.course_id}`)}
-                          className="w-full bg-white/20 hover:bg-white/30 text-white border-0 font-medium py-2 transition-all duration-200"
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          View Course
-                        </Button>
-                        
-                        {!enrollment && (
-                          <Button 
-                            onClick={() => handleEnrollment(course.course_id)}
-                            className="w-full bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium py-2 transition-all duration-200"
-                          >
-                            Enroll Now
-                          </Button>
-                        )}
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-1">
+                        {course.tags?.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
+                      
+                      {/* Action Button */}
+                      <Link to={`/sheet/${course.course_id}`} className="block">
+                        <Button 
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          size="sm"
+                        >
+                          {enrollment ? 'Continue' : 'Start Practice'}
+                        </Button>
+                      </Link>
                     </CardContent>
-
-                    {/* Decorative elements */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-                    <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/10 rounded-full blur-xl" />
-                    <div className="absolute -bottom-5 -left-5 w-16 h-16 bg-white/5 rounded-full blur-lg" />
                   </Card>
                 );
               })}
             </div>
+
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoading && filteredCourses.length === 0 && (
+              <div className="text-center py-12">
+                <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-400 mb-2">No sheets found</h3>
+                <p className="text-gray-500">Try adjusting your filter or search query.</p>
+              </div>
+            )}
           </div>
         </main>
       </div>

@@ -1,35 +1,16 @@
 
-import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import UserMenu from "@/components/UserMenu";
-import Dashboard from "./Dashboard";
+import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
+import UserMenu from '@/components/UserMenu';
+import StatsOverview from '@/components/StatsOverview';
+import ProgressSection from '@/components/ProgressSection';
 
 const DashboardPage = () => {
-  const { user, loading } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [selectedSheet, setSelectedSheet] = useState("dashboard");
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Access Denied</h1>
-          <p className="text-gray-400">Please log in to view this content.</p>
-        </div>
-      </div>
-    );
-  }
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="min-h-screen bg-black flex">
@@ -38,8 +19,8 @@ const DashboardPage = () => {
         sidebarCollapsed ? 'w-20' : 'w-72'
       }`}>
         <Sidebar 
-          selectedSheet={selectedSheet} 
-          onSheetChange={setSelectedSheet}
+          selectedSheet="dashboard" 
+          onSheetChange={() => {}}
           collapsed={sidebarCollapsed}
         />
       </div>
@@ -64,8 +45,24 @@ const DashboardPage = () => {
         </div>
         
         {/* Main Content */}
-        <main className="pt-16 bg-black min-h-screen">
-          <Dashboard />
+        <main className="pt-16 p-6 bg-black min-h-screen">
+          <div className="max-w-7xl mx-auto space-y-8">
+            {/* Dashboard Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+                Dashboard
+              </h1>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Track your progress and continue your learning journey
+              </p>
+            </div>
+
+            {/* Stats Overview */}
+            <StatsOverview />
+            
+            {/* Progress Section */}
+            <ProgressSection />
+          </div>
         </main>
       </div>
     </div>

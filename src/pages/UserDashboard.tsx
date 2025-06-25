@@ -1,38 +1,17 @@
 
-import { useParams, Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import UserMenu from "@/components/UserMenu";
-import Dashboard from "./Dashboard";
-import { useState } from "react";
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import Header from '@/components/Header';
+import Sidebar from '@/components/Sidebar';
+import UserMenu from '@/components/UserMenu';
+import ProblemDashboard from '@/components/ProblemDashboard';
 
 const UserDashboard = () => {
   const { username } = useParams<{ username: string }>();
-  const { user, loading } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [selectedSheet, setSelectedSheet] = useState("dashboard");
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  // Extract username from user metadata or email
-  const currentUsername = user.user_metadata?.username || user.email?.split('@')[0];
-  
-  // If the username in URL doesn't match current user, redirect to their dashboard
-  if (username !== currentUsername) {
-    return <Navigate to={`/u/${currentUsername}`} replace />;
-  }
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="min-h-screen bg-black flex">
@@ -41,8 +20,8 @@ const UserDashboard = () => {
         sidebarCollapsed ? 'w-20' : 'w-72'
       }`}>
         <Sidebar 
-          selectedSheet={selectedSheet} 
-          onSheetChange={setSelectedSheet}
+          selectedSheet="profile" 
+          onSheetChange={() => {}}
           collapsed={sidebarCollapsed}
         />
       </div>
@@ -67,8 +46,10 @@ const UserDashboard = () => {
         </div>
         
         {/* Main Content */}
-        <main className="pt-16 bg-black min-h-screen">
-          <Dashboard />
+        <main className="pt-16 p-6 bg-black min-h-screen">
+          <div className="max-w-7xl mx-auto">
+            <ProblemDashboard username={username} />
+          </div>
         </main>
       </div>
     </div>
