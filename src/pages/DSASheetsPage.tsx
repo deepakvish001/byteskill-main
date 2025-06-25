@@ -11,13 +11,14 @@ import {
   FileText, 
   Clock, 
   Search,
-  Target,
   CheckCircle,
   Lock,
-  Users,
+  Target,
   Star,
   BookOpen,
-  TrendingUp
+  TrendingUp,
+  Users,
+  Zap
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
@@ -93,10 +94,10 @@ const DSASheetsPage = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-900 text-green-400 border-green-800';
-      case 'intermediate': return 'bg-yellow-900 text-yellow-400 border-yellow-800';
-      case 'advanced': return 'bg-red-900 text-red-400 border-red-800';
-      default: return 'bg-gray-900 text-gray-400 border-gray-800';
+      case 'beginner': return 'bg-green-900/80 text-green-300 border-green-700';
+      case 'intermediate': return 'bg-yellow-900/80 text-yellow-300 border-yellow-700';
+      case 'advanced': return 'bg-red-900/80 text-red-300 border-red-700';
+      default: return 'bg-gray-900/80 text-gray-300 border-gray-700';
     }
   };
 
@@ -173,32 +174,34 @@ const DSASheetsPage = () => {
           </div>
         </div>
         
-        {/* Main Content */}
-        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with proper spacing */}
+        <main className="flex-1 pt-24 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Breadcrumb */}
-            <CourseBreadcrumb items={breadcrumbItems} />
+            <div className="bg-black">
+              <CourseBreadcrumb items={breadcrumbItems} />
+            </div>
 
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+            {/* Page Header */}
+            <div className="text-center mb-8 bg-black">
+              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4">
                 DSA Practice Sheets
               </h1>
-              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Master data structures and algorithms with curated problem sets designed for coding interviews
+              <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+                Master Data Structures and Algorithms with curated problem sets from top competitive programmers
               </p>
             </div>
 
-            {/* Search */}
-            <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            {/* Search Card */}
+            <Card className="bg-gray-900/90 border-gray-700 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
-                    placeholder="Search DSA sheets by name, difficulty, or topics..."
+                    placeholder="Search DSA sheets, algorithms, or data structures..."
                     value={filterQuery}
                     onChange={(e) => setFilterQuery(e.target.value)}
-                    className="pl-12 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 h-12 text-lg"
+                    className="pl-12 bg-gray-800/70 border-gray-600 text-white placeholder-gray-400 h-12 text-lg"
                   />
                 </div>
               </CardContent>
@@ -210,13 +213,13 @@ const DSASheetsPage = () => {
                 const enrollment = getEnrollmentStatus(course.course_id);
                 
                 return (
-                  <Card key={course.id} className="group bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Card key={course.id} className="group bg-gray-900/90 border-gray-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 overflow-hidden backdrop-blur-sm">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
-                    <CardHeader className="relative pb-4">
+                    <CardHeader className="relative pb-4 bg-gray-900/50">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
-                          <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl">
+                          <div className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl">
                             <FileText className="w-6 h-6 text-blue-400" />
                           </div>
                           <div className="flex-1">
@@ -243,25 +246,25 @@ const DSASheetsPage = () => {
                           </div>
                         </div>
                       </div>
-                      <CardDescription className="text-gray-300 text-sm leading-relaxed">
+                      <CardDescription className="text-gray-300 text-sm leading-relaxed bg-transparent">
                         {course.description}
                       </CardDescription>
                     </CardHeader>
                     
-                    <CardContent className="relative pt-0">
+                    <CardContent className="relative pt-0 bg-gray-900/50">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4 text-sm text-gray-400">
                           <div className="flex items-center space-x-1">
                             <Target className="w-4 h-4 text-blue-400" />
-                            <span className="font-medium">{course.total_lessons} problems</span>
+                            <span className="font-medium text-gray-300">{course.total_lessons} problems</span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Clock className="w-4 h-4 text-green-400" />
-                            <span className="font-medium">{course.estimated_hours}h</span>
+                            <span className="font-medium text-gray-300">{course.estimated_hours}h</span>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <Users className="w-4 h-4 text-purple-400" />
-                            <span className="font-medium">2.1k</span>
+                            <Star className="w-4 h-4 text-yellow-400" />
+                            <span className="font-medium text-gray-300">4.8</span>
                           </div>
                         </div>
                       </div>
@@ -274,7 +277,7 @@ const DSASheetsPage = () => {
                           </div>
                           <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
                             <div 
-                              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500" 
+                              className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-500" 
                               style={{ width: `${enrollment.progress_percentage}%` }}
                             />
                           </div>
@@ -305,10 +308,10 @@ const DSASheetsPage = () => {
                         )}
                         <Button 
                           onClick={() => navigate(`/sheet/${course.course_id}`)}
-                          className={`${enrollment ? 'flex-1' : 'flex-1'} bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium py-2.5 transition-all duration-200`}
+                          className={`${enrollment ? 'flex-1' : 'flex-1'} bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-medium py-2.5 transition-all duration-200`}
                         >
                           <BookOpen className="w-4 h-4 mr-2" />
-                          {enrollment ? 'Continue Practice' : 'View Course'}
+                          {enrollment ? 'Continue Practice' : 'View Sheet'}
                         </Button>
                       </div>
                     </CardContent>
@@ -319,32 +322,32 @@ const DSASheetsPage = () => {
 
             {/* Stats Section */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-              <Card className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 border-blue-700/30">
-                <CardContent className="p-6 text-center">
+              <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/30 border-blue-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
                   <FileText className="w-8 h-8 text-blue-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">{filteredCourses.length}</div>
                   <div className="text-sm text-blue-300">DSA Sheets</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-green-900/20 to-green-800/20 border-green-700/30">
-                <CardContent className="p-6 text-center">
-                  <Target className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">500+</div>
-                  <div className="text-sm text-green-300">Problems</div>
+              <Card className="bg-gradient-to-br from-cyan-900/30 to-cyan-800/30 border-cyan-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
+                  <Target className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">450+</div>
+                  <div className="text-sm text-cyan-300">Problems</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border-purple-700/30">
-                <CardContent className="p-6 text-center">
-                  <Users className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">10k+</div>
-                  <div className="text-sm text-purple-300">Students</div>
+              <Card className="bg-gradient-to-br from-teal-900/30 to-teal-800/30 border-teal-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
+                  <Users className="w-8 h-8 text-teal-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">25k+</div>
+                  <div className="text-sm text-teal-300">Students</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-yellow-900/20 to-yellow-800/20 border-yellow-700/30">
-                <CardContent className="p-6 text-center">
-                  <TrendingUp className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+              <Card className="bg-gradient-to-br from-green-900/30 to-green-800/30 border-green-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
+                  <TrendingUp className="w-8 h-8 text-green-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">95%</div>
-                  <div className="text-sm text-yellow-300">Success Rate</div>
+                  <div className="text-sm text-green-300">Success Rate</div>
                 </CardContent>
               </Card>
             </div>

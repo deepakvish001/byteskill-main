@@ -7,32 +7,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BookOpen, 
   Clock, 
-  Users, 
-  Star,
   Search,
-  Target,
-  Zap,
   CheckCircle,
   Lock,
+  GraduationCap,
+  Star,
   TrendingUp,
-  Cpu,
-  FileText,
-  MessageCircle
+  Users,
+  Award
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
+import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 
 interface Course {
   id: string;
   course_id: string;
   title: string;
   description: string;
-  category: string;
   difficulty: string;
   total_lessons: number;
   estimated_hours: number;
@@ -54,7 +50,10 @@ const CoursesOverview = () => {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterQuery, setFilterQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const breadcrumbItems = [
+    { label: 'Home', href: '/dashboard' },
+    { label: 'All Courses' }
+  ];
 
   useEffect(() => {
     fetchData();
@@ -66,6 +65,7 @@ const CoursesOverview = () => {
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
         .select('*')
+        .eq('category', 'course')
         .order('created_at', { ascending: false });
 
       if (coursesError) throw coursesError;
@@ -93,40 +93,10 @@ const CoursesOverview = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-900 text-green-400 border-green-800';
-      case 'intermediate': return 'bg-yellow-900 text-yellow-400 border-yellow-800';
-      case 'advanced': return 'bg-red-900 text-red-400 border-red-800';
-      default: return 'bg-gray-900 text-gray-400 border-gray-800';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'dsa-sheet': return FileText;
-      case 'course': return BookOpen;
-      case 'interview-prep': return Users;
-      case 'core-cs': return Cpu;
-      default: return BookOpen;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'dsa-sheet': return 'from-blue-500/20 to-purple-500/20';
-      case 'course': return 'from-green-500/20 to-emerald-500/20';
-      case 'interview-prep': return 'from-purple-500/20 to-pink-500/20';
-      case 'core-cs': return 'from-yellow-500/20 to-orange-500/20';
-      default: return 'from-gray-500/20 to-gray-400/20';
-    }
-  };
-
-  const getCategoryIconColor = (category: string) => {
-    switch (category) {
-      case 'dsa-sheet': return 'text-blue-400';
-      case 'course': return 'text-green-400';
-      case 'interview-prep': return 'text-purple-400';
-      case 'core-cs': return 'text-yellow-400';
-      default: return 'text-gray-400';
+      case 'beginner': return 'bg-green-900/80 text-green-300 border-green-700';
+      case 'intermediate': return 'bg-yellow-900/80 text-yellow-300 border-yellow-700';
+      case 'advanced': return 'bg-red-900/80 text-red-300 border-red-700';
+      default: return 'bg-gray-900/80 text-gray-300 border-gray-700';
     }
   };
 
@@ -134,128 +104,39 @@ const CoursesOverview = () => {
     return enrollments.find(e => e.course_id === courseId);
   };
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
-                         course.description?.toLowerCase().includes(filterQuery.toLowerCase()) ||
-                         course.tags.some(tag => tag.toLowerCase().includes(filterQuery.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  const handleEnrollment = async (courseId: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
 
-  const coursesByCategory = {
-    'dsa-sheet': filteredCourses.filter(c => c.category === 'dsa-sheet'),
-    'course': filteredCourses.filter(c => c.category === 'course'),
-    'interview-prep': filteredCourses.filter(c => c.category === 'interview-prep'),
-    'core-cs': filteredCourses.filter(c => c.category === 'core-cs'),
+    try {
+      const { error } = await supabase
+        .from('course_enrollments')
+        .insert({
+          user_id: user.id,
+          course_id: courseId
+        });
+
+      if (error) throw error;
+      
+      // Refresh enrollments
+      fetchData();
+    } catch (error) {
+      console.error('Error enrolling:', error);
+    }
   };
 
-  const renderCourseCard = (course: Course) => {
-    const CategoryIcon = getCategoryIcon(course.category);
-    const enrollment = getEnrollmentStatus(course.course_id);
-
-    return (
-      <Card key={course.id} className="group bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 overflow-hidden">
-        <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryColor(course.category)} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-        
-        <CardHeader className="relative pb-4">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center space-x-3">
-              <div className={`p-3 bg-gradient-to-br ${getCategoryColor(course.category)} rounded-xl`}>
-                <CategoryIcon className={`w-6 h-6 ${getCategoryIconColor(course.category)}`} />
-              </div>
-              <div className="flex-1">
-                <CardTitle className="text-white text-xl font-bold group-hover:text-blue-400 transition-colors">
-                  {course.title}
-                </CardTitle>
-                <div className="flex items-center space-x-2 mt-2">
-                  <Badge className={`${getDifficultyColor(course.difficulty)} text-xs font-medium`}>
-                    {course.difficulty}
-                  </Badge>
-                  {course.is_premium && (
-                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 text-xs">
-                      <Lock className="w-3 h-3 mr-1" />
-                      Pro
-                    </Badge>
-                  )}
-                  {enrollment && (
-                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Enrolled
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <CardDescription className="text-gray-300 text-sm leading-relaxed">
-            {course.description}
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="relative pt-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4 text-sm text-gray-400">
-              <div className="flex items-center space-x-1">
-                <BookOpen className="w-4 h-4 text-blue-400" />
-                <span className="font-medium">{course.total_lessons} lessons</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Clock className="w-4 h-4 text-green-400" />
-                <span className="font-medium">{course.estimated_hours}h</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Star className="w-4 h-4 text-yellow-400" />
-                <span className="font-medium">4.8</span>
-              </div>
-            </div>
-          </div>
-          
-          {enrollment && (
-            <div className="mb-6">
-              <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-400 font-medium">Progress</span>
-                <span className="text-white font-bold">{enrollment.progress_percentage}%</span>
-              </div>
-              <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                <div 
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500" 
-                  style={{ width: `${enrollment.progress_percentage}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-2 mb-6">
-            {course.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs bg-gray-800/50 text-gray-300 border-gray-600 hover:bg-gray-700/50">
-                {tag}
-              </Badge>
-            ))}
-            {course.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs bg-gray-800/50 text-gray-300 border-gray-600">
-                +{course.tags.length - 3} more
-              </Badge>
-            )}
-          </div>
-
-          <Button 
-            onClick={() => navigate(`/course/${course.course_id}`)}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium py-2.5 transition-all duration-200"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            {enrollment ? 'Continue Learning' : 'View Course'}
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  };
+  const filteredCourses = courses.filter(course => 
+    course.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
+    course.description?.toLowerCase().includes(filterQuery.toLowerCase()) ||
+    course.tags.some(tag => tag.toLowerCase().includes(filterQuery.toLowerCase()))
+  );
 
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
       </div>
     );
   }
@@ -292,113 +173,180 @@ const CoursesOverview = () => {
           </div>
         </div>
         
-        {/* Main Content */}
-        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with proper spacing */}
+        <main className="flex-1 pt-24 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent mb-4">
-                Explore All Courses
+            {/* Breadcrumb */}
+            <div className="bg-black">
+              <CourseBreadcrumb items={breadcrumbItems} />
+            </div>
+
+            {/* Page Header */}
+            <div className="text-center mb-8 bg-black">
+              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
+                All Courses
               </h1>
-              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Master coding skills with our comprehensive learning paths across different domains
+              <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+                Explore our comprehensive collection of programming courses designed to accelerate your learning journey
               </p>
             </div>
 
-            {/* Search and Filter */}
-            <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            {/* Search Card */}
+            <Card className="bg-gray-900/90 border-gray-700 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
-                    placeholder="Search courses, topics, or skills across all categories..."
+                    placeholder="Search courses by topic, technology, or difficulty..."
                     value={filterQuery}
                     onChange={(e) => setFilterQuery(e.target.value)}
-                    className="pl-12 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 h-12 text-lg"
+                    className="pl-12 bg-gray-800/70 border-gray-600 text-white placeholder-gray-400 h-12 text-lg"
                   />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Course Categories Tabs */}
-            <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-              <TabsList className="grid w-full grid-cols-5 bg-gray-900/50 border border-gray-700 backdrop-blur-sm">
-                <TabsTrigger value="all" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-gray-800">
-                  All Courses
-                </TabsTrigger>
-                <TabsTrigger value="dsa-sheet" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-gray-800">
-                  DSA Sheets
-                </TabsTrigger>
-                <TabsTrigger value="course" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-gray-800">
-                  Courses
-                </TabsTrigger>
-                <TabsTrigger value="interview-prep" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-gray-800">
-                  Interview Prep
-                </TabsTrigger>
-                <TabsTrigger value="core-cs" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-gray-800">
-                  Core CS
-                </TabsTrigger>
-              </TabsList>
+            {/* Course Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredCourses.map((course) => {
+                const enrollment = getEnrollmentStatus(course.course_id);
+                
+                return (
+                  <Card key={course.id} className="group bg-gray-900/90 border-gray-700 hover:border-green-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10 overflow-hidden backdrop-blur-sm">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-blue-500/5 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    <CardHeader className="relative pb-4 bg-gray-900/50">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-3 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-xl">
+                            <BookOpen className="w-6 h-6 text-green-400" />
+                          </div>
+                          <div className="flex-1">
+                            <CardTitle className="text-white text-xl font-bold group-hover:text-green-400 transition-colors">
+                              {course.title}
+                            </CardTitle>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Badge className={`${getDifficultyColor(course.difficulty)} text-xs font-medium`}>
+                                {course.difficulty}
+                              </Badge>
+                              {course.is_premium && (
+                                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 text-xs">
+                                  <Lock className="w-3 h-3 mr-1" />
+                                  Pro
+                                </Badge>
+                              )}
+                              {enrollment && (
+                                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Enrolled
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <CardDescription className="text-gray-300 text-sm leading-relaxed bg-transparent">
+                        {course.description}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent className="relative pt-0 bg-gray-900/50">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4 text-sm text-gray-400">
+                          <div className="flex items-center space-x-1">
+                            <GraduationCap className="w-4 h-4 text-green-400" />
+                            <span className="font-medium text-gray-300">{course.total_lessons} lessons</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Clock className="w-4 h-4 text-blue-400" />
+                            <span className="font-medium text-gray-300">{course.estimated_hours}h</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-4 h-4 text-yellow-400" />
+                            <span className="font-medium text-gray-300">4.7</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {enrollment && (
+                        <div className="mb-6">
+                          <div className="flex items-center justify-between text-sm mb-2">
+                            <span className="text-gray-400 font-medium">Progress</span>
+                            <span className="text-white font-bold">{enrollment.progress_percentage}%</span>
+                          </div>
+                          <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500" 
+                              style={{ width: `${enrollment.progress_percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
 
-              <TabsContent value="all" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredCourses.map(renderCourseCard)}
-                </div>
-              </TabsContent>
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {course.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs bg-gray-800/50 text-gray-300 border-gray-600 hover:bg-gray-700/50">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {course.tags.length > 3 && (
+                          <Badge variant="outline" className="text-xs bg-gray-800/50 text-gray-300 border-gray-600">
+                            +{course.tags.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
 
-              <TabsContent value="dsa-sheet" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {coursesByCategory['dsa-sheet'].map(renderCourseCard)}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="course" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {coursesByCategory['course'].map(renderCourseCard)}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="interview-prep" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {coursesByCategory['interview-prep'].map(renderCourseCard)}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="core-cs" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {coursesByCategory['core-cs'].map(renderCourseCard)}
-                </div>
-              </TabsContent>
-            </Tabs>
+                      <div className="flex space-x-3">
+                        {!enrollment && (
+                          <Button 
+                            onClick={() => handleEnrollment(course.course_id)}
+                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium py-2.5 transition-all duration-200"
+                          >
+                            Free Enroll
+                          </Button>
+                        )}
+                        <Button 
+                          onClick={() => navigate(`/course/${course.course_id}`)}
+                          className={`${enrollment ? 'flex-1' : 'flex-1'} bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-medium py-2.5 transition-all duration-200`}
+                        >
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          {enrollment ? 'Continue Learning' : 'View Course'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
 
             {/* Stats Section */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-              <Card className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 border-blue-700/30">
-                <CardContent className="p-6 text-center">
-                  <FileText className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">{coursesByCategory['dsa-sheet'].length}</div>
-                  <div className="text-sm text-blue-300">DSA Sheets</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-green-900/20 to-green-800/20 border-green-700/30">
-                <CardContent className="p-6 text-center">
+              <Card className="bg-gradient-to-br from-green-900/30 to-green-800/30 border-green-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
                   <BookOpen className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">{coursesByCategory['course'].length}</div>
-                  <div className="text-sm text-green-300">Courses</div>
+                  <div className="text-2xl font-bold text-white">{filteredCourses.length}</div>
+                  <div className="text-sm text-green-300">Total Courses</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border-purple-700/30">
-                <CardContent className="p-6 text-center">
+              <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/30 border-blue-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
+                  <GraduationCap className="w-8 h-8 text-blue-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">150+</div>
+                  <div className="text-sm text-blue-300">Lessons</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/30 border-purple-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
                   <Users className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">{coursesByCategory['interview-prep'].length}</div>
-                  <div className="text-sm text-purple-300">Interview Prep</div>
+                  <div className="text-2xl font-bold text-white">50k+</div>
+                  <div className="text-sm text-purple-300">Students</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-yellow-900/20 to-yellow-800/20 border-yellow-700/30">
-                <CardContent className="p-6 text-center">
-                  <Cpu className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">{coursesByCategory['core-cs'].length}</div>
-                  <div className="text-sm text-yellow-300">Core CS</div>
+              <Card className="bg-gradient-to-br from-yellow-900/30 to-yellow-800/30 border-yellow-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
+                  <Award className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">4.7</div>
+                  <div className="text-sm text-yellow-300">Avg Rating</div>
                 </CardContent>
               </Card>
             </div>
