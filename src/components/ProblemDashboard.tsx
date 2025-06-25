@@ -3,11 +3,9 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Circle, Clock, TrendingUp, BookOpen, Code, Trophy, Target, Filter, SortAsc, Search, Play, Star, Lock, CheckCircle } from "lucide-react";
+import { CheckCircle2, Circle, Clock, ChevronDown, ChevronRight, Plus, Star, Play, Youtube, FileText, Lock } from "lucide-react";
 
 interface ProblemDashboardProps {
   selectedSheet: string;
@@ -15,291 +13,307 @@ interface ProblemDashboardProps {
 }
 
 const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps) => {
-  const [selectedDifficulty, setSelectedDifficulty] = useState("all");
-  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({
+    "step1": true,
+    "step2": false,
+    "step3": false,
+    "step4": false,
+    "step5": false,
+    "step6": false
+  });
 
-  // Mock data for problems
-  const problems = [
-    {
-      id: 1,
-      title: "Two Sum",
-      difficulty: "Easy",
-      status: "solved",
-      tags: ["Array", "Hash Table"],
-      timeComplexity: "O(n)",
-      spaceComplexity: "O(n)",
-      acceptance: "49.2%",
-      likes: 15420,
-      description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target."
-    },
-    {
-      id: 2,
-      title: "Add Two Numbers",
-      difficulty: "Medium",
-      status: "attempted",
-      tags: ["Linked List", "Math", "Recursion"],
-      timeComplexity: "O(max(m,n))",
-      spaceComplexity: "O(max(m,n))",
-      acceptance: "38.4%",
-      likes: 9234,
-      description: "You are given two non-empty linked lists representing two non-negative integers."
-    },
-    {
-      id: 3,
-      title: "Longest Substring Without Repeating Characters",
-      difficulty: "Medium",
-      status: "unsolved",
-      tags: ["Hash Table", "String", "Sliding Window"],
-      timeComplexity: "O(n)",
-      spaceComplexity: "O(min(m,n))",
-      acceptance: "33.8%",
-      likes: 12876,
-      description: "Given a string s, find the length of the longest substring without repeating characters."
-    },
-    {
-      id: 4,
-      title: "Median of Two Sorted Arrays",
-      difficulty: "Hard",
-      status: "unsolved",
-      tags: ["Array", "Binary Search", "Divide and Conquer"],
-      timeComplexity: "O(log(min(m,n)))",
-      spaceComplexity: "O(1)",
-      acceptance: "35.2%",
-      likes: 8945,
-      description: "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays."
-    },
-    {
-      id: 5,
-      title: "Longest Palindromic Substring",
-      difficulty: "Medium",
-      status: "solved",
-      tags: ["String", "Dynamic Programming"],
-      timeComplexity: "O(n²)",
-      spaceComplexity: "O(1)",
-      acceptance: "32.1%",
-      likes: 11234,
-      description: "Given a string s, return the longest palindromic substring in s."
-    }
-  ];
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "solved":
-        return <CheckCircle className="w-5 h-5 text-green-400" />;
+        return <CheckCircle2 className="w-4 h-4 text-green-400" />;
       case "attempted":
-        return <Clock className="w-5 h-5 text-yellow-400" />;
+        return <Clock className="w-4 h-4 text-yellow-400" />;
       default:
-        return <Circle className="w-5 h-5 text-gray-600" />;
+        return <Circle className="w-4 h-4 text-gray-600" />;
     }
   };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "Easy":
-        return "bg-green-900 text-green-400 border-green-800";
+        return "bg-green-900/20 text-green-400 border-green-800/50";
       case "Medium":
-        return "bg-yellow-900 text-yellow-400 border-yellow-800";
+        return "bg-yellow-900/20 text-yellow-400 border-yellow-800/50";
       case "Hard":
-        return "bg-red-900 text-red-400 border-red-800";
+        return "bg-red-900/20 text-red-400 border-red-800/50";
       default:
-        return "bg-gray-900 text-gray-400 border-gray-800";
+        return "bg-gray-900/20 text-gray-400 border-gray-800/50";
     }
   };
 
-  const filteredProblems = problems.filter(problem => {
-    const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         problem.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesDifficulty = selectedDifficulty === "all" || problem.difficulty === selectedDifficulty;
-    const matchesStatus = selectedStatus === "all" || problem.status === selectedStatus;
-    
-    return matchesSearch && matchesDifficulty && matchesStatus;
-  });
-
-  const stats = {
-    total: problems.length,
-    solved: problems.filter(p => p.status === "solved").length,
-    attempted: problems.filter(p => p.status === "attempted").length,
-    unsolved: problems.filter(p => p.status === "unsolved").length
+  // Mock data structured like the reference image
+  const courseData = {
+    title: "Striver's A2Z DSA Course",
+    description: "This course is made for people who want to learn DSA from A to Z for free in a well-organized and structured manner.",
+    totalProgress: { solved: 0, total: 455 },
+    difficulties: {
+      easy: { solved: 0, total: 131 },
+      medium: { solved: 0, total: 187 },
+      hard: { solved: 0, total: 136 }
+    },
+    sections: [
+      {
+        id: "step1",
+        title: "Step 1: Learn the basics",
+        progress: { solved: 0, total: 31 },
+        lectures: [
+          {
+            id: "lec1",
+            title: "Lec 1: Things to Know in C++/Java/Python or any language",
+            progress: { solved: 0, total: 9 },
+            problems: [
+              { id: 1, title: "User Input / Output", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: false, hasNotes: true },
+              { id: 2, title: "Data Types", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: true, hasPractice: false, hasNotes: true },
+              { id: 3, title: "If Else statements", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true },
+              { id: 4, title: "Switch Statement", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true },
+              { id: 5, title: "What are arrays, strings?", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true },
+              { id: 6, title: "For loops", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true },
+              { id: 7, title: "While loops", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true },
+              { id: 8, title: "Functions (Pass by Reference and Value)", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true },
+              { id: 9, title: "Time Complexity (Learn Basics, and then analyse in next Steps)", status: "unsolved", difficulty: "Easy", hasVideo: true, hasArticle: false, hasPractice: true, hasNotes: true }
+            ]
+          }
+        ]
+      },
+      {
+        id: "step2",
+        title: "Step 2: Build-up Logical Thinking",
+        progress: { solved: 0, total: 1 },
+        lectures: []
+      },
+      {
+        id: "step3",
+        title: "Step 3: Learn STL/Java-Collections or similar thing in your language",
+        progress: { solved: 0, total: 1 },
+        lectures: []
+      },
+      {
+        id: "step4",
+        title: "Step 4: Know Basic Maths",
+        progress: { solved: 0, total: 7 },
+        lectures: []
+      },
+      {
+        id: "step5",
+        title: "Step 5: Learn Basic Recursion",
+        progress: { solved: 0, total: 9 },
+        lectures: []
+      },
+      {
+        id: "step6",
+        title: "Step 6: Learn Basic Hashing",
+        progress: { solved: 0, total: 3 },
+        lectures: []
+      }
+    ]
   };
 
-  const progressPercentage = (stats.solved / stats.total) * 100;
+  const progressPercentage = (courseData.totalProgress.solved / courseData.totalProgress.total) * 100;
 
   return (
-    <div className="space-y-6">
-      {/* Header with Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-black border-gray-900">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gray-900 rounded-lg">
-                <Target className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Total Problems</p>
-                <p className="text-2xl font-bold text-white">{stats.total}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-black border-gray-900">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-900 rounded-lg">
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Solved</p>
-                <p className="text-2xl font-bold text-green-400">{stats.solved}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-black border-gray-900">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-900 rounded-lg">
-                <Clock className="w-5 h-5 text-yellow-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Attempted</p>
-                <p className="text-2xl font-bold text-yellow-400">{stats.attempted}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-black border-gray-900">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-900 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Progress</p>
-                <p className="text-2xl font-bold text-white">{Math.round(progressPercentage)}%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Progress Bar */}
-      <Card className="bg-black border-gray-900">
-        <CardContent className="p-6">
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white">Overall Progress</h3>
-              <span className="text-sm text-gray-400">{stats.solved}/{stats.total} problems</span>
-            </div>
-            <Progress value={progressPercentage} className="h-2 bg-gray-900" />
+    <div className="bg-black min-h-screen p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Course Header */}
+        <div className="bg-black border border-gray-900 rounded-lg p-6">
+          <h1 className="text-2xl font-bold text-white mb-2">{courseData.title}</h1>
+          <p className="text-gray-400 text-sm mb-4">
+            {courseData.description}{" "}
+            <span className="text-orange-400 cursor-pointer hover:underline">Know More</span>
+          </p>
+          
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-6">
+            <p className="text-orange-800 text-sm">
+              <strong>Note:</strong> You can find <strong>LeetCode</strong> links for problems available on the internet. However few problems are not there on <strong>LeetCode</strong> for which you will not find a practice link attached. We cannot use third-party links due to legal constraints. Also the newly added TUF+ practice links are to give you a free trial of TUF+ which a lot of people asked for. If you don't wish to upgrade, you can still use the TUF platform, nothing has changed.
+            </p>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Filters */}
-      <Card className="bg-black border-gray-900">
-        <CardContent className="p-6">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-400">Filters:</span>
+          <p className="text-gray-400 text-sm mb-6">
+            Remember, you started using our website because of our content and not because of some third party links :)
+          </p>
+
+          {/* Progress Overview */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="bg-black border border-gray-900 rounded-lg p-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white mb-1">
+                  {courseData.totalProgress.solved} / {courseData.totalProgress.total}
+                </div>
+                <div className="text-sm text-gray-400">Total Progress</div>
+                <div className="text-lg font-semibold text-gray-500 mt-2">0%</div>
+              </div>
             </div>
             
-            <select
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1 text-white text-sm focus:ring-2 focus:ring-gray-700"
-            >
-              <option value="all">All Difficulties</option>
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
+            <div className="bg-black border border-gray-900 rounded-lg p-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400 mb-1">
+                  {courseData.difficulties.easy.solved} / {courseData.difficulties.easy.total}
+                </div>
+                <div className="text-sm text-gray-400">Easy</div>
+                <div className="text-sm text-gray-500 mt-1">completed</div>
+              </div>
+            </div>
 
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1 text-white text-sm focus:ring-2 focus:ring-gray-700"
-            >
-              <option value="all">All Status</option>
-              <option value="solved">Solved</option>
-              <option value="attempted">Attempted</option>
-              <option value="unsolved">Unsolved</option>
-            </select>
+            <div className="bg-black border border-gray-900 rounded-lg p-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-400 mb-1">
+                  {courseData.difficulties.medium.solved} / {courseData.difficulties.medium.total}
+                </div>
+                <div className="text-sm text-gray-400">Medium</div>
+                <div className="text-sm text-gray-500 mt-1">completed</div>
+              </div>
+            </div>
 
-            <Button variant="outline" size="sm" className="bg-gray-900 border-gray-800 text-white hover:bg-gray-800">
-              <SortAsc className="w-4 h-4 mr-2" />
-              Sort
-            </Button>
+            <div className="bg-black border border-gray-900 rounded-lg p-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-400 mb-1">
+                  {courseData.difficulties.hard.solved} / {courseData.difficulties.hard.total}
+                </div>
+                <div className="text-sm text-gray-400">Hard</div>
+                <div className="text-sm text-gray-500 mt-1">completed</div>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Problems List */}
-      <Card className="bg-black border-gray-900">
-        <CardHeader>
-          <CardTitle className="text-white">Problems</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[600px]">
-            <div className="space-y-3">
-              {filteredProblems.map((problem) => (
-                <div
-                  key={problem.id}
-                  className="bg-gray-950 border border-gray-900 rounded-lg p-4 hover:bg-gray-900 transition-colors cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between space-x-4">
-                    <div className="flex items-start space-x-3 flex-1">
-                      {getStatusIcon(problem.status)}
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center space-x-3">
-                          <h3 className="text-white font-medium group-hover:text-blue-400 transition-colors">
-                            {problem.title}
-                          </h3>
-                          <Badge className={getDifficultyColor(problem.difficulty)}>
-                            {problem.difficulty}
-                          </Badge>
-                        </div>
-                        
-                        <p className="text-sm text-gray-400 line-clamp-2">
-                          {problem.description}
-                        </p>
-                        
-                        <div className="flex flex-wrap gap-2">
-                          {problem.tags.map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-xs bg-gray-900 text-gray-300 border-gray-800">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        
-                        <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          <span>Time: {problem.timeComplexity}</span>
-                          <span>Space: {problem.spaceComplexity}</span>
-                          <span>Acceptance: {problem.acceptance}</span>
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-3 h-3" />
-                            <span>{problem.likes}</span>
-                          </div>
+          {/* Tabs */}
+          <div className="flex space-x-6 border-b border-gray-900">
+            <button className="pb-2 text-orange-400 border-b-2 border-orange-400 font-medium">
+              All Problems
+            </button>
+            <button className="pb-2 text-gray-400 hover:text-white transition-colors">
+              Revision
+            </button>
+          </div>
+        </div>
+
+        {/* Course Sections */}
+        <div className="space-y-4">
+          {courseData.sections.map((section) => (
+            <div key={section.id} className="bg-black border border-gray-900 rounded-lg">
+              {/* Section Header */}
+              <div 
+                className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-950 transition-colors"
+                onClick={() => toggleSection(section.id)}
+              >
+                <div className="flex items-center space-x-3">
+                  {expandedSections[section.id] ? (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  )}
+                  <h3 className="text-white font-medium">{section.title}</h3>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Progress 
+                    value={(section.progress.solved / section.progress.total) * 100} 
+                    className="w-32 h-2 bg-gray-800"
+                  />
+                  <span className="text-sm text-gray-400">
+                    {section.progress.solved} / {section.progress.total}
+                  </span>
+                </div>
+              </div>
+
+              {/* Section Content */}
+              {expandedSections[section.id] && section.lectures.length > 0 && (
+                <div className="border-t border-gray-900">
+                  {section.lectures.map((lecture) => (
+                    <div key={lecture.id} className="p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-white font-medium">{lecture.title}</h4>
+                        <div className="flex items-center space-x-4">
+                          <Progress 
+                            value={(lecture.progress.solved / lecture.progress.total) * 100} 
+                            className="w-24 h-2 bg-gray-800"
+                          />
+                          <span className="text-sm text-gray-400">
+                            {lecture.progress.solved} / {lecture.progress.total}
+                          </span>
                         </div>
                       </div>
+
+                      {/* Problems Table */}
+                      <div className="bg-black border border-gray-900 rounded-lg overflow-hidden">
+                        <div className="grid grid-cols-7 gap-4 p-3 border-b border-gray-900 bg-gray-950 text-sm font-medium text-gray-400">
+                          <div>Status</div>
+                          <div>Problem</div>
+                          <div>Resource (vids)</div>
+                          <div>Resource + (free)</div>
+                          <div>Practice</div>
+                          <div>Note</div>
+                          <div>Difficulty</div>
+                        </div>
+
+                        {lecture.problems.map((problem) => (
+                          <div key={problem.id} className="grid grid-cols-7 gap-4 p-3 border-b border-gray-900 hover:bg-gray-950 transition-colors items-center">
+                            <div className="flex items-center">
+                              <input type="checkbox" className="mr-2 accent-orange-400" />
+                              {getStatusIcon(problem.status)}
+                            </div>
+                            
+                            <div className="text-white text-sm">{problem.title}</div>
+                            
+                            <div className="flex items-center justify-center">
+                              {problem.hasVideo ? (
+                                <Youtube className="w-5 h-5 text-orange-400 cursor-pointer hover:text-orange-300" />
+                              ) : (
+                                <span className="text-gray-600">-</span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center justify-center">
+                              {problem.hasArticle ? (
+                                <FileText className="w-5 h-5 text-red-400 cursor-pointer hover:text-red-300" />
+                              ) : (
+                                <span className="text-gray-600">-</span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center justify-center">
+                              {problem.hasPractice ? (
+                                <Button size="sm" variant="outline" className="bg-red-900/20 border-red-800/50 text-red-400 hover:bg-red-900/30 h-6 px-2 text-xs">
+                                  TUF+
+                                </Button>
+                              ) : (
+                                <span className="text-gray-600">-</span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center justify-center">
+                              {problem.hasNotes ? (
+                                <Plus className="w-4 h-4 text-gray-400 cursor-pointer hover:text-white" />
+                              ) : (
+                                <span className="text-gray-600">-</span>
+                              )}
+                            </div>
+                            
+                            <div>
+                              <Badge className={getDifficultyColor(problem.difficulty)}>
+                                {problem.difficulty}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Button size="sm" variant="outline" className="bg-gray-900 border-gray-800 text-white hover:bg-gray-800">
-                        <Play className="w-4 h-4 mr-2" />
-                        Solve
-                      </Button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
