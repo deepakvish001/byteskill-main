@@ -183,7 +183,7 @@ const CoursePage = () => {
         sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
       }`}>
         <Sidebar 
-          selectedSheet={course.category} 
+          selectedSheet={course?.category || "courses"} 
           onSheetChange={() => {}}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -208,8 +208,8 @@ const CoursePage = () => {
           </div>
         </div>
         
-        {/* Main Content with increased top padding to show breadcrumb */}
-        <main className="flex-1 pt-28 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to pt-35 */}
+        <main className="flex-1 pt-35 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Breadcrumb - Now visible with proper spacing */}
             <div className="mb-6">
@@ -224,10 +224,10 @@ const CoursePage = () => {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-white mb-2">{course.title}</h1>
-                  <p className="text-gray-400 text-lg">{course.description}</p>
+                  <h1 className="text-3xl font-bold text-white mb-2">{course?.title}</h1>
+                  <p className="text-gray-400 text-lg">{course?.description}</p>
                 </div>
-                {!enrollment && (
+                {!enrollment && course && (
                   <Button 
                     onClick={handleEnroll}
                     className="bg-green-600 hover:bg-green-700 text-white"
@@ -238,25 +238,27 @@ const CoursePage = () => {
                 )}
               </div>
 
-              <div className="flex items-center space-x-4">
-                <Badge className="bg-blue-900 text-blue-400 border-blue-800">
-                  {course.difficulty}
-                </Badge>
-                <div className="flex items-center space-x-1 text-gray-400">
-                  <BookOpen className="w-4 h-4" />
-                  <span>{course.total_lessons} lessons</span>
-                </div>
-                <div className="flex items-center space-x-1 text-gray-400">
-                  <Clock className="w-4 h-4" />
-                  <span>{course.estimated_hours}h</span>
-                </div>
-                {enrollment && (
-                  <Badge className="bg-green-900 text-green-400 border-green-800">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    Enrolled - {enrollment.progress_percentage}% Complete
+              {course && (
+                <div className="flex items-center space-x-4">
+                  <Badge className="bg-blue-900 text-blue-400 border-blue-800">
+                    {course.difficulty}
                   </Badge>
-                )}
-              </div>
+                  <div className="flex items-center space-x-1 text-gray-400">
+                    <BookOpen className="w-4 h-4" />
+                    <span>{course.total_lessons} lessons</span>
+                  </div>
+                  <div className="flex items-center space-x-1 text-gray-400">
+                    <Clock className="w-4 h-4" />
+                    <span>{course.estimated_hours}h</span>
+                  </div>
+                  {enrollment && (
+                    <Badge className="bg-green-900 text-green-400 border-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Enrolled - {enrollment.progress_percentage}% Complete
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Course Content - Using CourseContent component */}

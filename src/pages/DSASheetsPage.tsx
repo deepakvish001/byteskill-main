@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -170,11 +169,11 @@ const DSASheetsPage = () => {
           </div>
         </div>
         
-        {/* Main Content with increased top padding to show breadcrumb */}
-        <main className="pt-28 p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to pt-35 */}
+        <main className="pt-35 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Breadcrumb - Now visible with proper spacing */}
-            <div className="bg-black mb-4">
+            <div className="bg-black mb-6">
               <CourseBreadcrumb items={breadcrumbItems} />
             </div>
 
