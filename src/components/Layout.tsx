@@ -1,0 +1,80 @@
+
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
+interface LayoutProps {
+  children: React.ReactNode;
+  selectedSheet?: string;
+  onSheetChange?: (sheet: string) => void;
+}
+
+const Layout = ({ children, selectedSheet = "dashboard", onSheetChange }: LayoutProps) => {
+  const { user, loading } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">Access Denied</h1>
+          <p className="text-gray-400">Please log in to view this content.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black flex relative overflow-hidden">
+      {/* Fixed Sidebar - Responsive */}
+      <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
+        sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
+      }`}>
+        <Sidebar 
+          selectedSheet={selectedSheet} 
+          onSheetChange={onSheetChange || (() => {})}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+      </div>
+      
+      {/* Main Content Area - Responsive */}
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+        sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'
+      }`}>
+        {/* Fixed Header - Responsive */}
+        <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
+          left: sidebarCollapsed ? '4rem' : '16rem',
+        }}>
+          <Header 
+            searchQuery={searchQuery} 
+            onSearchChange={setSearchQuery}
+            sidebarCollapsed={sidebarCollapsed}
+            onExpandSidebar={() => setSidebarCollapsed(false)}
+          />
+        </div>
+        
+        {/* Main Content with responsive padding */}
+        <main className="flex-1 pt-16 bg-black min-h-screen">
+          {children}
+        </main>
+
+        {/* Footer */}
+        <Footer />
+      </div>
+    </div>
+  );
+};
+
+export default Layout;
