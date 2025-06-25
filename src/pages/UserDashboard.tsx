@@ -48,7 +48,10 @@ const UserDashboard = () => {
         {/* Main Content */}
         <main className="pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            <ProblemDashboard username={username || ''} />
+            <ProblemDashboard 
+              selectedSheet="striver-a2z"
+              searchQuery={searchQuery}
+            />
           </div>
         </main>
       </div>

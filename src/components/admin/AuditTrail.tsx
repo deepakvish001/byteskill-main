@@ -19,29 +19,42 @@ interface AuditTrailProps {
 }
 
 const AuditTrail = ({ searchQuery }: AuditTrailProps) => {
-  // Fetch audit logs
+  // Fetch audit logs with manual join since foreign key doesn't exist
   const { data: auditLogs, isLoading } = useQuery({
     queryKey: ['admin-audit-logs', searchQuery],
     queryFn: async () => {
-      let query = supabase
+      // First get audit logs
+      let auditQuery = supabase
         .from('audit_logs')
-        .select(`
-          *,
-          profiles!actor_id (
-            username,
-            full_name
-          )
-        `)
+        .select('*')
         .order('timestamp', { ascending: false })
         .limit(100);
 
       if (searchQuery) {
-        query = query.ilike('action_type', `%${searchQuery}%`);
+        auditQuery = auditQuery.ilike('action_type', `%${searchQuery}%`);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      const { data: auditData, error: auditError } = await auditQuery;
+      if (auditError) throw auditError;
+
+      // Then get profiles for the actors
+      if (auditData && auditData.length > 0) {
+        const actorIds = [...new Set(auditData.map(log => log.actor_id))];
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, username, full_name')
+          .in('id', actorIds);
+
+        if (profilesError) throw profilesError;
+
+        // Manually combine the data
+        return auditData.map(log => ({
+          ...log,
+          profile: profilesData?.find(profile => profile.id === log.actor_id)
+        }));
+      }
+
+      return auditData || [];
     },
   });
 
@@ -111,8 +124,8 @@ const AuditTrail = ({ searchQuery }: AuditTrailProps) => {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{log.profiles?.full_name || 'Unknown'}</div>
-                        <div className="text-sm text-gray-500">@{log.profiles?.username || 'unknown'}</div>
+                        <div className="font-medium">{log.profile?.full_name || 'Unknown'}</div>
+                        <div className="text-sm text-gray-500">@{log.profile?.username || 'unknown'}</div>
                       </div>
                     </TableCell>
                     <TableCell>

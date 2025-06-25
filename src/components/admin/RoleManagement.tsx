@@ -25,24 +25,36 @@ const RoleManagement = ({ searchQuery }: RoleManagementProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch all user roles
+  // Fetch all user roles with manual join
   const { data: userRoles, isLoading } = useQuery({
     queryKey: ['admin-user-roles', searchQuery],
     queryFn: async () => {
-      let query = supabase
+      // First get user roles
+      const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
-        .select(`
-          *,
-          profiles!user_id (
-            username,
-            full_name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      if (rolesError) throw rolesError;
+
+      // Then get profiles for the users
+      if (rolesData && rolesData.length > 0) {
+        const userIds = [...new Set(rolesData.map(role => role.user_id))];
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, username, full_name')
+          .in('id', userIds);
+
+        if (profilesError) throw profilesError;
+
+        // Manually combine the data
+        return rolesData.map(role => ({
+          ...role,
+          profile: profilesData?.find(profile => profile.id === role.user_id)
+        }));
+      }
+
+      return rolesData || [];
     },
   });
 
@@ -92,8 +104,8 @@ const RoleManagement = ({ searchQuery }: RoleManagementProps) => {
   };
 
   const filteredRoles = userRoles?.filter(roleEntry => 
-    roleEntry.profiles?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    roleEntry.profiles?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    roleEntry.profile?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    roleEntry.profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     roleEntry.role.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
@@ -123,8 +135,8 @@ const RoleManagement = ({ searchQuery }: RoleManagementProps) => {
                   <TableRow key={roleEntry.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{roleEntry.profiles?.full_name}</div>
-                        <div className="text-sm text-gray-500">@{roleEntry.profiles?.username}</div>
+                        <div className="font-medium">{roleEntry.profile?.full_name || 'Unknown'}</div>
+                        <div className="text-sm text-gray-500">@{roleEntry.profile?.username || 'unknown'}</div>
                       </div>
                     </TableCell>
                     <TableCell>

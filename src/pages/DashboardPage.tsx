@@ -12,6 +12,21 @@ const DashboardPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Mock awards data
+  const mockAwards = [
+    { id: '1', name: 'First Problem Solved', description: 'Solved your first coding problem', icon: '🏆', earnedAt: new Date().toISOString() },
+    { id: '2', name: 'Streak Master', description: 'Maintained a 7-day solving streak', icon: '🔥', earnedAt: new Date().toISOString() },
+    { id: '3', name: 'Problem Hunter', description: 'Solved 50 problems', icon: '🎯', earnedAt: new Date().toISOString() }
+  ];
+
+  // Mock progress data
+  const mockProgressData = {
+    total: 150,
+    easy: 45,
+    medium: 32,
+    hard: 8
+  };
+
   return (
     <div className="min-h-screen bg-black flex">
       {/* Fixed Sidebar */}
@@ -62,11 +77,11 @@ const DashboardPage = () => {
               totalPoints={1250}
               totalArticlesRead={45}
               totalVideosWatched={32}
-              awards={8}
+              awards={mockAwards}
             />
             
             {/* Progress Section */}
-            <ProgressSection progress={[]} />
+            <ProgressSection progress={mockProgressData} />
           </div>
         </main>
       </div>
