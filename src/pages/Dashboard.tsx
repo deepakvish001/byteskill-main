@@ -39,54 +39,56 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 space-y-6">
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <Button 
-          onClick={handleExportProgress}
-          disabled={exportLoading}
-          className="bg-blue-900 text-blue-400 hover:bg-blue-800 border border-blue-800"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          {exportLoading ? "Exporting..." : "Export Progress"}
-        </Button>
-        <Button 
-          onClick={handleWeeklyDigest}
-          className="bg-purple-900 text-purple-400 hover:bg-purple-800 border border-purple-800"
-        >
-          <Mail className="w-4 h-4 mr-2" />
-          Weekly Digest
-        </Button>
-      </div>
-
-      {/* Profile Header */}
-      <ProfileHeader />
-
-      {/* Rating Chart */}
-      <RatingChart />
-
-      {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Problems Solved Chart - Takes 2 columns */}
-        <div className="lg:col-span-2">
-          <ProblemsSolvedChart />
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Quick Actions */}
+        <div className="flex flex-wrap gap-4 mb-6">
+          <Button 
+            onClick={handleExportProgress}
+            disabled={exportLoading}
+            className="bg-blue-900 text-blue-400 hover:bg-blue-800 border border-blue-800"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {exportLoading ? "Exporting..." : "Export Progress"}
+          </Button>
+          <Button 
+            onClick={handleWeeklyDigest}
+            className="bg-purple-900 text-purple-400 hover:bg-purple-800 border border-purple-800"
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            Weekly Digest
+          </Button>
         </div>
-        
-        {/* Community Stats */}
-        <CommunityStats />
-      </div>
 
-      {/* Submission Calendar - Full Width */}
-      <SubmissionCalendar />
+        {/* Profile Header */}
+        <ProfileHeader />
 
-      {/* Bottom Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Language Skills */}
-        <LanguageSkills />
-        
-        {/* Recent Activity - Takes 2 columns */}
-        <div className="lg:col-span-2">
-          <RecentActivity />
+        {/* Rating Chart */}
+        <RatingChart />
+
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Problems Solved Chart - Takes 2 columns */}
+          <div className="lg:col-span-2">
+            <ProblemsSolvedChart />
+          </div>
+          
+          {/* Community Stats */}
+          <CommunityStats />
+        </div>
+
+        {/* Submission Calendar - Full Width */}
+        <SubmissionCalendar />
+
+        {/* Bottom Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Language Skills */}
+          <LanguageSkills />
+          
+          {/* Recent Activity - Takes 2 columns */}
+          <div className="lg:col-span-2">
+            <RecentActivity />
+          </div>
         </div>
       </div>
     </div>

@@ -60,7 +60,7 @@ const UserDashboard = () => {
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
@@ -71,8 +71,8 @@ const UserDashboard = () => {
           </div>
         </div>
         
-        {/* Main Content with responsive padding */}
-        <main className="flex-1 pt-16 sm:pt-20 bg-black min-h-screen">
+        {/* Main Content with reduced top padding */}
+        <main className="flex-1 pt-20 bg-black min-h-screen">
           <Dashboard />
         </main>
       </div>

@@ -36,17 +36,8 @@ const CoursePageToolbar = ({
   filters,
   onFiltersChange
 }: CoursePageToolbarProps) => {
-  const defaultFilters: AdvancedFilters = {
-    difficulty: "all",
-    status: "all",
-    hasArticle: false,
-    hasVideo: false,
-    hasPractice: false,
-    searchQuery: ""
-  };
-
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 bg-gray-900/50 rounded-lg border border-gray-700">
+    <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 bg-black rounded-lg border border-gray-800">
       <div className="flex flex-wrap items-center gap-3">
         {/* Advanced Filter */}
         {filters && onFiltersChange && (

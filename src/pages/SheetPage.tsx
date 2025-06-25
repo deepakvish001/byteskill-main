@@ -6,7 +6,6 @@ import ProblemDashboard from "@/components/ProblemDashboard";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
-import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 import CoursePageToolbar from "@/components/CoursePageToolbar";
 import CourseProgressStats from "@/components/CourseProgressStats";
 
@@ -35,7 +34,7 @@ const SheetPage = () => {
     searchQuery: ""
   });
 
-  const getBreadcrumbItems = () => {
+  const getSheetTitle = () => {
     const sheetNames: { [key: string]: string } = {
       'striver-a2z': 'Striver A2Z Sheet',
       'striver-sde': 'Striver SDE Sheet',
@@ -45,11 +44,7 @@ const SheetPage = () => {
       'top-interview': 'Top Interview Questions'
     };
 
-    return [
-      { label: 'Home', href: '/dashboard' },
-      { label: 'DSA Sheets', href: '/dsa-sheets' },
-      { label: sheetNames[sheetId || ''] || sheetId || 'Sheet' }
-    ];
+    return sheetNames[sheetId || ''] || sheetId || 'Sheet';
   };
 
   const handleRevisionModeToggle = () => {
@@ -123,22 +118,13 @@ const SheetPage = () => {
           </div>
         </div>
         
-        {/* Main Content with proper spacing */}
-        <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with reduced top padding */}
+        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Breadcrumb with proper spacing */}
-            <div className="mb-8 mt-4">
-              <CourseBreadcrumb 
-                items={getBreadcrumbItems()}
-                showBackButton={true}
-                backUrl="/dsa-sheets"
-              />
-            </div>
-
             {/* Course Header */}
             <div className="mb-8">
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                {getBreadcrumbItems()[2]?.label}
+                {getSheetTitle()}
               </h1>
               <p className="text-gray-400 text-lg">
                 Complete this curated set of coding problems to master data structures and algorithms
