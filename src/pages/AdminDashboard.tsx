@@ -131,8 +131,8 @@ const AdminDashboard = () => {
             {activeTab === "interview-prep" && <InterviewPrepManagement searchQuery={searchQuery} />}
             {activeTab === "core-cs" && <CoreCSManagement searchQuery={searchQuery} />}
             {activeTab === "users" && <UserManagement searchQuery={searchQuery} />}
-            {activeTab === "roles" && <RoleManagement />}
-            {activeTab === "audit" && <AuditTrail />}
+            {activeTab === "roles" && <RoleManagement searchQuery={searchQuery} />}
+            {activeTab === "audit" && <AuditTrail searchQuery={searchQuery} />}
           </div>
         </main>
       </div>
