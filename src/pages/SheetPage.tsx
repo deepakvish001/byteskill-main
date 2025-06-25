@@ -82,15 +82,17 @@ const SheetPage = () => {
           </div>
         </div>
         
-        {/* Main Content with responsive padding */}
-        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to pt-40 */}
+        <main className="flex-1 pt-40 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Breadcrumb */}
-            <CourseBreadcrumb 
-              items={getBreadcrumbItems()}
-              showBackButton={true}
-              backUrl="/dsa-sheets"
-            />
+            {/* Breadcrumb - Now visible with proper spacing */}
+            <div className="mb-6">
+              <CourseBreadcrumb 
+                items={getBreadcrumbItems()}
+                showBackButton={true}
+                backUrl="/dsa-sheets"
+              />
+            </div>
             
             <ProblemDashboard 
               selectedSheet={sheetId || "striver-a2z"} 

@@ -12,12 +12,8 @@ import {
   Clock, 
   Search,
   CheckCircle,
-  Lock,
   Target,
   Star,
-  BookOpen,
-  TrendingUp,
-  Users,
   Play
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
@@ -174,11 +170,11 @@ const DSASheetsPage = () => {
           </div>
         </div>
         
-        {/* Main Content */}
-        <main className="pt-20 p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to pt-40 */}
+        <main className="pt-40 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Breadcrumb */}
-            <div className="bg-black">
+            {/* Breadcrumb - Now visible with proper spacing */}
+            <div className="bg-black mb-6">
               <CourseBreadcrumb items={breadcrumbItems} />
             </div>
 
@@ -318,38 +314,6 @@ const DSASheetsPage = () => {
                   </Card>
                 );
               })}
-            </div>
-
-            {/* Stats Section */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-              <Card className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 border-blue-500/30 backdrop-blur-sm">
-                <CardContent className="p-6 text-center bg-transparent">
-                  <FileText className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">{filteredCourses.length}</div>
-                  <div className="text-sm text-blue-300">DSA Sheets</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-cyan-600/20 to-cyan-800/20 border-cyan-500/30 backdrop-blur-sm">
-                <CardContent className="p-6 text-center bg-transparent">
-                  <Target className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">450+</div>
-                  <div className="text-sm text-cyan-300">Problems</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-teal-600/20 to-teal-800/20 border-teal-500/30 backdrop-blur-sm">
-                <CardContent className="p-6 text-center bg-transparent">
-                  <Users className="w-8 h-8 text-teal-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">25k+</div>
-                  <div className="text-sm text-teal-300">Students</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-gradient-to-br from-green-600/20 to-green-800/20 border-green-500/30 backdrop-blur-sm">
-                <CardContent className="p-6 text-center bg-transparent">
-                  <TrendingUp className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">95%</div>
-                  <div className="text-sm text-green-300">Success Rate</div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </main>
