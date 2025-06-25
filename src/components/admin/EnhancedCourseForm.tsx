@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
+import { useAdminValidation } from '@/hooks/useAdminValidation';
+import { validateCourseInput, sanitizeInput } from '@/utils/inputValidation';
 
 interface EnhancedCourseFormProps {
   course?: any;
@@ -21,6 +22,7 @@ interface EnhancedCourseFormProps {
 const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { validateAdminOperation, logAdminAction } = useAdminValidation();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -32,6 +34,7 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
   });
 
   const [newTag, setNewTag] = useState('');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
     if (course) {
@@ -49,12 +52,43 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
+      // Validate admin permissions first
+      const isAuthorized = await validateAdminOperation(
+        course ? 'update' : 'create',
+        'course'
+      );
+      
+      if (!isAuthorized) {
+        throw new Error('Insufficient permissions');
+      }
+
+      // Validate input data
+      const validation = validateCourseInput(data);
+      if (!validation.isValid) {
+        setValidationErrors(validation.errors);
+        throw new Error('Validation failed: ' + validation.errors.join(', '));
+      }
+
+      // Sanitize input data
+      const sanitizedData = {
+        ...data,
+        title: sanitizeInput(data.title),
+        description: data.description ? sanitizeInput(data.description) : '',
+        tags: data.tags?.map((tag: string) => sanitizeInput(tag)) || []
+      };
+
       if (course) {
         const { error } = await supabase
           .from('courses')
-          .update(data)
+          .update(sanitizedData)
           .eq('id', course.id);
         if (error) throw error;
+
+        // Log the update action
+        await logAdminAction('update', 'course', course.id, {
+          title: sanitizedData.title,
+          category
+        });
       } else {
         // Generate course_id
         const courseId = `${category}-${Date.now()}`;
@@ -62,19 +96,27 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
         const { error } = await supabase
           .from('courses')
           .insert({
-            ...data,
+            ...sanitizedData,
             course_id: courseId,
             category: category,
           });
         if (error) throw error;
+
+        // Log the create action
+        await logAdminAction('create', 'course', courseId, {
+          title: sanitizedData.title,
+          category
+        });
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`admin-${category}`] });
       toast({ title: `Course ${course ? 'updated' : 'created'} successfully` });
+      setValidationErrors([]);
       onClose();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Course mutation error:', error);
       toast({
         title: `Error ${course ? 'updating' : 'creating'} course`,
         description: error.message,
@@ -85,14 +127,16 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationErrors([]);
     mutation.mutate(formData);
   };
 
   const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
+    const sanitizedTag = sanitizeInput(newTag);
+    if (sanitizedTag && !formData.tags.includes(sanitizedTag)) {
       setFormData({
         ...formData,
-        tags: [...formData.tags, newTag.trim()]
+        tags: [...formData.tags, sanitizedTag]
       });
       setNewTag('');
     }
@@ -107,6 +151,17 @@ const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormPro
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto">
+      {validationErrors.length > 0 && (
+        <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
+          <h4 className="text-red-400 font-medium mb-2">Validation Errors:</h4>
+          <ul className="text-red-300 text-sm space-y-1">
+            {validationErrors.map((error, index) => (
+              <li key={index}>• {error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>

@@ -753,6 +753,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_login_rate_limit: {
+        Args: { email_param: string; ip_param?: string }
+        Returns: boolean
+      }
       cleanup_old_login_attempts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -761,9 +765,22 @@ export type Database = {
         Args: { user_uuid: string; required_role: string }
         Returns: boolean
       }
+      log_admin_action: {
+        Args: {
+          action_type_param: string
+          target_type_param?: string
+          target_id_param?: string
+          payload_param?: Json
+        }
+        Returns: undefined
+      }
       update_user_stats: {
         Args: { user_uuid: string }
         Returns: undefined
+      }
+      validate_admin_operation: {
+        Args: { operation_type: string; resource_type?: string }
+        Returns: boolean
       }
     }
     Enums: {
