@@ -12,19 +12,40 @@ const DashboardPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Mock awards data
+  // Mock awards data with proper Award type structure
   const mockAwards = [
-    { id: '1', name: 'First Problem Solved', description: 'Solved your first coding problem', icon: '🏆', earnedAt: new Date().toISOString() },
-    { id: '2', name: 'Streak Master', description: 'Maintained a 7-day solving streak', icon: '🔥', earnedAt: new Date().toISOString() },
-    { id: '3', name: 'Problem Hunter', description: 'Solved 50 problems', icon: '🎯', earnedAt: new Date().toISOString() }
+    { 
+      id: '1', 
+      name: 'First Problem Solved', 
+      description: 'Solved your first coding problem', 
+      icon: '🏆', 
+      earnedAt: new Date().toISOString(),
+      color: 'gold'
+    },
+    { 
+      id: '2', 
+      name: 'Streak Master', 
+      description: 'Maintained a 7-day solving streak', 
+      icon: '🔥', 
+      earnedAt: new Date().toISOString(),
+      color: 'red'
+    },
+    { 
+      id: '3', 
+      name: 'Problem Hunter', 
+      description: 'Solved 50 problems', 
+      icon: '🎯', 
+      earnedAt: new Date().toISOString(),
+      color: 'blue'
+    }
   ];
 
-  // Mock progress data
+  // Mock progress data with proper ProgressData structure
   const mockProgressData = {
-    total: 150,
-    easy: 45,
-    medium: 32,
-    hard: 8
+    total: { solved: 85, total: 150, percentage: 56.7 },
+    easy: { solved: 45, total: 60, percentage: 75 },
+    medium: { solved: 32, total: 70, percentage: 45.7 },
+    hard: { solved: 8, total: 20, percentage: 40 }
   };
 
   return (

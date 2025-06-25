@@ -18,11 +18,26 @@ interface AuditTrailProps {
   searchQuery: string;
 }
 
+interface AuditLogWithProfile {
+  id: string;
+  action_type: string;
+  actor_id: string;
+  target_type: string | null;
+  target_id: string | null;
+  payload: any;
+  timestamp: string;
+  profile?: {
+    id: string;
+    username: string;
+    full_name: string;
+  };
+}
+
 const AuditTrail = ({ searchQuery }: AuditTrailProps) => {
   // Fetch audit logs with manual join since foreign key doesn't exist
   const { data: auditLogs, isLoading } = useQuery({
     queryKey: ['admin-audit-logs', searchQuery],
-    queryFn: async () => {
+    queryFn: async (): Promise<AuditLogWithProfile[]> => {
       // First get audit logs
       let auditQuery = supabase
         .from('audit_logs')
@@ -72,7 +87,7 @@ const AuditTrail = ({ searchQuery }: AuditTrailProps) => {
     }
   };
 
-  const getActionBadgeVariant = (actionType: string) => {
+  const getActionBadgeVariant = (actionType: string): "default" | "destructive" | "outline" | "secondary" => {
     switch (actionType.toLowerCase()) {
       case 'create':
         return 'secondary';

@@ -21,6 +21,18 @@ interface RoleManagementProps {
   searchQuery: string;
 }
 
+interface UserRoleWithProfile {
+  id: string;
+  user_id: string;
+  role: string;
+  created_at: string;
+  profile?: {
+    id: string;
+    username: string;
+    full_name: string;
+  };
+}
+
 const RoleManagement = ({ searchQuery }: RoleManagementProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -28,7 +40,7 @@ const RoleManagement = ({ searchQuery }: RoleManagementProps) => {
   // Fetch all user roles with manual join
   const { data: userRoles, isLoading } = useQuery({
     queryKey: ['admin-user-roles', searchQuery],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserRoleWithProfile[]> => {
       // First get user roles
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
@@ -94,7 +106,7 @@ const RoleManagement = ({ searchQuery }: RoleManagementProps) => {
     }
   };
 
-  const getRoleBadgeVariant = (role: string) => {
+  const getRoleBadgeVariant = (role: string): "default" | "destructive" | "outline" | "secondary" => {
     switch (role) {
       case 'super_admin': return 'destructive';
       case 'admin': return 'default';
