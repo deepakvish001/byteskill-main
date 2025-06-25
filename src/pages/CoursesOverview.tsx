@@ -292,7 +292,7 @@ const CoursesOverview = () => {
                         
                         {!enrollment && (
                           <Button 
-                            onclick={() => handleEnrollment(course.course_id)}
+                            onClick={() => handleEnrollment(course.course_id)}
                             className="w-full bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium py-2 transition-all duration-200"
                           >
                             Enroll Now
