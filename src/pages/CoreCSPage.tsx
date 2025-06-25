@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,12 +10,15 @@ import { Input } from "@/components/ui/input";
 import { 
   Cpu, 
   Clock, 
-  Star,
   Search,
-  Target,
   CheckCircle,
   Lock,
-  Database
+  Database,
+  Star,
+  BookOpen,
+  TrendingUp,
+  Users,
+  Zap
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
@@ -133,7 +137,7 @@ const CoreCSPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
       </div>
     );
   }
@@ -157,10 +161,10 @@ const CoreCSPage = () => {
         sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'
       }`}>
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
+        <div className="fixed top-0 right-0 z-30 bg-black border-b border-gray-800 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900">
+          <div className="flex items-center justify-between p-4">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
@@ -172,60 +176,66 @@ const CoreCSPage = () => {
         
         {/* Main Content */}
         <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
-          <div className="max-w-7xl mx-auto space-y-6">
+          <div className="max-w-7xl mx-auto space-y-8">
             {/* Breadcrumb */}
             <CourseBreadcrumb items={breadcrumbItems} />
 
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-red-400 bg-clip-text text-transparent mb-4">
                 Core Computer Science
               </h1>
-              <p className="text-gray-400">Master fundamental CS concepts every developer should know</p>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Master fundamental CS concepts with comprehensive courses in algorithms, systems, and theory
+              </p>
             </div>
 
             {/* Search */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
-                    placeholder="Search core CS topics..."
+                    placeholder="Search core CS topics, algorithms, or system design..."
                     value={filterQuery}
                     onChange={(e) => setFilterQuery(e.target.value)}
-                    className="pl-10 bg-gray-800 border-gray-700 text-white"
+                    className="pl-12 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 h-12 text-lg"
                   />
                 </div>
               </CardContent>
             </Card>
 
             {/* Course Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);
                 
                 return (
-                  <Card key={course.id} className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-colors">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
+                  <Card key={course.id} className="group bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    <CardHeader className="relative pb-4">
+                      <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-yellow-900/50 rounded-lg">
-                            <Cpu className="w-5 h-5 text-yellow-400" />
+                          <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
+                            <Cpu className="w-6 h-6 text-yellow-400" />
                           </div>
-                          <div>
-                            <CardTitle className="text-white text-lg">{course.title}</CardTitle>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge className={getDifficultyColor(course.difficulty)}>
+                          <div className="flex-1">
+                            <CardTitle className="text-white text-xl font-bold group-hover:text-yellow-400 transition-colors">
+                              {course.title}
+                            </CardTitle>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Badge className={`${getDifficultyColor(course.difficulty)} text-xs font-medium`}>
                                 {course.difficulty}
                               </Badge>
                               {course.is_premium && (
-                                <Badge className="bg-purple-900 text-purple-400 border-purple-800">
+                                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 text-xs">
                                   <Lock className="w-3 h-3 mr-1" />
                                   Pro
                                 </Badge>
                               )}
                               {enrollment && (
-                                <Badge className="bg-green-900 text-green-400 border-green-800">
+                                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs">
                                   <CheckCircle className="w-3 h-3 mr-1" />
                                   Enrolled
                                 </Badge>
@@ -234,65 +244,71 @@ const CoreCSPage = () => {
                           </div>
                         </div>
                       </div>
-                      <CardDescription className="text-gray-400">
+                      <CardDescription className="text-gray-300 text-sm leading-relaxed">
                         {course.description}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    
+                    <CardContent className="relative pt-0">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4 text-sm text-gray-400">
                           <div className="flex items-center space-x-1">
-                            <Database className="w-4 h-4" />
-                            <span>{course.total_lessons} topics</span>
+                            <Database className="w-4 h-4 text-yellow-400" />
+                            <span className="font-medium">{course.total_lessons} topics</span>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{course.estimated_hours}h</span>
+                            <Clock className="w-4 h-4 text-green-400" />
+                            <span className="font-medium">{course.estimated_hours}h</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-4 h-4 text-orange-400" />
+                            <span className="font-medium">4.9</span>
                           </div>
                         </div>
                       </div>
                       
                       {enrollment && (
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between text-sm mb-1">
-                            <span className="text-gray-400">Progress</span>
-                            <span className="text-white">{enrollment.progress_percentage}%</span>
+                        <div className="mb-6">
+                          <div className="flex items-center justify-between text-sm mb-2">
+                            <span className="text-gray-400 font-medium">Progress</span>
+                            <span className="text-white font-bold">{enrollment.progress_percentage}%</span>
                           </div>
-                          <div className="w-full bg-gray-800 rounded-full h-2">
+                          <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
                             <div 
-                              className="bg-yellow-500 h-2 rounded-full transition-all" 
+                              className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full transition-all duration-500" 
                               style={{ width: `${enrollment.progress_percentage}%` }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       )}
 
-                      <div className="flex flex-wrap gap-1 mb-4">
+                      <div className="flex flex-wrap gap-2 mb-6">
                         {course.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs bg-gray-800 text-gray-400 border-gray-700">
+                          <Badge key={tag} variant="outline" className="text-xs bg-gray-800/50 text-gray-300 border-gray-600 hover:bg-gray-700/50">
                             {tag}
                           </Badge>
                         ))}
                         {course.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs bg-gray-800 text-gray-400 border-gray-700">
-                            +{course.tags.length - 3}
+                          <Badge variant="outline" className="text-xs bg-gray-800/50 text-gray-300 border-gray-600">
+                            +{course.tags.length - 3} more
                           </Badge>
                         )}
                       </div>
 
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-3">
                         {!enrollment && (
                           <Button 
                             onClick={() => handleEnrollment(course.course_id)}
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium py-2.5 transition-all duration-200"
                           >
                             Free Enroll
                           </Button>
                         )}
                         <Button 
                           onClick={() => navigate(`/course/${course.course_id}`)}
-                          className={`${enrollment ? 'flex-1' : 'flex-1'} bg-yellow-600 hover:bg-yellow-700 text-white`}
+                          className={`${enrollment ? 'flex-1' : 'flex-1'} bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-medium py-2.5 transition-all duration-200`}
                         >
+                          <BookOpen className="w-4 h-4 mr-2" />
                           {enrollment ? 'Continue Learning' : 'View Course'}
                         </Button>
                       </div>
@@ -300,6 +316,38 @@ const CoreCSPage = () => {
                   </Card>
                 );
               })}
+            </div>
+
+            {/* Stats Section */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+              <Card className="bg-gradient-to-br from-yellow-900/20 to-yellow-800/20 border-yellow-700/30">
+                <CardContent className="p-6 text-center">
+                  <Cpu className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">{filteredCourses.length}</div>
+                  <div className="text-sm text-yellow-300">CS Courses</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-orange-900/20 to-orange-800/20 border-orange-700/30">
+                <CardContent className="p-6 text-center">
+                  <Database className="w-8 h-8 text-orange-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">20+</div>
+                  <div className="text-sm text-orange-300">Core Topics</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-red-900/20 to-red-800/20 border-red-700/30">
+                <CardContent className="p-6 text-center">
+                  <Users className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">15k+</div>
+                  <div className="text-sm text-red-300">Students</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border-purple-700/30">
+                <CardContent className="p-6 text-center">
+                  <Zap className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">4.9</div>
+                  <div className="text-sm text-purple-300">Avg Rating</div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </main>
