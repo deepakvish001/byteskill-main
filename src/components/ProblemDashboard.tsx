@@ -1,10 +1,13 @@
-
 import { useState, useEffect } from "react";
-import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, CheckCircle2, Circle, X, ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, CheckCircle2, Circle, X, ChevronDown, ChevronRight, Plus, Save, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 
 interface Problem {
   id: number;
@@ -22,6 +25,7 @@ interface Problem {
   hasArticle?: boolean;
   hasVideo?: boolean;
   hasPractice?: boolean;
+  estimatedTime?: number;
 }
 
 interface Lecture {
@@ -54,8 +58,8 @@ interface Sheet {
 const mockSheets: Record<string, Sheet> = {
   "striver-a2z": {
     id: "striver-a2z",
-    name: "Striver A2Z DSA Course",
-    description: "This course is made for people who want to learn DSA from A to Z for free in a well-organized and structured manner.",
+    name: "Byteskill A2Z DSA Course",
+    description: "This course is made for people who want to learn DSA from A to Z for free in a well-organized and structured manner. Master algorithms and data structures with our comprehensive curriculum.",
     totalTime: 2400,
     completion: 0,
     steps: [
@@ -82,7 +86,8 @@ const mockSheets: Record<string, Sheet> = {
                 companies: [],
                 hasArticle: true,
                 hasVideo: true,
-                hasPractice: false,
+                hasPractice: true,
+                estimatedTime: 15,
                 article: "https://takeuforward.org/c/c-basic-input-output/",
                 video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
               },
@@ -95,7 +100,8 @@ const mockSheets: Record<string, Sheet> = {
                 companies: [],
                 hasArticle: true,
                 hasVideo: true,
-                hasPractice: false,
+                hasPractice: true,
+                estimatedTime: 20,
                 article: "https://takeuforward.org/c/data-types-in-c/",
                 video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
               },
@@ -108,7 +114,8 @@ const mockSheets: Record<string, Sheet> = {
                 companies: [],
                 hasArticle: true,
                 hasVideo: true,
-                hasPractice: false,
+                hasPractice: true,
+                estimatedTime: 25,
                 article: "https://takeuforward.org/if-else/if-else-statements-in-c/",
                 video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
               },
@@ -408,6 +415,10 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
   const [bookmarkedProblems, setBookmarkedProblems] = useState<number[]>([]);
   const [problemNotes, setProblemNotes] = useState<Record<number, string>>({});
   const [selectedTab, setSelectedTab] = useState<"all" | "revision">("all");
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [currentProblemId, setCurrentProblemId] = useState<number | null>(null);
+  const [noteContent, setNoteContent] = useState("");
+  const [noteTitle, setNoteTitle] = useState("");
 
   const sheet = mockSheets[selectedSheet] || mockSheets["striver-a2z"];
 
@@ -496,24 +507,81 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     });
   };
 
+  const progressData = [
+    { label: "Problem Solving", value: 25, color: "bg-blue-500" },
+    { label: "System Design", value: 45, color: "bg-green-500" },
+    { label: "Behavioral", value: 60, color: "bg-purple-500" },
+    { label: "Mock Interviews", value: 30, color: "bg-orange-500" },
+    { label: "Resume Building", value: 80, color: "bg-red-500" }
+  ];
+
+  const openNoteDialog = (problemId: number, problemTitle: string) => {
+    setCurrentProblemId(problemId);
+    setNoteTitle(`Notes for: ${problemTitle}`);
+    setNoteContent(problemNotes[problemId] || "");
+    setNoteDialogOpen(true);
+  };
+
+  const saveNote = () => {
+    if (currentProblemId) {
+      setProblemNotes(prev => ({
+        ...prev,
+        [currentProblemId]: noteContent
+      }));
+      setNoteDialogOpen(false);
+      setCurrentProblemId(null);
+      setNoteContent("");
+      setNoteTitle("");
+    }
+  };
+
   return (
     <div className="text-white space-y-6 bg-black min-h-screen">
-      {/* Header Section */}
-      <div className="bg-black space-y-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-2">
-            {sheet.name}
-          </h1>
-          <p className="text-gray-400 text-sm mb-4">
-            {sheet.description} <span className="text-orange-500 cursor-pointer hover:underline transition-colors">Know More</span>
-          </p>
-          <div className="bg-red-900/20 border border-red-800/50 rounded-lg p-4 mb-4 backdrop-blur-sm">
-            <p className="text-red-300 text-sm leading-relaxed">
-              <strong>Note:</strong> You can find <strong>LeetCode</strong> links for problems available on the internet. However few problems are not there on <strong>LeetCode</strong> for which you will not find a practice link attached. We cannot use third-party links due to legal constraints. Also the newly added TUF+ practice links are to give you a free trial of TUF+ which a lot of people asked for. If you don't wish to upgrade, you can still use the TUF platform, nothing has changed.
+      {/* Enhanced Header Section */}
+      <div className="bg-black space-y-6">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl blur-xl"></div>
+          <div className="relative bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  {sheet.name}
+                </h1>
+                <div className="flex items-center space-x-2 mt-1">
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                    Free Course
+                  </Badge>
+                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                    450+ Problems
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              {sheet.description}
             </p>
-            <p className="text-red-300 text-sm mt-2">
-              Remember, you started using our website because of our content and not because of some third party links :)
-            </p>
+          </div>
+        </div>
+
+        {/* Progress Section - Most Important Prep Factors */}
+        <div className="bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+            <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full mr-3"></div>
+            Interview Preparation Progress
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {progressData.map((item, index) => (
+              <div key={index} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-300">{item.label}</span>
+                  <span className="text-xs text-gray-400">{item.value}%</span>
+                </div>
+                <Progress value={item.value} className="h-2" />
+              </div>
+            ))}
           </div>
         </div>
 
@@ -634,11 +702,11 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
                     {expandedLectures.includes(lecture.id) && (
                       <div className="bg-black">
-                        {/* Enhanced Table Header */}
+                        {/* Updated Table Header */}
                         <div className="grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800 text-xs font-semibold text-gray-300 uppercase tracking-wider bg-gray-900/20">
                           <div className="col-span-1">Status</div>
                           <div className="col-span-3">Problem</div>
-                          <div className="col-span-1">TUF+</div>
+                          <div className="col-span-1">Est. Time</div>
                           <div className="col-span-1">Article</div>
                           <div className="col-span-1">Video</div>
                           <div className="col-span-1">Practice</div>
@@ -657,12 +725,10 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                               <span className="text-white font-medium hover:text-orange-400 transition-colors cursor-pointer">{problem.title}</span>
                             </div>
                             <div className="col-span-1 flex items-center">
-                              <Button 
-                                onClick={() => window.open('https://takeuforward.org/tuf-plus', '_blank')}
-                                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-3 py-1 text-xs rounded-full font-semibold shadow-lg shadow-orange-500/20 transition-all duration-200 hover:scale-105"
-                              >
-                                Solve
-                              </Button>
+                              <div className="flex items-center space-x-1 text-gray-400">
+                                <Clock className="w-3 h-3" />
+                                <span className="text-xs">{problem.estimatedTime || 30}m</span>
+                              </div>
                             </div>
                             <div className="col-span-1 flex items-center">
                               {problem.hasArticle ? (
@@ -693,10 +759,10 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                             <div className="col-span-1 flex items-center">
                               {problem.hasPractice ? (
                                 <Button
-                                  className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
+                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs rounded-full font-semibold shadow-md transition-all duration-200 hover:scale-105"
                                   size="sm"
                                 >
-                                  <ExternalLink className="w-3 h-3" />
+                                  Solve
                                 </Button>
                               ) : (
                                 <span className="text-gray-600 text-center w-full">-</span>
@@ -704,14 +770,13 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                             </div>
                             <div className="col-span-1 flex items-center">
                               <Button
-                                onClick={() => {
-                                  const note = prompt("Add a note for this problem:", problemNotes[problem.id] || "");
-                                  if (note !== null) addNote(problem.id, note);
-                                }}
-                                className="bg-transparent hover:bg-gray-700 text-gray-400 hover:text-white p-2 rounded-lg transition-all duration-200"
+                                onClick={() => openNoteDialog(problem.id, problem.title)}
+                                className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
+                                  problemNotes[problem.id] ? 'text-blue-400 hover:text-blue-300' : 'text-gray-400 hover:text-white'
+                                }`}
                                 size="sm"
                               >
-                                <Plus className="w-3 h-3" />
+                                <Edit3 className="w-3 h-3" />
                               </Button>
                             </div>
                             <div className="col-span-1 flex items-center">
@@ -750,6 +815,50 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
           </div>
         ))}
       </div>
+
+      {/* Advanced Note Taking Dialog */}
+      <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
+        <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-white">
+              {noteTitle}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="note-content" className="text-sm font-medium text-gray-300">
+                Your Notes
+              </Label>
+              <Textarea
+                id="note-content"
+                placeholder="Write your notes, observations, solution approach, time complexity, etc..."
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                className="min-h-[200px] bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/20 resize-none"
+              />
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-gray-400">
+              <span>💡 Tip: Include approach, complexity, and key insights</span>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setNoteDialogOpen(false)}
+              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={saveNote}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save Note
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
