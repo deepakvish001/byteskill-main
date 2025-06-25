@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { 
   Table, 
   TableBody, 
@@ -13,8 +14,10 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Edit, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, EyeOff, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CourseForm from './CourseForm';
+import LessonForm from './LessonForm';
 
 interface CoreCSManagementProps {
   searchQuery: string;
@@ -23,6 +26,9 @@ interface CoreCSManagementProps {
 const CoreCSManagement = ({ searchQuery }: CoreCSManagementProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [showCourseForm, setShowCourseForm] = useState(false);
+  const [showLessonForm, setShowLessonForm] = useState(false);
 
   // Fetch Core CS courses
   const { data: coreCSCourses, isLoading } = useQuery({
@@ -67,6 +73,29 @@ const CoreCSManagement = ({ searchQuery }: CoreCSManagementProps) => {
     },
   });
 
+  // Delete course
+  const deleteMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', courseId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-core-cs'] });
+      toast({ title: "Core CS course deleted successfully" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error deleting core CS course", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    },
+  });
+
   const getDifficultyBadgeVariant = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner': return 'secondary';
@@ -82,7 +111,7 @@ const CoreCSManagement = ({ searchQuery }: CoreCSManagementProps) => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Core CS Management
-            <Button>
+            <Button onClick={() => { setSelectedCourse(null); setShowCourseForm(true); }}>
               <Plus className="w-4 h-4 mr-2" />
               Add Core CS Course
             </Button>
@@ -130,8 +159,11 @@ const CoreCSManagement = ({ searchQuery }: CoreCSManagementProps) => {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => { setSelectedCourse(course); setShowCourseForm(true); }}>
                           <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => { setSelectedCourse(course); setShowLessonForm(true); }}>
+                          <BookOpen className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
@@ -143,7 +175,15 @@ const CoreCSManagement = ({ searchQuery }: CoreCSManagementProps) => {
                         >
                           {course.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </Button>
-                        <Button size="sm" variant="destructive">
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this core CS course?')) {
+                              deleteMutation.mutate(course.id);
+                            }
+                          }}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -155,6 +195,27 @@ const CoreCSManagement = ({ searchQuery }: CoreCSManagementProps) => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Course Form Dialog */}
+      <Dialog open={showCourseForm} onOpenChange={setShowCourseForm}>
+        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
+          <CourseForm
+            course={selectedCourse}
+            category="core-cs"
+            onClose={() => setShowCourseForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Lesson Form Dialog */}
+      <Dialog open={showLessonForm} onOpenChange={setShowLessonForm}>
+        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
+          <LessonForm
+            courseId={selectedCourse?.course_id}
+            onClose={() => setShowLessonForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
