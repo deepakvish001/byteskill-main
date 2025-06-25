@@ -1,111 +1,112 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, userData: SignUpData) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, userData: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
-  updateProfile: (data: ProfileUpdateData) => Promise<{ error: any }>;
-}
-
-interface SignUpData {
-  fullName: string;
-  username: string;
-  mobileNumber?: string;
-}
-
-interface ProfileUpdateData {
-  full_name?: string;
-  username?: string;
-  mobile_number?: string;
-  avatar_url?: string;
+  signInWithGoogle: () => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Rate limiting function
+  const checkRateLimit = async (email: string): Promise<boolean> => {
+    try {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from('login_attempts')
+        .select('*')
+        .eq('email', email)
+        .gte('attempted_at', oneHourAgo);
+
+      if (error) {
+        console.error('Rate limit check error:', error);
+        return true; // Allow if we can't check
+      }
+
+      const failedAttempts = data?.filter(attempt => !attempt.success) || [];
+      return failedAttempts.length < 5; // Max 5 failed attempts per hour
+    } catch (error) {
+      console.error('Rate limit check error:', error);
+      return true;
+    }
+  };
+
+  const logLoginAttempt = async (email: string, success: boolean) => {
+    try {
+      await supabase.from('login_attempts').insert({
+        email,
+        ip_address: 'unknown', // In production, you'd get the real IP
+        success
+      });
+    } catch (error) {
+      console.error('Failed to log login attempt:', error);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Log activity
-          setTimeout(() => {
-            logActivity('login', 'User signed in successfully');
-          }, 0);
+          // Get user's username for redirect
+          const username = session.user.user_metadata?.username || session.user.email?.split('@')[0];
+          
+          // Redirect to user dashboard after successful login
+          if (location.pathname === '/auth' || location.pathname === '/') {
+            navigate(`/u/${username}`, { replace: true });
+          }
+        } else if (event === 'SIGNED_OUT') {
+          // Redirect to auth page after logout
+          navigate('/auth', { replace: true });
         }
       }
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+      }
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate, location.pathname]);
 
-  const logActivity = async (activityType: string, description: string, metadata?: any) => {
-    if (!user) return;
-    
-    try {
-      await supabase.from('activity_logs').insert({
-        user_id: user.id,
-        activity_type: activityType,
-        description,
-        metadata: metadata || {}
-      });
-    } catch (error) {
-      console.error('Error logging activity:', error);
-    }
-  };
-
-  const checkRateLimit = async (email: string, ipAddress: string) => {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    
-    const { data, error } = await supabase
-      .from('login_attempts')
-      .select('*')
-      .eq('email', email)
-      .gte('attempted_at', oneHourAgo);
-
-    if (error) return { allowed: true, attempts: 0 };
-
-    const attempts = data?.length || 0;
-    return { allowed: attempts < 5, attempts }; // Max 5 attempts per hour
-  };
-
-  const logLoginAttempt = async (email: string, success: boolean) => {
-    const ipAddress = '127.0.0.1'; // In production, get real IP
-    
-    await supabase.from('login_attempts').insert({
-      email,
-      ip_address: ipAddress,
-      success,
-      attempted_at: new Date().toISOString()
-    });
-  };
-
-  const signUp = async (email: string, password: string, userData: SignUpData) => {
+  const signUp = async (email: string, password: string, userData: any) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
@@ -114,11 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: {
-            full_name: userData.fullName,
-            username: userData.username,
-            mobile_number: userData.mobileNumber || ''
-          }
+          data: userData
         }
       });
 
@@ -126,17 +123,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         toast({
           title: "Sign Up Failed",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
       } else {
         toast({
-          title: "Registration Successful",
-          description: "Please check your email to verify your account."
+          title: "Success!",
+          description: "Please check your email to verify your account.",
         });
       }
 
       return { error };
     } catch (error: any) {
+      console.error('Sign up error:', error);
       return { error };
     }
   };
@@ -144,20 +142,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       // Check rate limiting
-      const rateLimit = await checkRateLimit(email, '127.0.0.1');
-      if (!rateLimit.allowed) {
-        const error = new Error(`Too many login attempts. Please try again later.`);
+      const canAttempt = await checkRateLimit(email);
+      if (!canAttempt) {
+        const error = { message: 'Too many failed login attempts. Please try again in an hour.' };
         toast({
-          title: "Too Many Attempts",
+          title: "Login Failed",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
         return { error };
       }
 
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
 
       // Log the attempt
@@ -165,14 +163,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) {
         toast({
-          title: "Sign In Failed",
+          title: "Login Failed", 
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You have been successfully logged in.",
         });
       }
 
       return { error };
     } catch (error: any) {
+      console.error('Sign in error:', error);
       await logLoginAttempt(email, false);
       return { error };
     }
@@ -183,7 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/`,
         }
       });
 
@@ -191,31 +195,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         toast({
           title: "Google Sign In Failed",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
 
       return { error };
     } catch (error: any) {
+      console.error('Google sign in error:', error);
       return { error };
     }
   };
 
   const signOut = async () => {
     try {
-      if (user) {
-        await logActivity('logout', 'User signed out');
-      }
-      
       const { error } = await supabase.auth.signOut();
       if (error) {
+        console.error('Sign out error:', error);
         toast({
           title: "Sign Out Failed",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Signed Out",
+          description: "You have been successfully signed out.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign out error:', error);
     }
   };
@@ -223,56 +230,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: `${window.location.origin}/auth`,
       });
 
       if (error) {
         toast({
           title: "Password Reset Failed",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
       } else {
         toast({
           title: "Password Reset Email Sent",
-          description: "Check your email for reset instructions."
+          description: "Please check your email for password reset instructions.",
         });
       }
 
       return { error };
     } catch (error: any) {
-      return { error };
-    }
-  };
-
-  const updateProfile = async (data: ProfileUpdateData) => {
-    if (!user) return { error: new Error('No user logged in') };
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          ...data,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-
-      if (error) {
-        toast({
-          title: "Profile Update Failed",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        await logActivity('profile_update', 'Profile updated successfully');
-        toast({
-          title: "Profile Updated",
-          description: "Your profile has been updated successfully."
-        });
-      }
-
-      return { error };
-    } catch (error: any) {
+      console.error('Password reset error:', error);
       return { error };
     }
   };
@@ -283,23 +259,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     signUp,
     signIn,
-    signInWithGoogle,
     signOut,
     resetPassword,
-    updateProfile
+    signInWithGoogle,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

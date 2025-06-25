@@ -1,5 +1,7 @@
-import { ChevronDown, ChevronRight, FileText, Users, BookOpen, Cpu, Network, Settings, Trophy, Target, TrendingUp, Star, Code, GitBranch, ChevronLeft, Menu, Award, Calendar, Brain, Timer, Bookmark, PenTool, MessageCircle, Lightbulb, History } from "lucide-react";
+
+import { ChevronDown, ChevronRight, FileText, Users, BookOpen, Cpu, Settings, Trophy, Target, TrendingUp, Star, Code, GitBranch, ChevronLeft, Menu, Award, Calendar, Brain, Timer, Bookmark, PenTool, MessageCircle, Lightbulb, History, GraduationCap } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +16,8 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: SidebarProps) => {
-  const [expandedSections, setExpandedSections] = useState<string[]>(["dsa-sheet", "study-tools"]);
+  const [expandedSections, setExpandedSections] = useState<string[]>(["dsa-sheet", "courses"]);
+  const navigate = useNavigate();
 
   const toggleSection = (section: string) => {
     if (collapsed) return;
@@ -25,26 +28,20 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
     );
   };
 
+  const handleSheetClick = (sheetId: string) => {
+    onSheetChange(sheetId);
+    // Navigate to the specific sheet page
+    navigate(`/sheet/${sheetId}`);
+  };
+
   const menuItems = [
     {
       id: "dashboard",
       label: "Dashboard",
       icon: TrendingUp,
       items: [],
-      badge: "New"
-    },
-    {
-      id: "study-tools",
-      label: "Study Tools",
-      icon: PenTool,
-      items: [
-        { id: "pomodoro-timer", label: "Pomodoro Timer", badge: "Focus" },
-        { id: "flashcards", label: "Flashcards", badge: "Memory" },
-        { id: "code-snippets", label: "Code Snippets Library" },
-        { id: "study-notes", label: "Study Notes", progress: 45 },
-        { id: "progress-tracker", label: "Progress Tracker" },
-        { id: "bookmarks", label: "Bookmarked Problems", progress: 23 }
-      ]
+      badge: "Home",
+      action: () => navigate("/dashboard")
     },
     {
       id: "dsa-sheet",
@@ -60,43 +57,15 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
       ]
     },
     {
-      id: "practice",
-      label: "Practice Arena",
-      icon: Target,
+      id: "courses",
+      label: "Courses",
+      icon: GraduationCap,
       items: [
-        { id: "daily-challenge", label: "Daily Challenge", badge: "Hot" },
-        { id: "weekly-contest", label: "Weekly Contest", badge: "Live" },
-        { id: "mock-interviews", label: "Mock Interviews" },
-        { id: "peer-battles", label: "Peer Code Battles", badge: "New" },
-        { id: "speed-coding", label: "Speed Coding", badge: "Beta" }
-      ]
-    },
-    {
-      id: "dsa-playlist",
-      label: "Topic Wise",
-      icon: Code,
-      items: [
-        { id: "array-series", label: "Arrays & Hashing", progress: 78 },
-        { id: "binary-search", label: "Binary Search", progress: 45 },
-        { id: "string-series", label: "String Algorithms", progress: 67 },
-        { id: "linkedlist", label: "Linked Lists", progress: 89 },
-        { id: "recursion", label: "Recursion & Backtracking", progress: 34 },
-        { id: "stack-queue", label: "Stack & Queue", progress: 56 },
-        { id: "tree-series", label: "Trees & Graphs", progress: 23 },
-        { id: "dynamic-programming", label: "Dynamic Programming", progress: 12 },
-        { id: "greedy", label: "Greedy Algorithms", progress: 78 }
-      ]
-    },
-    {
-      id: "learning-resources",
-      label: "Learning Hub",
-      icon: Lightbulb,
-      items: [
-        { id: "video-tutorials", label: "Video Tutorials" },
-        { id: "articles", label: "Articles & Blogs" },
-        { id: "cheat-sheets", label: "Cheat Sheets" },
-        { id: "interview-tips", label: "Interview Tips", badge: "Pro" },
-        { id: "company-guides", label: "Company Guides" }
+        { id: "dsa-fundamentals", label: "DSA Fundamentals", progress: 65, badge: "New" },
+        { id: "system-design", label: "System Design", progress: 30, badge: "Pro" },
+        { id: "algorithms-advanced", label: "Advanced Algorithms", progress: 20 },
+        { id: "competitive-programming", label: "Competitive Programming", progress: 40 },
+        { id: "interview-prep", label: "Interview Preparation", progress: 85, badge: "Popular" }
       ]
     },
     {
@@ -147,7 +116,15 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
   const SidebarButton = ({ item, isActive }: { item: any, isActive: boolean }) => {
     const button = (
       <button
-        onClick={() => item.items.length > 0 ? toggleSection(item.id) : onSheetChange(item.id)}
+        onClick={() => {
+          if (item.action) {
+            item.action();
+          } else if (item.items.length > 0) {
+            toggleSection(item.id);
+          } else {
+            onSheetChange(item.id);
+          }
+        }}
         className={cn(
           "w-full flex items-center justify-between p-3 rounded-xl text-left hover:bg-gray-900 transition-all duration-200 group",
           isActive && "bg-gray-900 border border-gray-800",
@@ -176,10 +153,10 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                   item.badge === "Live" && "bg-red-900 text-red-400 border-red-800 animate-pulse",
                   item.badge === "Beta" && "bg-purple-900 text-purple-400 border-purple-800",
                   item.badge === "Pro" && "bg-yellow-900 text-yellow-400 border-yellow-800",
-                  item.badge === "Focus" && "bg-blue-900 text-blue-400 border-blue-800",
-                  item.badge === "Memory" && "bg-pink-900 text-pink-400 border-pink-800",
+                  item.badge === "Home" && "bg-blue-900 text-blue-400 border-blue-800",
                   item.badge === "Track" && "bg-cyan-900 text-cyan-400 border-cyan-800",
-                  typeof item.badge === "string" && !["New", "Hot", "Live", "Beta", "Pro", "Focus", "Memory", "Track"].includes(item.badge) && "bg-gray-800 text-gray-400 border-gray-700"
+                  item.badge === "Popular" && "bg-orange-900 text-orange-400 border-orange-800",
+                  typeof item.badge === "string" && !["New", "Hot", "Live", "Beta", "Pro", "Home", "Track", "Popular"].includes(item.badge) && "bg-gray-800 text-gray-400 border-gray-700"
                 )}>
                   {item.badge}
                 </Badge>
@@ -223,7 +200,6 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
         <div className="p-4 border-b border-gray-900">
           <div className="flex items-center justify-between">
             {collapsed ? (
-              // Minimized state - show only minimal logo and expand button
               <div className="flex flex-col items-center space-y-3 w-full">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-sm opacity-50"></div>
@@ -241,7 +217,6 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                 </Button>
               </div>
             ) : (
-              // Expanded state - show full animated branding
               <>
                 <div className="flex items-center space-x-3">
                   <div className="relative">
@@ -257,7 +232,7 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                     <div className="flex items-center space-x-2">
                       <Trophy className="w-4 h-4 text-yellow-400 animate-spin" style={{ animationDuration: '3s' }} />
                       <span className="text-sm bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">
-                        Dashboard
+                        Platform
                       </span>
                     </div>
                   </div>
@@ -287,7 +262,7 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                     {item.items.map((subItem) => (
                       <button
                         key={subItem.id}
-                        onClick={() => onSheetChange(subItem.id)}
+                        onClick={() => handleSheetClick(subItem.id)}
                         className={cn(
                           "w-full text-left p-2 rounded-lg text-sm transition-all duration-200 group flex items-center justify-between",
                           selectedSheet === subItem.id 
@@ -305,8 +280,7 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                               subItem.badge === "Live" && "bg-red-900 text-red-400 animate-pulse",
                               subItem.badge === "Beta" && "bg-purple-900 text-purple-400",
                               subItem.badge === "Pro" && "bg-yellow-900 text-yellow-400",
-                              subItem.badge === "Focus" && "bg-blue-900 text-blue-400",
-                              subItem.badge === "Memory" && "bg-pink-900 text-pink-400"
+                              subItem.badge === "Popular" && "bg-orange-900 text-orange-400"
                             )}>
                               {subItem.badge}
                             </Badge>
