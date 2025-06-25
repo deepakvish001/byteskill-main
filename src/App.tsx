@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import DashboardPage from "./pages/DashboardPage";
 import UserDashboard from "./pages/UserDashboard";
 import SheetPage from "./pages/SheetPage";
+import CoursePage from "./pages/CoursePage";
+import CoursesOverview from "./pages/CoursesOverview";
 import PublicProfile from "./pages/PublicProfile";
 import AuthPage from "./components/auth/AuthPage";
 import UserProfile from "./components/profile/UserProfile";
@@ -41,6 +43,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DashboardPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses" 
+              element={
+                <ProtectedRoute>
+                  <CoursesOverview />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/course/:courseId" 
+              element={
+                <ProtectedRoute>
+                  <CoursePage />
                 </ProtectedRoute>
               } 
             />

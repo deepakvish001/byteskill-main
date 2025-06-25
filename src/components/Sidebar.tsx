@@ -1,4 +1,3 @@
-
 import { ChevronDown, ChevronRight, FileText, Users, BookOpen, Cpu, Settings, Trophy, Target, TrendingUp, Star, Code, GitBranch, ChevronLeft, Menu, Award, Calendar, Brain, Timer, Bookmark, PenTool, MessageCircle, Lightbulb, History, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -33,9 +32,19 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
     navigate(`/sheet/${sheetId}`);
   };
 
+  const handleCourseClick = (courseId: string) => {
+    onSheetChange(courseId);
+    navigate(`/course/${courseId}`);
+  };
+
   const handleDashboardClick = () => {
     onSheetChange("dashboard");
     navigate("/dashboard");
+  };
+
+  const handleCoursesClick = () => {
+    onSheetChange("courses");
+    navigate("/courses");
   };
 
   const menuItems = [
@@ -65,21 +74,22 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
       label: "Courses",
       icon: GraduationCap,
       items: [
-        { id: "dsa-fundamentals", label: "DSA Fundamentals", progress: 65, badge: "New" },
-        { id: "system-design", label: "System Design", progress: 30, badge: "Pro" },
-        { id: "algorithms-advanced", label: "Advanced Algorithms", progress: 20 },
-        { id: "competitive-programming", label: "Competitive Programming", progress: 40 },
-        { id: "interview-prep", label: "Interview Preparation", progress: 85, badge: "Popular" }
-      ]
+        { id: "dsa-fundamentals", label: "DSA Fundamentals", progress: 65, badge: "New", action: () => handleCourseClick("dsa-fundamentals") },
+        { id: "system-design", label: "System Design", progress: 30, badge: "Pro", action: () => handleCourseClick("system-design") },
+        { id: "algorithms-advanced", label: "Advanced Algorithms", progress: 20, action: () => handleCourseClick("algorithms-advanced") },
+        { id: "competitive-programming", label: "Competitive Programming", progress: 40, action: () => handleCourseClick("competitive-programming") },
+        { id: "interview-prep", label: "Interview Preparation", progress: 85, badge: "Popular", action: () => handleCourseClick("interview-prep") }
+      ],
+      action: handleCoursesClick
     },
     {
       id: "interview",
       label: "Interview Prep",
       icon: Users,
       items: [
-        { id: "behavioral", label: "Behavioral Questions" },
-        { id: "company-specific", label: "Company Specific" },
-        { id: "salary-negotiation", label: "Salary Negotiation" },
+        { id: "behavioral", label: "Behavioral Questions", action: () => handleCourseClick("behavioral") },
+        { id: "company-specific", label: "Company Specific", action: () => handleCourseClick("company-specific") },
+        { id: "salary-negotiation", label: "Salary Negotiation", badge: "Pro", action: () => handleCourseClick("salary-negotiation") },
         { id: "resume-review", label: "Resume Review", badge: "Pro" }
       ]
     },
@@ -88,10 +98,10 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
       label: "Core CS",
       icon: Cpu,
       items: [
-        { id: "dbms", label: "Database Management", progress: 45 },
-        { id: "operating-system", label: "Operating Systems", progress: 23 },
-        { id: "computer-networks", label: "Computer Networks", progress: 67 },
-        { id: "oops", label: "Object Oriented Programming", progress: 89 }
+        { id: "dbms", label: "Database Management", progress: 45, action: () => handleCourseClick("dbms") },
+        { id: "operating-system", label: "Operating Systems", progress: 23, action: () => handleCourseClick("operating-system") },
+        { id: "computer-networks", label: "Computer Networks", progress: 67, action: () => handleCourseClick("computer-networks") },
+        { id: "oops", label: "Object Oriented Programming", progress: 89, action: () => handleCourseClick("oops") }
       ]
     },
     {
@@ -266,7 +276,13 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                     {item.items.map((subItem) => (
                       <button
                         key={subItem.id}
-                        onClick={() => handleSheetClick(subItem.id)}
+                        onClick={() => {
+                          if (subItem.action) {
+                            subItem.action();
+                          } else {
+                            handleSheetClick(subItem.id);
+                          }
+                        }}
                         className={cn(
                           "w-full text-left p-2 rounded-lg text-sm transition-all duration-200 group flex items-center justify-between",
                           selectedSheet === subItem.id 
