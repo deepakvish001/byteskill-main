@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, CheckCircle2, Circle, X, ChevronDown, ChevronRight, Plus, Save, Edit3, Minimize2, Maximize2, Code, Trophy, Target, Award } from "lucide-react";
+import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, CheckCircle2, Circle, X, ChevronDown, ChevronRight, Plus, Save, Edit3, Minimize2, Maximize2, Code, Trophy, Target, Award, Medal, Zap, Brain, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -411,8 +411,6 @@ interface ProblemDashboardProps {
 const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps) => {
   const [expandedSteps, setExpandedSteps] = useState<string[]>(["step1"]);
   const [expandedLectures, setExpandedLectures] = useState<string[]>(["lec1"]);
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [bookmarkedProblems, setBookmarkedProblems] = useState<number[]>([]);
   const [problemNotes, setProblemNotes] = useState<Record<number, string>>({});
   const [selectedTab, setSelectedTab] = useState<"all" | "revision">("all");
@@ -423,6 +421,15 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
   const [problemStatuses, setProblemStatuses] = useState<Record<number, "Solved" | "Attempted" | "Not Started">>({});
   const [allStepsCollapsed, setAllStepsCollapsed] = useState(false);
   const [allLecturesCollapsed, setAllLecturesCollapsed] = useState(false);
+  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    difficulty: "all",
+    status: "all",
+    hasArticle: false,
+    hasVideo: false,
+    hasPractice: false,
+    searchQuery: ""
+  });
 
   const sheet = mockSheets[selectedSheet] || mockSheets["striver-a2z"];
 
@@ -545,15 +552,32 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     }
   };
 
-  const filteredProblems = (problems: Problem[]) => {
+  const filteredStepsAndLectures = () => {
+    if (selectedTab !== "revision") {
+      return sheet.steps;
+    }
+
+    // Filter to show only steps and lectures that contain bookmarked problems
+    return sheet.steps.map(step => ({
+      ...step,
+      lectures: step.lectures.map(lecture => ({
+        ...lecture,
+        problems: lecture.problems.filter(problem => bookmarkedProblems.includes(problem.id))
+      })).filter(lecture => lecture.problems.length > 0)
+    })).filter(step => step.lectures.length > 0);
+  };
+
+  const applyAdvancedFilters = (problems: Problem[]) => {
     return problems.filter(problem => {
       const currentStatus = problemStatuses[problem.id] || problem.status;
-      const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDifficulty = difficultyFilter === "all" || problem.difficulty === difficultyFilter;
-      const matchesStatus = statusFilter === "all" || currentStatus === statusFilter;
-      const matchesTab = selectedTab === "all" || (selectedTab === "revision" && bookmarkedProblems.includes(problem.id));
+      const matchesSearch = problem.title.toLowerCase().includes(advancedFilters.searchQuery.toLowerCase());
+      const matchesDifficulty = advancedFilters.difficulty === "all" || problem.difficulty === advancedFilters.difficulty;
+      const matchesStatus = advancedFilters.status === "all" || currentStatus === advancedFilters.status;
+      const matchesArticle = !advancedFilters.hasArticle || problem.hasArticle;
+      const matchesVideo = !advancedFilters.hasVideo || problem.hasVideo;
+      const matchesPractice = !advancedFilters.hasPractice || problem.hasPractice;
       
-      return matchesSearch && matchesDifficulty && matchesStatus && matchesTab;
+      return matchesSearch && matchesDifficulty && matchesStatus && matchesArticle && matchesVideo && matchesPractice;
     });
   };
 
@@ -615,7 +639,44 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     return lecture.problems.length > 0 ? Math.round((solvedProblems.length / lecture.problems.length) * 100) : 0;
   };
 
+  // Calculate points and awards
+  const calculatePointsAndAwards = () => {
+    const allProblems = sheet.steps.flatMap(step => 
+      step.lectures.flatMap(lecture => lecture.problems)
+    );
+    
+    let totalPoints = 0;
+    let totalArticlesRead = 0;
+    let totalVideosWatched = 0;
+    
+    allProblems.forEach(problem => {
+      const status = problemStatuses[problem.id] || problem.status;
+      if (status === "Solved") {
+        // Points based on difficulty
+        switch (problem.difficulty) {
+          case "Easy": totalPoints += 10; break;
+          case "Medium": totalPoints += 25; break;
+          case "Hard": totalPoints += 50; break;
+        }
+      }
+      // Simulate articles read and videos watched (in real app, track these separately)
+      if (problem.hasArticle && Math.random() > 0.7) totalArticlesRead++;
+      if (problem.hasVideo && Math.random() > 0.8) totalVideosWatched++;
+    });
+
+    const awards = [];
+    if (progress.total.solved >= 50) awards.push({ name: "Problem Solver", icon: Trophy, color: "text-yellow-400" });
+    if (progress.easy.solved >= 20) awards.push({ name: "Easy Master", icon: Medal, color: "text-green-400" });
+    if (progress.medium.solved >= 15) awards.push({ name: "Medium Challenger", icon: Target, color: "text-yellow-400" });
+    if (progress.hard.solved >= 5) awards.push({ name: "Hard Warrior", icon: Crown, color: "text-red-400" });
+    if (totalArticlesRead >= 30) awards.push({ name: "Knowledge Seeker", icon: Brain, color: "text-blue-400" });
+    if (totalVideosWatched >= 20) awards.push({ name: "Video Learner", icon: Zap, color: "text-purple-400" });
+
+    return { totalPoints, totalArticlesRead, totalVideosWatched, awards };
+  };
+
   const progress = calculateProgress();
+  const { totalPoints, totalArticlesRead, totalVideosWatched, awards } = calculatePointsAndAwards();
 
   const openNoteDialog = (problemId: number, problemTitle: string) => {
     setCurrentProblemId(problemId);
@@ -670,6 +731,67 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
             <p className="text-gray-300 text-sm sm:text-base lg:text-lg leading-relaxed text-center sm:text-left">
               {sheet.description}
             </p>
+          </div>
+        </div>
+
+        {/* Course Summary and Awards Section */}
+        <div className="bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center justify-center sm:justify-start">
+            <div className="w-2 h-6 bg-gradient-to-b from-yellow-500 to-orange-500 rounded-full mr-3"></div>
+            Course Summary & Achievements
+          </h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Points and Stats */}
+            <div className="space-y-4">
+              <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-4 border border-purple-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-300">Total Points Earned</span>
+                  <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                </div>
+                <div className="text-2xl font-bold text-yellow-400">{totalPoints.toLocaleString()}</div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-blue-600/20 rounded-lg p-3 border border-blue-500/30">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <BookOpen className="w-4 h-4 text-blue-400" />
+                    <span className="text-xs text-gray-300">Articles Read</span>
+                  </div>
+                  <div className="text-lg font-bold text-blue-400">{totalArticlesRead}</div>
+                </div>
+                
+                <div className="bg-red-600/20 rounded-lg p-3 border border-red-500/30">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <Video className="w-4 h-4 text-red-400" />
+                    <span className="text-xs text-gray-300">Videos Watched</span>
+                  </div>
+                  <div className="text-lg font-bold text-red-400">{totalVideosWatched}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Awards */}
+            <div className="space-y-4">
+              <h3 className="text-base font-semibold text-white flex items-center">
+                <Trophy className="w-5 h-5 text-yellow-400 mr-2" />
+                Your Awards ({awards.length})
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {awards.map((award, index) => (
+                  <div key={index} className="bg-gray-800/50 rounded-lg p-3 border border-gray-600/30 flex items-center space-x-3">
+                    <award.icon className={`w-5 h-5 ${award.color}`} />
+                    <span className="text-sm font-medium text-white">{award.name}</span>
+                  </div>
+                ))}
+                {awards.length === 0 && (
+                  <div className="col-span-2 text-center text-gray-400 py-4">
+                    <Award className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Start solving problems to earn awards!</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -785,52 +907,132 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
               <span className="hidden sm:inline">{allLecturesCollapsed ? "Expand Lectures" : "Collapse Lectures"}</span>
               <span className="sm:hidden">{allLecturesCollapsed ? "Expand L" : "Collapse L"}</span>
             </Button>
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input 
-                placeholder="Search problems..." 
-                className="pl-10 w-48 lg:w-64 bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-lg" 
-                value={searchQuery}
-                readOnly
-              />
-            </div>
-            <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-              <SelectTrigger className="w-24 sm:w-32 bg-gray-900 border-gray-700 text-white rounded-lg text-xs sm:text-sm">
-                <SelectValue placeholder="Difficulty" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="Easy">Easy</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Hard">Hard</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-24 sm:w-32 bg-gray-900 border-gray-700 text-white rounded-lg text-xs sm:text-sm">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Solved">Solved</SelectItem>
-                <SelectItem value="Attempted">Attempted</SelectItem>
-                <SelectItem value="Not Started">Not Started</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button 
-              onClick={handleRandomProblem}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg shadow-purple-600/20 text-xs sm:text-sm"
-            >
-              <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Pick Random</span>
-              <span className="sm:hidden">Random</span>
-            </Button>
+            
+            {/* Advanced Filter Dialog */}
+            <Dialog open={advancedFilterOpen} onOpenChange={setAdvancedFilterOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg shadow-purple-600/20 text-xs sm:text-sm">
+                  <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Advanced Filter</span>
+                  <span className="sm:hidden">Filter</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-black border-gray-700 text-white max-w-xs sm:max-w-md mx-2 sm:mx-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-semibold text-white">Advanced Filters</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-300">Search Problems</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input 
+                        placeholder="Search problems..." 
+                        className="pl-10 bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-lg" 
+                        value={advancedFilters.searchQuery}
+                        onChange={(e) => setAdvancedFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-300">Difficulty</Label>
+                      <Select value={advancedFilters.difficulty} onValueChange={(value) => setAdvancedFilters(prev => ({ ...prev, difficulty: value }))}>
+                        <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-900 border-gray-700">
+                          <SelectItem value="all">All Levels</SelectItem>
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-300">Status</Label>
+                      <Select value={advancedFilters.status} onValueChange={(value) => setAdvancedFilters(prev => ({ ...prev, status: value }))}>
+                        <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-900 border-gray-700">
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="Solved">Solved</SelectItem>
+                          <SelectItem value="Attempted">Attempted</SelectItem>
+                          <SelectItem value="Not Started">Not Started</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-300">Content Type</Label>
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={advancedFilters.hasArticle}
+                          onChange={(e) => setAdvancedFilters(prev => ({ ...prev, hasArticle: e.target.checked }))}
+                          className="rounded border-gray-600 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-300">Has Article</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={advancedFilters.hasVideo}
+                          onChange={(e) => setAdvancedFilters(prev => ({ ...prev, hasVideo: e.target.checked }))}
+                          className="rounded border-gray-600 text-red-600 focus:ring-red-500"
+                        />
+                        <span className="text-sm text-gray-300">Has Video</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={advancedFilters.hasPractice}
+                          onChange={(e) => setAdvancedFilters(prev => ({ ...prev, hasPractice: e.target.checked }))}
+                          className="rounded border-gray-600 text-green-600 focus:ring-green-500"
+                        />
+                        <span className="text-sm text-gray-300">Has Practice</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setAdvancedFilters({
+                        difficulty: "all",
+                        status: "all",
+                        hasArticle: false,
+                        hasVideo: false,
+                        hasPractice: false,
+                        searchQuery: ""
+                      });
+                    }}
+                    className="border-gray-600 text-white bg-black hover:bg-gray-800"
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    onClick={() => setAdvancedFilterOpen(false)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    Apply Filters
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
 
       {/* Steps and Lectures with Enhanced Progress Sliders - Responsive */}
       <div className="space-y-2">
-        {sheet.steps.map((step) => {
+        {filteredStepsAndLectures().map((step) => {
           const stepProgress = calculateStepProgress(step);
           const stepSolved = step.lectures.flatMap(lecture => lecture.problems).filter(problem => 
             (problemStatuses[problem.id] || problem.status) === "Solved"
@@ -909,7 +1111,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
                             {/* Mobile Card Layout */}
                             <div className="lg:hidden">
-                              {filteredProblems(lecture.problems).map((problem, index) => (
+                              {applyAdvancedFilters(lecture.problems).map((problem, index) => (
                                 <div key={problem.id} className={`p-4 border-b border-gray-800/30 ${index % 2 === 0 ? 'bg-gray-950/20' : ''}`}>
                                   <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center space-x-3">
@@ -987,7 +1189,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
                             {/* Desktop Table Layout */}
                             <div className="hidden lg:block">
-                              {filteredProblems(lecture.problems).map((problem, index) => (
+                              {applyAdvancedFilters(lecture.problems).map((problem, index) => (
                                 <div key={problem.id} className={`grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800/30 hover:bg-gray-900/40 text-sm transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-950/20' : ''}`}>
                                   <div className="col-span-1 flex items-center">
                                     {getStatusCheckbox(problem.id, problem.status, () => toggleProblemStatus(problem.id))}
@@ -1073,7 +1275,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                               ))}
                             </div>
                             
-                            {filteredProblems(lecture.problems).length === 0 && (
+                            {applyAdvancedFilters(lecture.problems).length === 0 && (
                               <div className="p-8 text-center text-gray-500">
                                 <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
                                 <p>No problems match your current filters</p>
