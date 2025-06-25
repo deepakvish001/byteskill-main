@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, Settings, LogOut, Trophy } from 'lucide-react';
+import { User, Settings, LogOut, Trophy, Shield } from 'lucide-react';
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
@@ -32,6 +32,9 @@ const UserMenu = () => {
   if (!user) return null;
 
   const userInitial = user.email?.charAt(0).toUpperCase() || 'U';
+
+  // Check if user has admin role (simplified check - in production you'd check against actual roles)
+  const isAdmin = user.email === 'admin@byteskill.com' || user.user_metadata?.role === 'admin';
 
   return (
     <DropdownMenu>
@@ -71,6 +74,18 @@ const UserMenu = () => {
           <Trophy className="mr-2 h-4 w-4" />
           <span>Achievements</span>
         </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator className="bg-gray-700" />
+            <DropdownMenuItem 
+              onClick={() => navigate('/admin')}
+              className="text-orange-400 hover:bg-gray-800 cursor-pointer"
+            >
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Admin Dashboard</span>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator className="bg-gray-700" />
         <DropdownMenuItem 
           onClick={handleSignOut}
