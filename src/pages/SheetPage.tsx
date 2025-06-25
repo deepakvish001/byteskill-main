@@ -82,10 +82,10 @@ const SheetPage = () => {
           </div>
         </div>
         
-        {/* Main Content with responsive padding */}
-        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with proper top padding to avoid header overlap */}
+        <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Breadcrumb */}
+            {/* Breadcrumb - Now visible with proper spacing */}
             <CourseBreadcrumb 
               items={getBreadcrumbItems()}
               showBackButton={true}
