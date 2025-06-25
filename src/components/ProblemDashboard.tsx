@@ -638,112 +638,103 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
   };
 
   return (
-    <div className="text-white space-y-6 bg-black min-h-screen">
-      {/* Enhanced Header Section with Dark Black Background and Colorful Icons */}
-      <div className="bg-black space-y-6">
+    <div className="text-white space-y-4 sm:space-y-6 bg-black min-h-screen px-2 sm:px-4 lg:px-0">
+      {/* Enhanced Header Section with Single Icon and Dark Black Background */}
+      <div className="bg-black space-y-4 sm:space-y-6">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl blur-xl"></div>
-          <div className="relative bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="relative bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+              <div className="flex items-center justify-center sm:justify-start">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
                   <Code className="w-8 h-8 text-white" />
                 </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <Trophy className="w-6 h-6 text-white" />
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <Target className="w-6 h-6 text-white" />
-                </div>
-                <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <Award className="w-6 h-6 text-white" />
-                </div>
               </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <div className="text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
                   {sheet.name}
                 </h1>
-                <div className="flex items-center space-x-2 mt-2">
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-semibold">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-semibold text-xs">
                     Free Course
                   </Badge>
-                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-semibold">
+                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-semibold text-xs">
                     450+ Problems
                   </Badge>
-                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold">
+                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold text-xs">
                     Complete DSA
                   </Badge>
                 </div>
               </div>
             </div>
-            <p className="text-gray-300 text-lg leading-relaxed">
+            <p className="text-gray-300 text-sm sm:text-base lg:text-lg leading-relaxed text-center sm:text-left">
               {sheet.description}
             </p>
           </div>
         </div>
 
         {/* Progress Section with Dark Black Background */}
-        <div className="bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+        <div className="bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center justify-center sm:justify-start">
             <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full mr-3"></div>
             DSA Progress Overview
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Total Progress */}
-            <div className="bg-black rounded-lg p-4 border border-gray-700/30">
+            <div className="bg-black rounded-lg p-3 sm:p-4 border border-gray-700/30">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm font-medium text-gray-300">Total Progress</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-300">Total Progress</span>
                 </div>
                 <span className="text-xs text-gray-400">{progress.total.percentage}%</span>
               </div>
-              <div className="text-lg font-bold text-blue-400 mb-2">
+              <div className="text-base sm:text-lg font-bold text-blue-400 mb-2">
                 {progress.total.solved} / {progress.total.total}
               </div>
               <Progress value={progress.total.percentage} className="h-2" />
             </div>
 
             {/* Easy Progress */}
-            <div className="bg-black rounded-lg p-4 border border-gray-700/30">
+            <div className="bg-black rounded-lg p-3 sm:p-4 border border-gray-700/30">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-4 h-4 text-green-400" />
-                  <span className="text-sm font-medium text-gray-300">Easy</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-300">Easy</span>
                 </div>
                 <span className="text-xs text-gray-400">{progress.easy.percentage}%</span>
               </div>
-              <div className="text-lg font-bold text-green-400 mb-2">
+              <div className="text-base sm:text-lg font-bold text-green-400 mb-2">
                 {progress.easy.solved} / {progress.easy.total} completed
               </div>
               <Progress value={progress.easy.percentage} className="h-2" />
             </div>
 
             {/* Medium Progress */}
-            <div className="bg-black rounded-lg p-4 border border-gray-700/30">
+            <div className="bg-black rounded-lg p-3 sm:p-4 border border-gray-700/30">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-4 h-4 text-yellow-400" />
-                  <span className="text-sm font-medium text-gray-300">Medium</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-300">Medium</span>
                 </div>
                 <span className="text-xs text-gray-400">{progress.medium.percentage}%</span>
               </div>
-              <div className="text-lg font-bold text-yellow-400 mb-2">
+              <div className="text-base sm:text-lg font-bold text-yellow-400 mb-2">
                 {progress.medium.solved} / {progress.medium.total} completed
               </div>
               <Progress value={progress.medium.percentage} className="h-2" />
             </div>
 
             {/* Hard Progress */}
-            <div className="bg-black rounded-lg p-4 border border-gray-700/30">
+            <div className="bg-black rounded-lg p-3 sm:p-4 border border-gray-700/30">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-4 h-4 text-red-400" />
-                  <span className="text-sm font-medium text-gray-300">Hard</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-300">Hard</span>
                 </div>
                 <span className="text-xs text-gray-400">{progress.hard.percentage}%</span>
               </div>
-              <div className="text-lg font-bold text-red-400 mb-2">
+              <div className="text-base sm:text-lg font-bold text-red-400 mb-2">
                 {progress.hard.solved} / {progress.hard.total} completed
               </div>
               <Progress value={progress.hard.percentage} className="h-2" />
@@ -751,12 +742,12 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
           </div>
         </div>
 
-        {/* Enhanced Filter Tabs with Collapse Controls */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex space-x-2">
+        {/* Enhanced Filter Tabs with Collapse Controls - Responsive */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 mb-6">
+          <div className="flex flex-wrap gap-2">
             <Button 
               onClick={() => setSelectedTab("all")}
-              className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm ${
                 selectedTab === "all" 
                   ? "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20" 
                   : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
@@ -766,43 +757,45 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
             </Button>
             <Button 
               onClick={() => setSelectedTab("revision")}
-              className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm ${
                 selectedTab === "revision" 
                   ? "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20" 
                   : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
               }`}
             >
-              <Bookmark className="w-4 h-4 mr-2" />
+              <Bookmark className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Revision ({bookmarkedProblems.length})
             </Button>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <Button
               onClick={collapseAllSteps}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-lg font-medium transition-all duration-200"
+              className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm"
             >
-              {allStepsCollapsed ? <Maximize2 className="w-4 h-4 mr-2" /> : <Minimize2 className="w-4 h-4 mr-2" />}
-              {allStepsCollapsed ? "Expand Steps" : "Collapse Steps"}
+              {allStepsCollapsed ? <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> : <Minimize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />}
+              <span className="hidden sm:inline">{allStepsCollapsed ? "Expand Steps" : "Collapse Steps"}</span>
+              <span className="sm:hidden">{allStepsCollapsed ? "Expand" : "Collapse"}</span>
             </Button>
             <Button
               onClick={collapseAllLectures}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-lg font-medium transition-all duration-200"
+              className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm"
             >
-              {allLecturesCollapsed ? <Maximize2 className="w-4 h-4 mr-2" /> : <Minimize2 className="w-4 h-4 mr-2" />}
-              {allLecturesCollapsed ? "Expand Lectures" : "Collapse Lectures"}
+              {allLecturesCollapsed ? <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> : <Minimize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />}
+              <span className="hidden sm:inline">{allLecturesCollapsed ? "Expand Lectures" : "Collapse Lectures"}</span>
+              <span className="sm:hidden">{allLecturesCollapsed ? "Expand L" : "Collapse L"}</span>
             </Button>
-            <div className="relative">
+            <div className="relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input 
                 placeholder="Search problems..." 
-                className="pl-10 w-64 bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-lg" 
+                className="pl-10 w-48 lg:w-64 bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-lg" 
                 value={searchQuery}
                 readOnly
               />
             </div>
             <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-              <SelectTrigger className="w-32 bg-gray-900 border-gray-700 text-white rounded-lg">
+              <SelectTrigger className="w-24 sm:w-32 bg-gray-900 border-gray-700 text-white rounded-lg text-xs sm:text-sm">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
               <SelectContent className="bg-gray-900 border-gray-700">
@@ -813,7 +806,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32 bg-gray-900 border-gray-700 text-white rounded-lg">
+              <SelectTrigger className="w-24 sm:w-32 bg-gray-900 border-gray-700 text-white rounded-lg text-xs sm:text-sm">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-gray-900 border-gray-700">
@@ -825,16 +818,17 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
             </Select>
             <Button 
               onClick={handleRandomProblem}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg shadow-purple-600/20"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg shadow-purple-600/20 text-xs sm:text-sm"
             >
-              <Play className="w-4 h-4 mr-2" />
-              Pick Random
+              <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Pick Random</span>
+              <span className="sm:hidden">Random</span>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Steps and Lectures with Enhanced Progress Sliders */}
+      {/* Steps and Lectures with Enhanced Progress Sliders - Responsive */}
       <div className="space-y-2">
         {sheet.steps.map((step) => {
           const stepProgress = calculateStepProgress(step);
@@ -845,24 +839,24 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
           return (
             <div key={step.id} className="bg-black border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors">
               <div 
-                className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-900/50 transition-colors"
+                className="flex items-center justify-between p-3 sm:p-4 cursor-pointer hover:bg-gray-900/50 transition-colors"
                 onClick={() => toggleStep(step.id)}
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                   {expandedSteps.includes(step.id) ? 
-                    <ChevronDown className="w-5 h-5 text-orange-400" /> : 
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                    <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 flex-shrink-0" /> : 
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                   }
-                  <span className="font-semibold text-white text-lg">{step.title}</span>
+                  <span className="font-semibold text-white text-sm sm:text-base lg:text-lg truncate">{step.title}</span>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="w-40 bg-gray-800 rounded-full h-3 overflow-hidden">
+                <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+                  <div className="w-20 sm:w-32 lg:w-40 bg-gray-800 rounded-full h-2 sm:h-3 overflow-hidden">
                     <div 
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-700" 
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 sm:h-3 rounded-full transition-all duration-700" 
                       style={{ width: `${stepProgress}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm text-gray-400 font-medium min-w-20">{stepSolved} / {step.totalProblems}</span>
+                  <span className="text-xs sm:text-sm text-gray-400 font-medium min-w-12 sm:min-w-20 text-right">{stepSolved} / {step.totalProblems}</span>
                 </div>
               </div>
 
@@ -877,31 +871,31 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                     return (
                       <div key={lecture.id}>
                         <div 
-                          className="flex items-center justify-between p-4 pl-12 cursor-pointer hover:bg-gray-900/30 border-b border-gray-800/50 transition-colors"
+                          className="flex items-center justify-between p-3 sm:p-4 pl-8 sm:pl-12 cursor-pointer hover:bg-gray-900/30 border-b border-gray-800/50 transition-colors"
                           onClick={() => toggleLecture(lecture.id)}
                         >
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                             {expandedLectures.includes(lecture.id) ? 
-                              <ChevronDown className="w-4 h-4 text-orange-400" /> : 
-                              <ChevronRight className="w-4 h-4 text-gray-400" />
+                              <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-orange-400 flex-shrink-0" /> : 
+                              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
                             }
-                            <span className="text-white font-medium">{lecture.title}</span>
+                            <span className="text-white font-medium text-xs sm:text-sm lg:text-base truncate">{lecture.title}</span>
                           </div>
-                          <div className="flex items-center space-x-4">
-                            <div className="w-32 bg-gray-800 rounded-full h-2.5 overflow-hidden">
+                          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+                            <div className="w-16 sm:w-24 lg:w-32 bg-gray-800 rounded-full h-2 sm:h-2.5 overflow-hidden">
                               <div 
-                                className="bg-gradient-to-r from-green-500 to-blue-500 h-2.5 rounded-full transition-all duration-700" 
+                                className="bg-gradient-to-r from-green-500 to-blue-500 h-2 sm:h-2.5 rounded-full transition-all duration-700" 
                                 style={{ width: `${lectureProgress}%` }}
                               ></div>
                             </div>
-                            <span className="text-sm text-gray-400 font-medium min-w-16">{lectureSolved} / {lecture.totalProblems}</span>
+                            <span className="text-xs sm:text-sm text-gray-400 font-medium min-w-10 sm:min-w-16 text-right">{lectureSolved} / {lecture.totalProblems}</span>
                           </div>
                         </div>
 
                         {expandedLectures.includes(lecture.id) && (
                           <div className="bg-black">
-                            {/* Updated Table Header */}
-                            <div className="grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800 text-xs font-semibold text-gray-300 uppercase tracking-wider bg-gray-900/20">
+                            {/* Mobile-First Table Design */}
+                            <div className="hidden lg:grid lg:grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800 text-xs font-semibold text-gray-300 uppercase tracking-wider bg-gray-900/20">
                               <div className="col-span-1">Status</div>
                               <div className="col-span-3">Problem</div>
                               <div className="col-span-1">Est. Time</div>
@@ -913,91 +907,171 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                               <div className="col-span-2">Difficulty</div>
                             </div>
 
-                            {/* Enhanced Problems */}
-                            {filteredProblems(lecture.problems).map((problem, index) => (
-                              <div key={problem.id} className={`grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800/30 hover:bg-gray-900/40 text-sm transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-950/20' : ''}`}>
-                                <div className="col-span-1 flex items-center">
-                                  {getStatusCheckbox(problem.id, problem.status, () => toggleProblemStatus(problem.id))}
-                                </div>
-                                <div className="col-span-3 flex items-center">
-                                  <span className="text-white font-medium hover:text-orange-400 transition-colors cursor-pointer">{problem.title}</span>
-                                </div>
-                                <div className="col-span-1 flex items-center">
-                                  <div className="flex items-center space-x-1 text-gray-400">
-                                    <Clock className="w-3 h-3" />
-                                    <span className="text-xs">{problem.estimatedTime || 30}m</span>
+                            {/* Mobile Card Layout */}
+                            <div className="lg:hidden">
+                              {filteredProblems(lecture.problems).map((problem, index) => (
+                                <div key={problem.id} className={`p-4 border-b border-gray-800/30 ${index % 2 === 0 ? 'bg-gray-950/20' : ''}`}>
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center space-x-3">
+                                      {getStatusCheckbox(problem.id, problem.status, () => toggleProblemStatus(problem.id))}
+                                      <div>
+                                        <h4 className="text-white font-medium text-sm hover:text-orange-400 transition-colors cursor-pointer">{problem.title}</h4>
+                                        <div className="flex items-center space-x-2 mt-1">
+                                          <Badge className={`${getDifficultyColor(problem.difficulty)} bg-transparent border border-current text-xs px-2 py-0.5 rounded-full font-semibold`}>
+                                            {problem.difficulty}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <Button
+                                      onClick={() => toggleBookmark(problem.id)}
+                                      className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
+                                        bookmarkedProblems.includes(problem.id) 
+                                          ? 'text-yellow-400 hover:text-yellow-300' 
+                                          : 'text-gray-400 hover:text-white'
+                                      }`}
+                                      size="sm"
+                                    >
+                                      <Star className={`w-3 h-3 ${bookmarkedProblems.includes(problem.id) ? 'fill-current' : ''}`} />
+                                    </Button>
+                                  </div>
+                                  
+                                  <div className="flex items-center justify-between mt-3">
+                                    <div className="flex items-center space-x-1 text-gray-400">
+                                      <Clock className="w-3 h-3" />
+                                      <span className="text-xs">{problem.estimatedTime || 30}m</span>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                      {problem.hasArticle && (
+                                        <Button
+                                          onClick={() => window.open(problem.article, '_blank')}
+                                          className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
+                                          size="sm"
+                                        >
+                                          <FileText className="w-3 h-3" />
+                                        </Button>
+                                      )}
+                                      {problem.hasVideo && (
+                                        <Button
+                                          onClick={() => window.open(problem.video, '_blank')}
+                                          className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
+                                          size="sm"
+                                        >
+                                          <Video className="w-3 h-3" />
+                                        </Button>
+                                      )}
+                                      {problem.hasPractice && (
+                                        <Button
+                                          onClick={() => window.open(`https://leetcode.com/problems/${problem.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}/`, '_blank')}
+                                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs rounded-full font-semibold shadow-md transition-all duration-200 hover:scale-105"
+                                          size="sm"
+                                        >
+                                          Solve
+                                        </Button>
+                                      )}
+                                      <Button
+                                        onClick={() => openNoteDialog(problem.id, problem.title)}
+                                        className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
+                                          problemNotes[problem.id] ? 'text-blue-400 hover:text-blue-300' : 'text-gray-400 hover:text-white'
+                                        }`}
+                                        size="sm"
+                                      >
+                                        <Edit3 className="w-3 h-3" />
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="col-span-1 flex items-center">
-                                  {problem.hasArticle ? (
+                              ))}
+                            </div>
+
+                            {/* Desktop Table Layout */}
+                            <div className="hidden lg:block">
+                              {filteredProblems(lecture.problems).map((problem, index) => (
+                                <div key={problem.id} className={`grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800/30 hover:bg-gray-900/40 text-sm transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-950/20' : ''}`}>
+                                  <div className="col-span-1 flex items-center">
+                                    {getStatusCheckbox(problem.id, problem.status, () => toggleProblemStatus(problem.id))}
+                                  </div>
+                                  <div className="col-span-3 flex items-center">
+                                    <span className="text-white font-medium hover:text-orange-400 transition-colors cursor-pointer">{problem.title}</span>
+                                  </div>
+                                  <div className="col-span-1 flex items-center">
+                                    <div className="flex items-center space-x-1 text-gray-400">
+                                      <Clock className="w-3 h-3" />
+                                      <span className="text-xs">{problem.estimatedTime || 30}m</span>
+                                    </div>
+                                  </div>
+                                  <div className="col-span-1 flex items-center">
+                                    {problem.hasArticle ? (
+                                      <Button
+                                        onClick={() => window.open(problem.article, '_blank')}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
+                                        size="sm"
+                                      >
+                                        <FileText className="w-3 h-3" />
+                                      </Button>
+                                    ) : (
+                                      <span className="text-gray-600 text-center w-full">-</span>
+                                    )}
+                                  </div>
+                                  <div className="col-span-1 flex items-center">
+                                    {problem.hasVideo ? (
+                                      <Button
+                                        onClick={() => window.open(problem.video, '_blank')}
+                                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
+                                        size="sm"
+                                      >
+                                        <Video className="w-3 h-3" />
+                                      </Button>
+                                    ) : (
+                                      <span className="text-gray-600 text-center w-full">-</span>
+                                    )}
+                                  </div>
+                                  <div className="col-span-1 flex items-center">
+                                    {problem.hasPractice ? (
+                                      <Button
+                                        onClick={() => window.open(`https://leetcode.com/problems/${problem.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}/`, '_blank')}
+                                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs rounded-full font-semibold shadow-md transition-all duration-200 hover:scale-105"
+                                        size="sm"
+                                      >
+                                        Solve
+                                      </Button>
+                                    ) : (
+                                      <span className="text-gray-600 text-center w-full">-</span>
+                                    )}
+                                  </div>
+                                  <div className="col-span-1 flex items-center">
                                     <Button
-                                      onClick={() => window.open(problem.article, '_blank')}
-                                      className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
+                                      onClick={() => openNoteDialog(problem.id, problem.title)}
+                                      className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
+                                        problemNotes[problem.id] ? 'text-blue-400 hover:text-blue-300' : 'text-gray-400 hover:text-white'
+                                      }`}
                                       size="sm"
                                     >
-                                      <FileText className="w-3 h-3" />
+                                      <Edit3 className="w-3 h-3" />
                                     </Button>
-                                  ) : (
-                                    <span className="text-gray-600 text-center w-full">-</span>
-                                  )}
-                                </div>
-                                <div className="col-span-1 flex items-center">
-                                  {problem.hasVideo ? (
+                                  </div>
+                                  <div className="col-span-1 flex items-center">
                                     <Button
-                                      onClick={() => window.open(problem.video, '_blank')}
-                                      className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
+                                      onClick={() => toggleBookmark(problem.id)}
+                                      className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
+                                        bookmarkedProblems.includes(problem.id) 
+                                          ? 'text-yellow-400 hover:text-yellow-300' 
+                                          : 'text-gray-400 hover:text-white'
+                                      }`}
                                       size="sm"
                                     >
-                                      <Video className="w-3 h-3" />
+                                      <Star className={`w-3 h-3 ${bookmarkedProblems.includes(problem.id) ? 'fill-current' : ''}`} />
                                     </Button>
-                                  ) : (
-                                    <span className="text-gray-600 text-center w-full">-</span>
-                                  )}
+                                  </div>
+                                  <div className="col-span-2 flex items-center">
+                                    <Badge className={`${getDifficultyColor(problem.difficulty)} bg-transparent border border-current text-sm px-3 py-1 rounded-full font-semibold`}>
+                                      {problem.difficulty}
+                                    </Badge>
+                                  </div>
                                 </div>
-                                <div className="col-span-1 flex items-center">
-                                  {problem.hasPractice ? (
-                                    <Button
-                                      onClick={() => window.open(`https://leetcode.com/problems/${problem.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}/`, '_blank')}
-                                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs rounded-full font-semibold shadow-md transition-all duration-200 hover:scale-105"
-                                      size="sm"
-                                    >
-                                      Solve
-                                    </Button>
-                                  ) : (
-                                    <span className="text-gray-600 text-center w-full">-</span>
-                                  )}
-                                </div>
-                                <div className="col-span-1 flex items-center">
-                                  <Button
-                                    onClick={() => openNoteDialog(problem.id, problem.title)}
-                                    className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
-                                      problemNotes[problem.id] ? 'text-blue-400 hover:text-blue-300' : 'text-gray-400 hover:text-white'
-                                    }`}
-                                    size="sm"
-                                  >
-                                    <Edit3 className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                                <div className="col-span-1 flex items-center">
-                                  <Button
-                                    onClick={() => toggleBookmark(problem.id)}
-                                    className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
-                                      bookmarkedProblems.includes(problem.id) 
-                                        ? 'text-yellow-400 hover:text-yellow-300' 
-                                        : 'text-gray-400 hover:text-white'
-                                    }`}
-                                    size="sm"
-                                  >
-                                    <Star className={`w-3 h-3 ${bookmarkedProblems.includes(problem.id) ? 'fill-current' : ''}`} />
-                                  </Button>
-                                </div>
-                                <div className="col-span-2 flex items-center">
-                                  <Badge className={`${getDifficultyColor(problem.difficulty)} bg-transparent border border-current text-sm px-3 py-1 rounded-full font-semibold`}>
-                                    {problem.difficulty}
-                                  </Badge>
-                                </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                             
                             {filteredProblems(lecture.problems).length === 0 && (
                               <div className="p-8 text-center text-gray-500">
@@ -1019,9 +1093,9 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
       {/* Advanced Note Taking Dialog with Dark Black Background */}
       <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
-        <DialogContent className="bg-black border-gray-700 text-white max-w-2xl">
+        <DialogContent className="bg-black border-gray-700 text-white max-w-xs sm:max-w-2xl mx-2 sm:mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-white">
+            <DialogTitle className="text-lg sm:text-xl font-semibold text-white">
               {noteTitle}
             </DialogTitle>
           </DialogHeader>
@@ -1035,24 +1109,24 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                 placeholder="Write your notes, observations, solution approach, time complexity, etc..."
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
-                className="min-h-[200px] bg-black border-gray-600 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/20 resize-none"
+                className="min-h-[150px] sm:min-h-[200px] bg-black border-gray-600 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/20 resize-none"
               />
             </div>
             <div className="flex items-center space-x-2 text-xs text-gray-400">
               <span>💡 Tip: Include approach, complexity, and key insights</span>
             </div>
           </div>
-          <div className="flex justify-end space-x-3">
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
             <Button
               variant="outline"
               onClick={() => setNoteDialogOpen(false)}
-              className="border-gray-600 text-white bg-black hover:bg-gray-800"
+              className="border-gray-600 text-white bg-black hover:bg-gray-800 w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               onClick={saveNote}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
             >
               <Save className="w-4 h-4 mr-2" />
               Save Note
