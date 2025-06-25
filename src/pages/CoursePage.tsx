@@ -6,14 +6,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { BookOpen, Clock, Users, Star, Trophy, Target, CheckCircle, PlayCircle, Lock, Zap } from "lucide-react";
+import { 
+  BookOpen, 
+  Clock, 
+  Users, 
+  Star, 
+  Trophy, 
+  Target,
+  CheckCircle,
+  PlayCircle,
+  Lock,
+  Zap
+} from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
 import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 import CourseContent from "@/components/CourseContent";
-import CoursePageToolbar from "@/components/CoursePageToolbar";
-import CourseProgressStats from "@/components/CourseProgressStats";
+
 interface Course {
   id: string;
   course_id: string;
@@ -26,65 +36,50 @@ interface Course {
   tags: string[];
   is_premium: boolean;
 }
+
 interface Enrollment {
   id: string;
   enrolled_at: string;
   progress_percentage: number;
   completed_at: string | null;
 }
-interface AdvancedFilters {
-  difficulty: string;
-  status: string;
-  hasArticle: boolean;
-  hasVideo: boolean;
-  hasPractice: boolean;
-  searchQuery: string;
-}
+
 const CoursePage = () => {
-  const {
-    courseId
-  } = useParams<{
-    courseId: string;
-  }>();
-  const {
-    user
-  } = useAuth();
+  const { courseId } = useParams<{ courseId: string }>();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [course, setCourse] = useState<Course | null>(null);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [loading, setLoading] = useState(true);
-  const [allStepsCollapsed, setAllStepsCollapsed] = useState(false);
-  const [allLecturesCollapsed, setAllLecturesCollapsed] = useState(false);
-  const [filters, setFilters] = useState<AdvancedFilters>({
-    difficulty: "all",
-    status: "all",
-    hasArticle: false,
-    hasVideo: false,
-    hasPractice: false,
-    searchQuery: ""
-  });
+
   useEffect(() => {
     if (courseId) {
       fetchCourseData();
     }
   }, [courseId, user]);
+
   const fetchCourseData = async () => {
     try {
       // Fetch course details
-      const {
-        data: courseData,
-        error: courseError
-      } = await supabase.from('courses').select('*').eq('course_id', courseId).single();
+      const { data: courseData, error: courseError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('course_id', courseId)
+        .single();
+
       if (courseError) throw courseError;
       setCourse(courseData);
 
       // Fetch enrollment if user is logged in
       if (user) {
-        const {
-          data: enrollmentData,
-          error: enrollmentError
-        } = await supabase.from('course_enrollments').select('*').eq('course_id', courseId).eq('user_id', user.id).maybeSingle();
+        const { data: enrollmentData, error: enrollmentError } = await supabase
+          .from('course_enrollments')
+          .select('*')
+          .eq('course_id', courseId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
         if (enrollmentError) {
           console.error('Error fetching enrollment:', enrollmentError);
         } else {
@@ -98,21 +93,26 @@ const CoursePage = () => {
       setLoading(false);
     }
   };
+
   const handleEnroll = async () => {
     if (!user) {
       toast.error('Please log in to enroll in this course');
       return;
     }
+
     if (!course) return;
+
     try {
-      const {
-        error
-      } = await supabase.from('course_enrollments').insert({
-        user_id: user.id,
-        course_id: course.course_id,
-        progress_percentage: 0
-      });
+      const { error } = await supabase
+        .from('course_enrollments')
+        .insert({
+          user_id: user.id,
+          course_id: course.course_id,
+          progress_percentage: 0
+        });
+
       if (error) throw error;
+
       toast.success('Successfully enrolled in the course!');
       fetchCourseData(); // Refresh data
     } catch (error: any) {
@@ -124,150 +124,150 @@ const CoursePage = () => {
       }
     }
   };
+
   const getBreadcrumbItems = () => {
     if (!course) return [];
-    const categoryMap: {
-      [key: string]: {
-        label: string;
-        href: string;
-      };
-    } = {
-      'dsa-sheet': {
-        label: 'DSA Sheets',
-        href: '/dsa-sheets'
-      },
-      'course': {
-        label: 'Courses',
-        href: '/courses'
-      },
-      'interview-prep': {
-        label: 'Interview Prep',
-        href: '/interview-prep'
-      },
-      'core-cs': {
-        label: 'Core CS',
-        href: '/core-cs'
-      }
+    
+    const categoryMap: { [key: string]: { label: string; href: string } } = {
+      'dsa-sheet': { label: 'DSA Sheets', href: '/dsa-sheets' },
+      'course': { label: 'Courses', href: '/courses' },
+      'interview-prep': { label: 'Interview Prep', href: '/interview-prep' },
+      'core-cs': { label: 'Core CS', href: '/core-cs' }
     };
-    const category = categoryMap[course.category] || {
-      label: 'Courses',
-      href: '/courses'
-    };
-    return [{
-      label: 'Home',
-      href: '/dashboard'
-    }, category, {
-      label: course.title
-    }];
+
+    const category = categoryMap[course.category] || { label: 'Courses', href: '/courses' };
+    
+    return [
+      { label: 'Home', href: '/dashboard' },
+      category,
+      { label: course.title }
+    ];
   };
+
   const getBackUrl = () => {
     if (!course) return '/courses';
-    const categoryMap: {
-      [key: string]: string;
-    } = {
+    
+    const categoryMap: { [key: string]: string } = {
       'dsa-sheet': '/dsa-sheets',
       'course': '/courses',
       'interview-prep': '/interview-prep',
       'core-cs': '/core-cs'
     };
+
     return categoryMap[course.category] || '/courses';
   };
-  const handleRevisionModeToggle = () => {
-    console.log("Revision mode toggled");
-  };
-  const handleCollapseAllSteps = () => {
-    setAllStepsCollapsed(true);
-  };
-  const handleExpandAllSteps = () => {
-    setAllStepsCollapsed(false);
-  };
-  const handleCollapseAllLectures = () => {
-    setAllLecturesCollapsed(true);
-  };
-  const handleExpandAllLectures = () => {
-    setAllLecturesCollapsed(false);
-  };
+
   if (loading) {
-    return <div className="min-h-screen bg-black flex items-center justify-center">
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>;
+      </div>
+    );
   }
+
   if (!course) {
-    return <div className="min-h-screen bg-black flex items-center justify-center">
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-4">Course Not Found</h1>
           <p className="text-gray-400">The course you're looking for doesn't exist.</p>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen bg-black flex relative overflow-hidden">
+
+  return (
+    <div className="min-h-screen bg-black flex relative overflow-hidden">
       {/* Fixed Sidebar */}
-      <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'}`}>
-        <Sidebar selectedSheet={course?.category || "courses"} onSheetChange={() => {}} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+      <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
+        sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
+      }`}>
+        <Sidebar 
+          selectedSheet={course.category} 
+          onSheetChange={() => {}}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
       </div>
       
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+        sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'
+      }`}>
         {/* Fixed Header */}
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
-        left: sidebarCollapsed ? '4rem' : '16rem'
-      }}>
-          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900 py-px px-[8px]">
-            <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} sidebarCollapsed={sidebarCollapsed} />
+          left: sidebarCollapsed ? '4rem' : '16rem',
+        }}>
+          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900">
+            <Header 
+              searchQuery={searchQuery} 
+              onSearchChange={setSearchQuery}
+              sidebarCollapsed={sidebarCollapsed}
+            />
             <UserMenu />
           </div>
         </div>
         
-        {/* Main Content with proper spacing */}
-        <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content */}
+        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Breadcrumb with proper spacing */}
-            <div className="mb-8 mt-4">
-              <CourseBreadcrumb items={getBreadcrumbItems()} showBackButton={true} backUrl={getBackUrl()} />
-            </div>
+            {/* Breadcrumb */}
+            <CourseBreadcrumb 
+              items={getBreadcrumbItems()}
+              showBackButton={true}
+              backUrl={getBackUrl()}
+            />
 
             {/* Course Header */}
-            <div className="mb-8">
+            <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{course?.title}</h1>
-                  <p className="text-gray-400 text-lg">{course?.description}</p>
+                  <h1 className="text-3xl font-bold text-white mb-2">{course.title}</h1>
+                  <p className="text-gray-400 text-lg">{course.description}</p>
                 </div>
-                {!enrollment && course && <Button onClick={handleEnroll} className="bg-green-600 hover:bg-green-700 text-white" disabled={!user}>
+                {!enrollment && (
+                  <Button 
+                    onClick={handleEnroll}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    disabled={!user}
+                  >
                     {user ? 'Free Enroll' : 'Login to Enroll'}
-                  </Button>}
+                  </Button>
+                )}
               </div>
 
-              {course && <div className="flex items-center space-x-4">
-                  <Badge className="bg-blue-900 text-blue-400 border-blue-800">
-                    {course.difficulty}
+              <div className="flex items-center space-x-4">
+                <Badge className="bg-blue-900 text-blue-400 border-blue-800">
+                  {course.difficulty}
+                </Badge>
+                <div className="flex items-center space-x-1 text-gray-400">
+                  <BookOpen className="w-4 h-4" />
+                  <span>{course.total_lessons} lessons</span>
+                </div>
+                <div className="flex items-center space-x-1 text-gray-400">
+                  <Clock className="w-4 h-4" />
+                  <span>{course.estimated_hours}h</span>
+                </div>
+                {enrollment && (
+                  <Badge className="bg-green-900 text-green-400 border-green-800">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Enrolled - {enrollment.progress_percentage}% Complete
                   </Badge>
-                  <div className="flex items-center space-x-1 text-gray-400">
-                    <BookOpen className="w-4 h-4" />
-                    <span>{course.total_lessons} lessons</span>
-                  </div>
-                  <div className="flex items-center space-x-1 text-gray-400">
-                    <Clock className="w-4 h-4" />
-                    <span>{course.estimated_hours}h</span>
-                  </div>
-                  {enrollment && <Badge className="bg-green-900 text-green-400 border-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Enrolled - {enrollment.progress_percentage}% Complete
-                    </Badge>}
-                </div>}
+                )}
+              </div>
             </div>
 
-            {/* Progress Stats - Only show if enrolled */}
-            {enrollment && <CourseProgressStats totalProblems={course.total_lessons} solvedProblems={Math.floor(enrollment.progress_percentage / 100 * course.total_lessons)} attemptedProblems={Math.floor((enrollment.progress_percentage + 10) / 100 * course.total_lessons)} averageTime={22} streak={4} completionRate={enrollment.progress_percentage} />}
-
-            {/* Course Toolbar - Only show if enrolled */}
-            {enrollment && <CoursePageToolbar onRevisionModeToggle={handleRevisionModeToggle} onCollapseAllSteps={handleCollapseAllSteps} onExpandAllSteps={handleExpandAllSteps} onCollapseAllLectures={handleCollapseAllLectures} onExpandAllLectures={handleExpandAllLectures} allStepsCollapsed={allStepsCollapsed} allLecturesCollapsed={allLecturesCollapsed} filters={filters} onFiltersChange={setFilters} />}
-
             {/* Course Content - Using CourseContent component */}
-            <CourseContent selectedSheet={courseId || ""} searchQuery={searchQuery} isEnrolled={!!enrollment} />
+            <CourseContent 
+              selectedSheet={courseId || ""}
+              searchQuery={searchQuery}
+              isEnrolled={!!enrollment}
+            />
           </div>
         </main>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default CoursePage;

@@ -15,18 +15,17 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-const Sidebar = ({
-  selectedSheet,
-  onSheetChange,
-  collapsed,
-  onToggleCollapse
-}: SidebarProps) => {
+const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: SidebarProps) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const navigate = useNavigate();
 
   const toggleSection = (section: string) => {
     if (collapsed) return;
-    setExpandedSections(prev => prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section]);
+    setExpandedSections(prev => 
+      prev.includes(section) 
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    );
   };
 
   const handleDashboardClick = () => {
@@ -93,7 +92,7 @@ const Sidebar = ({
     }
   ];
 
-  const SidebarButton = ({ item, isActive }: { item: any; isActive: boolean }) => {
+  const SidebarButton = ({ item, isActive }: { item: any, isActive: boolean }) => {
     const button = (
       <button
         onClick={() => {
@@ -182,11 +181,19 @@ const Sidebar = ({
             {collapsed ? (
               <div className="flex flex-col items-center space-y-3 w-full">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
-                  <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-3 rounded-xl shadow-2xl">
-                    <BookOpen className="w-8 h-8 text-white animate-bounce" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-sm opacity-50"></div>
+                  <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl">
+                    <BookOpen className="w-6 h-6 text-white" />
                   </div>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleCollapse}
+                  className="text-gray-400 hover:bg-gray-900 hover:text-white rounded-lg p-2"
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
               </div>
             ) : (
               <>
@@ -209,9 +216,9 @@ const Sidebar = ({
                     </div>
                   </div>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={onToggleCollapse}
                   className="text-gray-400 hover:bg-gray-900 hover:text-white rounded-lg"
                 >

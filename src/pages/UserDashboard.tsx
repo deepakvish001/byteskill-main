@@ -14,10 +14,6 @@ const UserDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState("dashboard");
 
-  const handleExpandSidebar = () => {
-    setSidebarCollapsed(false);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -60,19 +56,18 @@ const UserDashboard = () => {
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900">
+          <div className="flex items-center justify-between p-4">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
-              onExpandSidebar={handleExpandSidebar}
             />
             <UserMenu />
           </div>
         </div>
         
-        {/* Main Content with reduced top padding */}
-        <main className="flex-1 pt-20 bg-black min-h-screen">
+        {/* Main Content with responsive padding */}
+        <main className="flex-1 pt-16 sm:pt-20 bg-black min-h-screen">
           <Dashboard />
         </main>
       </div>
