@@ -35,7 +35,7 @@ const Index = () => {
         </div>
         
         {/* Main Content with top padding to account for fixed header */}
-        <main className="flex-1 pt-20 p-6 bg-gradient-to-br from-gray-950 via-black to-blue-950/20 min-h-screen">
+        <main className="flex-1 pt-20 p-6 bg-black min-h-screen">
           <ProblemDashboard selectedSheet={selectedSheet} searchQuery={searchQuery} />
         </main>
       </div>
