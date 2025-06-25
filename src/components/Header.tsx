@@ -13,17 +13,12 @@ const Header = ({ searchQuery, onSearchChange }: HeaderProps) => {
     <header className="w-full bg-black border-b border-gray-800 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-              <span className="text-black font-bold text-lg">BS</span>
-            </div>
-            <div>
-              <span className="text-2xl font-bold text-white">
-                Byteskill
-              </span>
-              <div className="text-xs text-gray-400 font-medium">
-                Learning Platform
-              </div>
+          <div>
+            <span className="text-2xl font-bold text-white">
+              Byteskill
+            </span>
+            <div className="text-xs text-gray-400 font-medium">
+              Learning Platform
             </div>
           </div>
         </div>
