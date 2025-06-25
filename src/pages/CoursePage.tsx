@@ -14,6 +14,7 @@ import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 import CourseContent from "@/components/CourseContent";
 import CoursePageToolbar from "@/components/CoursePageToolbar";
 import CourseProgressStats from "@/components/CourseProgressStats";
+
 interface Course {
   id: string;
   course_id: string;
@@ -26,12 +27,14 @@ interface Course {
   tags: string[];
   is_premium: boolean;
 }
+
 interface Enrollment {
   id: string;
   enrolled_at: string;
   progress_percentage: number;
   completed_at: string | null;
 }
+
 interface AdvancedFilters {
   difficulty: string;
   status: string;
@@ -40,15 +43,10 @@ interface AdvancedFilters {
   hasPractice: boolean;
   searchQuery: string;
 }
+
 const CoursePage = () => {
-  const {
-    courseId
-  } = useParams<{
-    courseId: string;
-  }>();
-  const {
-    user
-  } = useAuth();
+  const { courseId } = useParams<{ courseId: string }>();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [course, setCourse] = useState<Course | null>(null);
@@ -64,11 +62,13 @@ const CoursePage = () => {
     hasPractice: false,
     searchQuery: ""
   });
+
   useEffect(() => {
     if (courseId) {
       fetchCourseData();
     }
   }, [courseId, user]);
+
   const fetchCourseData = async () => {
     try {
       // Fetch course details
@@ -98,6 +98,7 @@ const CoursePage = () => {
       setLoading(false);
     }
   };
+
   const handleEnroll = async () => {
     if (!user) {
       toast.error('Please log in to enroll in this course');
@@ -124,6 +125,7 @@ const CoursePage = () => {
       }
     }
   };
+
   const getBreadcrumbItems = () => {
     if (!course) return [];
     const categoryMap: {
@@ -160,6 +162,7 @@ const CoursePage = () => {
       label: course.title
     }];
   };
+
   const getBackUrl = () => {
     if (!course) return '/courses';
     const categoryMap: {
@@ -172,54 +175,80 @@ const CoursePage = () => {
     };
     return categoryMap[course.category] || '/courses';
   };
+
   const handleRevisionModeToggle = () => {
     console.log("Revision mode toggled");
   };
+
   const handleCollapseAllSteps = () => {
     setAllStepsCollapsed(true);
   };
+
   const handleExpandAllSteps = () => {
     setAllStepsCollapsed(false);
   };
+
   const handleCollapseAllLectures = () => {
     setAllLecturesCollapsed(true);
   };
+
   const handleExpandAllLectures = () => {
     setAllLecturesCollapsed(false);
   };
+
   if (loading) {
-    return <div className="min-h-screen bg-black flex items-center justify-center">
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-      </div>;
+      </div>
+    );
   }
+
   if (!course) {
-    return <div className="min-h-screen bg-black flex items-center justify-center">
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-4">Course Not Found</h1>
           <p className="text-gray-400">The course you're looking for doesn't exist.</p>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen bg-black flex relative overflow-hidden">
+
+  return (
+    <div className="min-h-screen bg-black flex relative overflow-hidden">
       {/* Fixed Sidebar */}
-      <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'}`}>
-        <Sidebar selectedSheet={course?.category || "courses"} onSheetChange={() => {}} collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+      <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
+        sidebarCollapsed ? 'w-20' : 'w-72'
+      }`}>
+        <Sidebar 
+          selectedSheet={course?.category || "courses"} 
+          onSheetChange={() => {}}
+          collapsed={sidebarCollapsed}
+        />
       </div>
       
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+        sidebarCollapsed ? 'ml-20' : 'ml-72'
+      }`}>
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
-        left: sidebarCollapsed ? '4rem' : '16rem'
-      }}>
-          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900 py-px px-[8px]">
-            <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} sidebarCollapsed={sidebarCollapsed} />
+        <div className="fixed top-0 right-0 z-30 h-16 bg-black border-b border-gray-800 transition-all duration-300" style={{
+          left: sidebarCollapsed ? '5rem' : '18rem',
+        }}>
+          <div className="flex items-center justify-between h-full px-4">
+            <Header 
+              searchQuery={searchQuery} 
+              onSearchChange={setSearchQuery}
+              sidebarCollapsed={sidebarCollapsed}
+              onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+            />
             <UserMenu />
           </div>
         </div>
         
         {/* Main Content with proper spacing */}
-        <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
+        <main className="flex-1 pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Breadcrumb with proper spacing */}
             <div className="mb-8 mt-4">
@@ -268,6 +297,8 @@ const CoursePage = () => {
           </div>
         </main>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default CoursePage;

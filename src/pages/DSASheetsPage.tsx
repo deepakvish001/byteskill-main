@@ -143,7 +143,6 @@ const DSASheetsPage = () => {
           selectedSheet="dsa-sheets" 
           onSheetChange={() => {}}
           collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
       </div>
       
@@ -160,6 +159,7 @@ const DSASheetsPage = () => {
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
+              onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
             <UserMenu />
           </div>

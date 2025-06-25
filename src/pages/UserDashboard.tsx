@@ -44,7 +44,6 @@ const UserDashboard = () => {
           selectedSheet={selectedSheet} 
           onSheetChange={setSelectedSheet}
           collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
       </div>
       
@@ -61,6 +60,7 @@ const UserDashboard = () => {
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
+              onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
             <UserMenu />
           </div>
