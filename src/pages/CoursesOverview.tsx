@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -132,13 +133,13 @@ const CoursesOverview = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black flex relative">
+    <div className="min-h-screen bg-black flex relative overflow-hidden">
       {/* Fixed Sidebar */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
         sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
@@ -152,14 +153,14 @@ const CoursesOverview = () => {
       </div>
       
       {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 ${
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
         sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'
       }`}>
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 z-30 bg-black border-b border-gray-800/50 transition-all duration-300" style={{
+        <div className="fixed top-0 right-0 z-30 bg-black border-b border-gray-800 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4 bg-black">
+          <div className="flex items-center justify-between p-4">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
@@ -169,8 +170,8 @@ const CoursesOverview = () => {
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-48 */}
-        <main className="flex-1 pt-48 p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to pt-40 */}
+        <main className="flex-1 pt-40 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Breadcrumb - Now visible with proper spacing */}
             <div className="bg-black mb-6">
@@ -178,12 +179,12 @@ const CoursesOverview = () => {
             </div>
 
             {/* Page Header */}
-            <div className="text-center mb-12 bg-black">
+            <div className="text-center mb-8 bg-black">
               <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                 All Courses
               </h1>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Explore our comprehensive collection of programming and computer science courses
+                Explore our comprehensive collection of programming courses designed to accelerate your learning journey
               </p>
             </div>
 
@@ -192,7 +193,7 @@ const CoursesOverview = () => {
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <Input
-                  placeholder="Search courses, topics, or technologies..."
+                  placeholder="Search courses by topic, technology, or difficulty..."
                   value={filterQuery}
                   onChange={(e) => setFilterQuery(e.target.value)}
                   className="pl-12 bg-black border-gray-800 text-white placeholder-gray-500 h-12 text-lg focus:border-blue-500"
@@ -200,7 +201,7 @@ const CoursesOverview = () => {
               </div>
             </div>
 
-            {/* Course Cards Grid */}
+            {/* Course Cards Grid - Same design as DSA Sheets */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);
