@@ -1,10 +1,10 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { 
   Table, 
   TableBody, 
@@ -13,8 +13,10 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Edit, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, EyeOff, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CourseForm from './CourseForm';
+import LessonForm from './LessonForm';
 
 interface InterviewPrepManagementProps {
   searchQuery: string;
@@ -23,6 +25,9 @@ interface InterviewPrepManagementProps {
 const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [showCourseForm, setShowCourseForm] = useState(false);
+  const [showLessonForm, setShowLessonForm] = useState(false);
 
   // Fetch Interview Prep courses
   const { data: interviewPreps, isLoading } = useQuery({
@@ -82,7 +87,7 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Interview Prep Management
-            <Button>
+            <Button onClick={() => { setSelectedCourse(null); setShowCourseForm(true); }}>
               <Plus className="w-4 h-4 mr-2" />
               Add Interview Prep
             </Button>
@@ -155,6 +160,27 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
           </Table>
         </CardContent>
       </Card>
+
+      {/* Course Form Dialog */}
+      <Dialog open={showCourseForm} onOpenChange={setShowCourseForm}>
+        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
+          <CourseForm
+            course={selectedCourse}
+            category="interview-prep"
+            onClose={() => setShowCourseForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Lesson Form Dialog */}
+      <Dialog open={showLessonForm} onOpenChange={setShowLessonForm}>
+        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
+          <LessonForm
+            courseId={selectedCourse?.course_id}
+            onClose={() => setShowLessonForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

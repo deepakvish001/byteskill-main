@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { 
   Table, 
   TableBody, 
@@ -14,8 +14,10 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Edit, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, EyeOff, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CourseForm from './CourseForm';
+import LessonForm from './LessonForm';
 
 interface DSASheetManagementProps {
   searchQuery: string;
@@ -24,8 +26,11 @@ interface DSASheetManagementProps {
 const DSASheetManagement = ({ searchQuery }: DSASheetManagementProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedSheet, setSelectedSheet] = useState<any>(null);
+  const [showSheetForm, setShowSheetForm] = useState(false);
+  const [showLessonForm, setShowLessonForm] = useState(false);
 
-  // Fetch DSA sheets (courses with category 'dsa-sheet')
+  // Fetch DSA sheets
   const { data: dsaSheets, isLoading } = useQuery({
     queryKey: ['admin-dsa-sheets', searchQuery],
     queryFn: async () => {
@@ -68,6 +73,29 @@ const DSASheetManagement = ({ searchQuery }: DSASheetManagementProps) => {
     },
   });
 
+  // Delete sheet
+  const deleteMutation = useMutation({
+    mutationFn: async (sheetId: string) => {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', sheetId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-dsa-sheets'] });
+      toast({ title: "DSA Sheet deleted successfully" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error deleting DSA sheet", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    },
+  });
+
   const getDifficultyBadgeVariant = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner': return 'secondary';
@@ -83,7 +111,7 @@ const DSASheetManagement = ({ searchQuery }: DSASheetManagementProps) => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             DSA Sheet Management
-            <Button>
+            <Button onClick={() => { setSelectedSheet(null); setShowSheetForm(true); }}>
               <Plus className="w-4 h-4 mr-2" />
               Add DSA Sheet
             </Button>
@@ -131,8 +159,11 @@ const DSASheetManagement = ({ searchQuery }: DSASheetManagementProps) => {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => { setSelectedSheet(sheet); setShowSheetForm(true); }}>
                           <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => { setSelectedSheet(sheet); setShowLessonForm(true); }}>
+                          <BookOpen className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
@@ -144,7 +175,15 @@ const DSASheetManagement = ({ searchQuery }: DSASheetManagementProps) => {
                         >
                           {sheet.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </Button>
-                        <Button size="sm" variant="destructive">
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this DSA sheet?')) {
+                              deleteMutation.mutate(sheet.id);
+                            }
+                          }}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -156,6 +195,27 @@ const DSASheetManagement = ({ searchQuery }: DSASheetManagementProps) => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Sheet Form Dialog */}
+      <Dialog open={showSheetForm} onOpenChange={setShowSheetForm}>
+        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
+          <CourseForm
+            course={selectedSheet}
+            category="dsa-sheet"
+            onClose={() => setShowSheetForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Problem Form Dialog */}
+      <Dialog open={showLessonForm} onOpenChange={setShowLessonForm}>
+        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
+          <LessonForm
+            courseId={selectedSheet?.course_id}
+            onClose={() => setShowLessonForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
