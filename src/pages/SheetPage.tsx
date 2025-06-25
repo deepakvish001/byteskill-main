@@ -82,15 +82,17 @@ const SheetPage = () => {
           </div>
         </div>
         
-        {/* Main Content with proper top padding to avoid header overlap */}
-        <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to show breadcrumb */}
+        <main className="flex-1 pt-28 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Breadcrumb - Now visible with proper spacing */}
-            <CourseBreadcrumb 
-              items={getBreadcrumbItems()}
-              showBackButton={true}
-              backUrl="/dsa-sheets"
-            />
+            <div className="mb-6">
+              <CourseBreadcrumb 
+                items={getBreadcrumbItems()}
+                showBackButton={true}
+                backUrl="/dsa-sheets"
+              />
+            </div>
             
             <ProblemDashboard 
               selectedSheet={sheetId || "striver-a2z"} 

@@ -208,15 +208,17 @@ const CoursePage = () => {
           </div>
         </div>
         
-        {/* Main Content */}
-        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to show breadcrumb */}
+        <main className="flex-1 pt-28 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Breadcrumb */}
-            <CourseBreadcrumb 
-              items={getBreadcrumbItems()}
-              showBackButton={true}
-              backUrl={getBackUrl()}
-            />
+            {/* Breadcrumb - Now visible with proper spacing */}
+            <div className="mb-6">
+              <CourseBreadcrumb 
+                items={getBreadcrumbItems()}
+                showBackButton={true}
+                backUrl={getBackUrl()}
+              />
+            </div>
 
             {/* Course Header */}
             <div className="mb-6">
