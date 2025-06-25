@@ -81,13 +81,13 @@ const Sidebar = ({ selectedSheet, onSheetChange }: SidebarProps) => {
   ];
 
   return (
-    <div className="w-64 bg-gray-900 text-white h-screen overflow-y-auto">
+    <div className="w-64 bg-black border-r border-gray-800 text-white h-screen overflow-y-auto">
       <div className="p-4">
         <div className="flex items-center space-x-2 mb-8">
-          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">BS</span>
           </div>
-          <span className="text-xl font-bold">Byteskill</span>
+          <span className="text-xl font-bold text-white">Byteskill</span>
         </div>
 
         <nav className="space-y-2">
@@ -97,17 +97,17 @@ const Sidebar = ({ selectedSheet, onSheetChange }: SidebarProps) => {
                 onClick={() => toggleSection(item.id)}
                 className={cn(
                   "w-full flex items-center justify-between p-2 rounded-lg text-left hover:bg-gray-800 transition-colors",
-                  selectedSheet === item.id && "bg-gray-800"
+                  selectedSheet === item.id && "bg-blue-600"
                 )}
               >
                 <div className="flex items-center space-x-3">
-                  <item.icon className="w-5 h-5" />
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <item.icon className="w-5 h-5 text-blue-400" />
+                  <span className="text-sm font-medium text-white">{item.label}</span>
                 </div>
                 {item.items.length > 0 && (
                   expandedSections.includes(item.id) ? 
-                    <ChevronDown className="w-4 h-4" /> : 
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronDown className="w-4 h-4 text-blue-400" /> : 
+                    <ChevronRight className="w-4 h-4 text-blue-400" />
                 )}
               </button>
               
@@ -119,7 +119,7 @@ const Sidebar = ({ selectedSheet, onSheetChange }: SidebarProps) => {
                       onClick={() => onSheetChange(subItem.id)}
                       className={cn(
                         "w-full text-left p-2 rounded text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors",
-                        selectedSheet === subItem.id && "text-white bg-gray-800"
+                        selectedSheet === subItem.id && "text-blue-400 bg-gray-800 font-medium"
                       )}
                     >
                       {subItem.label}
