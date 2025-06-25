@@ -419,6 +419,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
   const [currentProblemId, setCurrentProblemId] = useState<number | null>(null);
   const [noteContent, setNoteContent] = useState("");
   const [noteTitle, setNoteTitle] = useState("");
+  const [problemStatuses, setProblemStatuses] = useState<Record<number, "Solved" | "Attempted" | "Not Started">>({});
 
   const sheet = mockSheets[selectedSheet] || mockSheets["striver-a2z"];
 
@@ -446,6 +447,32 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     );
   };
 
+  const toggleProblemStatus = (problemId: number) => {
+    setProblemStatuses(prev => {
+      const currentStatus = prev[problemId] || "Not Started";
+      let nextStatus: "Solved" | "Attempted" | "Not Started";
+      
+      switch (currentStatus) {
+        case "Not Started":
+          nextStatus = "Attempted";
+          break;
+        case "Attempted":
+          nextStatus = "Solved";
+          break;
+        case "Solved":
+          nextStatus = "Not Started";
+          break;
+        default:
+          nextStatus = "Not Started";
+      }
+      
+      return {
+        ...prev,
+        [problemId]: nextStatus
+      };
+    });
+  };
+
   const addNote = (problemId: number, note: string) => {
     setProblemNotes(prev => ({
       ...prev,
@@ -456,16 +483,17 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "Easy": return "text-green-400";
-      case "Medium": return "text-yellow-400";
+      case "Medium": return "text-yellow-400";  
       case "Hard": return "text-red-400";
       default: return "text-gray-400";
     }
   };
 
-  const getStatusCheckbox = (status: string, onClick?: () => void) => {
+  const getStatusCheckbox = (problemId: number, status: string, onClick?: () => void) => {
+    const currentStatus = problemStatuses[problemId] || status;
     const baseClasses = "w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110";
     
-    switch (status) {
+    switch (currentStatus) {
       case "Solved":
         return (
           <div className={`${baseClasses} bg-green-500 border-green-500`} onClick={onClick}>
@@ -498,22 +526,59 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
   const filteredProblems = (problems: Problem[]) => {
     return problems.filter(problem => {
+      const currentStatus = problemStatuses[problem.id] || problem.status;
       const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesDifficulty = difficultyFilter === "all" || problem.difficulty === difficultyFilter;
-      const matchesStatus = statusFilter === "all" || problem.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || currentStatus === statusFilter;
       const matchesTab = selectedTab === "all" || (selectedTab === "revision" && bookmarkedProblems.includes(problem.id));
       
       return matchesSearch && matchesDifficulty && matchesStatus && matchesTab;
     });
   };
 
-  const progressData = [
-    { label: "Problem Solving", value: 25, color: "bg-blue-500" },
-    { label: "System Design", value: 45, color: "bg-green-500" },
-    { label: "Behavioral", value: 60, color: "bg-purple-500" },
-    { label: "Mock Interviews", value: 30, color: "bg-orange-500" },
-    { label: "Resume Building", value: 80, color: "bg-red-500" }
-  ];
+  // Calculate progress statistics
+  const calculateProgress = () => {
+    const allProblems = sheet.steps.flatMap(step => 
+      step.lectures.flatMap(lecture => lecture.problems)
+    );
+    
+    const totalProblems = 455; // Total DSA problems
+    const easyTotal = 131;
+    const mediumTotal = 187;
+    const hardTotal = 136;
+    
+    let totalSolved = 0;
+    let easySolved = 0;
+    let mediumSolved = 0;
+    let hardSolved = 0;
+    
+    allProblems.forEach(problem => {
+      const status = problemStatuses[problem.id] || problem.status;
+      if (status === "Solved") {
+        totalSolved++;
+        switch (problem.difficulty) {
+          case "Easy":
+            easySolved++;
+            break;
+          case "Medium":
+            mediumSolved++;
+            break;
+          case "Hard":
+            hardSolved++;
+            break;
+        }
+      }
+    });
+    
+    return {
+      total: { solved: totalSolved, total: totalProblems, percentage: Math.round((totalSolved / totalProblems) * 100) },
+      easy: { solved: easySolved, total: easyTotal, percentage: Math.round((easySolved / easyTotal) * 100) },
+      medium: { solved: mediumSolved, total: mediumTotal, percentage: Math.round((mediumSolved / mediumTotal) * 100) },
+      hard: { solved: hardSolved, total: hardTotal, percentage: Math.round((hardSolved / hardTotal) * 100) }
+    };
+  };
+
+  const progress = calculateProgress();
 
   const openNoteDialog = (problemId: number, problemTitle: string) => {
     setCurrentProblemId(problemId);
@@ -537,11 +602,11 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
   return (
     <div className="text-white space-y-6 bg-black min-h-screen">
-      {/* Enhanced Header Section */}
+      {/* Enhanced Header Section with Dark Black Background */}
       <div className="bg-black space-y-6">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl blur-xl"></div>
-          <div className="relative bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
+          <div className="relative bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
                 <BookOpen className="w-6 h-6 text-white" />
@@ -566,22 +631,72 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
           </div>
         </div>
 
-        {/* Progress Section - Most Important Prep Factors */}
-        <div className="bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
+        {/* Progress Section with Dark Black Background */}
+        <div className="bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
             <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full mr-3"></div>
-            Interview Preparation Progress
+            DSA Progress Overview
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {progressData.map((item, index) => (
-              <div key={index} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-300">{item.label}</span>
-                  <span className="text-xs text-gray-400">{item.value}%</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Progress */}
+            <div className="bg-black rounded-lg p-4 border border-gray-700/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-medium text-gray-300">Total Progress</span>
                 </div>
-                <Progress value={item.value} className="h-2" />
+                <span className="text-xs text-gray-400">{progress.total.percentage}%</span>
               </div>
-            ))}
+              <div className="text-lg font-bold text-blue-400 mb-2">
+                {progress.total.solved} / {progress.total.total}
+              </div>
+              <Progress value={progress.total.percentage} className="h-2" />
+            </div>
+
+            {/* Easy Progress */}
+            <div className="bg-black rounded-lg p-4 border border-gray-700/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-medium text-gray-300">Easy</span>
+                </div>
+                <span className="text-xs text-gray-400">{progress.easy.percentage}%</span>
+              </div>
+              <div className="text-lg font-bold text-green-400 mb-2">
+                {progress.easy.solved} / {progress.easy.total} completed
+              </div>
+              <Progress value={progress.easy.percentage} className="h-2" />
+            </div>
+
+            {/* Medium Progress */}
+            <div className="bg-black rounded-lg p-4 border border-gray-700/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-yellow-400" />
+                  <span className="text-sm font-medium text-gray-300">Medium</span>
+                </div>
+                <span className="text-xs text-gray-400">{progress.medium.percentage}%</span>
+              </div>
+              <div className="text-lg font-bold text-yellow-400 mb-2">
+                {progress.medium.solved} / {progress.medium.total} completed
+              </div>
+              <Progress value={progress.medium.percentage} className="h-2" />
+            </div>
+
+            {/* Hard Progress */}
+            <div className="bg-black rounded-lg p-4 border border-gray-700/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-red-400" />
+                  <span className="text-sm font-medium text-gray-300">Hard</span>
+                </div>
+                <span className="text-xs text-gray-400">{progress.hard.percentage}%</span>
+              </div>
+              <div className="text-lg font-bold text-red-400 mb-2">
+                {progress.hard.solved} / {progress.hard.total} completed
+              </div>
+              <Progress value={progress.hard.percentage} className="h-2" />
+            </div>
           </div>
         </div>
 
@@ -719,7 +834,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
                         {filteredProblems(lecture.problems).map((problem, index) => (
                           <div key={problem.id} className={`grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800/30 hover:bg-gray-900/40 text-sm transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-950/20' : ''}`}>
                             <div className="col-span-1 flex items-center">
-                              {getStatusCheckbox(problem.status)}
+                              {getStatusCheckbox(problem.id, problem.status, () => toggleProblemStatus(problem.id))}
                             </div>
                             <div className="col-span-3 flex items-center">
                               <span className="text-white font-medium hover:text-orange-400 transition-colors cursor-pointer">{problem.title}</span>
@@ -816,9 +931,9 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
         ))}
       </div>
 
-      {/* Advanced Note Taking Dialog */}
+      {/* Advanced Note Taking Dialog with Dark Black Background */}
       <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
-        <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-2xl">
+        <DialogContent className="bg-black border-gray-700 text-white max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold text-white">
               {noteTitle}
