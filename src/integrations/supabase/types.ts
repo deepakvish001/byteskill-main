@@ -66,6 +66,151 @@ export type Database = {
         }
         Relationships: []
       }
+      course_chapters: {
+        Row: {
+          chapter_order: number
+          course_id: string
+          created_at: string | null
+          description: string | null
+          estimated_time_minutes: number | null
+          id: string
+          is_published: boolean | null
+          module_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          chapter_order?: number
+          course_id: string
+          created_at?: string | null
+          description?: string | null
+          estimated_time_minutes?: number | null
+          id?: string
+          is_published?: boolean | null
+          module_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          chapter_order?: number
+          course_id?: string
+          created_at?: string | null
+          description?: string | null
+          estimated_time_minutes?: number | null
+          id?: string
+          is_published?: boolean | null
+          module_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_chapters_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "course_chapters_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_content: {
+        Row: {
+          article_content: string | null
+          chapter_id: string
+          content_order: number
+          content_type: string
+          course_id: string
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          estimated_time_minutes: number | null
+          id: string
+          is_bookmarkable: boolean | null
+          is_practice_available: boolean | null
+          module_id: string
+          practice_link: string | null
+          status: string | null
+          tags: string[] | null
+          title: string
+          topics: string[] | null
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          article_content?: string | null
+          chapter_id: string
+          content_order?: number
+          content_type: string
+          course_id: string
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          estimated_time_minutes?: number | null
+          id?: string
+          is_bookmarkable?: boolean | null
+          is_practice_available?: boolean | null
+          module_id: string
+          practice_link?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          topics?: string[] | null
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          article_content?: string | null
+          chapter_id?: string
+          content_order?: number
+          content_type?: string
+          course_id?: string
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          estimated_time_minutes?: number | null
+          id?: string
+          is_bookmarkable?: boolean | null
+          is_practice_available?: boolean | null
+          module_id?: string
+          practice_link?: string | null
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          topics?: string[] | null
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_content_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "course_chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_content_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "course_content_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_enrollments: {
         Row: {
           completed_at: string | null
@@ -141,6 +286,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "course_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["course_id"]
+          },
+        ]
+      }
+      course_modules: {
+        Row: {
+          course_id: string
+          created_at: string | null
+          description: string | null
+          estimated_hours: number | null
+          id: string
+          is_published: boolean | null
+          module_order: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string | null
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          is_published?: boolean | null
+          module_order?: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string | null
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          is_published?: boolean | null
+          module_order?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_modules_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
@@ -338,6 +527,169 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_content_progress: {
+        Row: {
+          bookmarked_at: string | null
+          chapter_id: string
+          completed_at: string | null
+          content_id: string
+          course_id: string
+          created_at: string | null
+          id: string
+          is_bookmarked: boolean | null
+          is_completed: boolean | null
+          module_id: string
+          notes: string | null
+          time_spent_minutes: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          bookmarked_at?: string | null
+          chapter_id: string
+          completed_at?: string | null
+          content_id: string
+          course_id: string
+          created_at?: string | null
+          id?: string
+          is_bookmarked?: boolean | null
+          is_completed?: boolean | null
+          module_id: string
+          notes?: string | null
+          time_spent_minutes?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          bookmarked_at?: string | null
+          chapter_id?: string
+          completed_at?: string | null
+          content_id?: string
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          is_bookmarked?: boolean | null
+          is_completed?: boolean | null
+          module_id?: string
+          notes?: string | null
+          time_spent_minutes?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_content_progress_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "course_chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_content_progress_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "course_content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_content_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "user_content_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_course_progress: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          id: string
+          last_accessed_at: string | null
+          progress_percentage: number | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          id?: string
+          last_accessed_at?: string | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          id?: string
+          last_accessed_at?: string | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_course_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["course_id"]
+          },
+        ]
+      }
+      user_module_progress: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          id: string
+          module_id: string
+          progress_percentage: number | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          id?: string
+          module_id: string
+          progress_percentage?: number | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          id?: string
+          module_id?: string
+          progress_percentage?: number | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_module_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "user_module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_progress: {
         Row: {
