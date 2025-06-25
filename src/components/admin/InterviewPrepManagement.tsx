@@ -17,7 +17,7 @@ import {
 import { Edit, Trash2, Plus, Eye, EyeOff, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import CourseForm from './CourseForm';
-import LessonForm from './LessonForm';
+import LessonManagement from './LessonManagement';
 
 interface InterviewPrepManagementProps {
   searchQuery: string;
@@ -28,7 +28,7 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
   const queryClient = useQueryClient();
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [showCourseForm, setShowCourseForm] = useState(false);
-  const [showLessonForm, setShowLessonForm] = useState(false);
+  const [showLessonManagement, setShowLessonManagement] = useState(false);
 
   // Fetch Interview Prep courses
   const { data: interviewPreps, isLoading } = useQuery({
@@ -54,6 +54,7 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
   const togglePublishMutation = useMutation({
     mutationFn: async ({ courseId, isPublished }: { courseId: string; isPublished: boolean }) => {
       const { error } = await supabase
+        .from('courses')
         .update({ is_published: !isPublished })
         .eq('id', courseId);
       
@@ -109,9 +110,9 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
     setShowCourseForm(true);
   };
 
-  const handleAddLessons = (course: any) => {
+  const handleManageLessons = (course: any) => {
     setSelectedCourse(course);
-    setShowLessonForm(true);
+    setShowLessonManagement(true);
   };
 
   return (
@@ -171,7 +172,7 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
                         <Button size="sm" variant="outline" onClick={() => handleEditCourse(course)}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleAddLessons(course)}>
+                        <Button size="sm" variant="outline" onClick={() => handleManageLessons(course)}>
                           <BookOpen className="w-4 h-4" />
                         </Button>
                         <Button
@@ -216,12 +217,12 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
         </DialogContent>
       </Dialog>
 
-      {/* Lesson Form Dialog */}
-      <Dialog open={showLessonForm} onOpenChange={setShowLessonForm}>
-        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
-          <LessonForm
+      {/* Lesson Management Dialog */}
+      <Dialog open={showLessonManagement} onOpenChange={setShowLessonManagement}>
+        <DialogContent className="max-w-6xl bg-gray-900 border-gray-800">
+          <LessonManagement
             courseId={selectedCourse?.course_id}
-            onClose={() => setShowLessonForm(false)}
+            onClose={() => setShowLessonManagement(false)}
           />
         </DialogContent>
       </Dialog>
