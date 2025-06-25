@@ -141,47 +141,47 @@ const InterviewPrepPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black flex relative overflow-hidden">
+    <div className="min-h-screen bg-black flex">
       {/* Fixed Sidebar */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
-        sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
+        sidebarCollapsed ? 'w-20' : 'w-72'
       }`}>
         <Sidebar 
           selectedSheet="interview-prep" 
           onSheetChange={() => {}}
           collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
       </div>
       
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'
+      <div className={`flex-1 transition-all duration-300 ${
+        sidebarCollapsed ? 'ml-20' : 'ml-72'
       }`}>
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 z-30 bg-black border-b border-gray-800 transition-all duration-300" style={{
-          left: sidebarCollapsed ? '4rem' : '16rem',
+        <div className="fixed top-0 right-0 z-30 h-16 bg-black border-b border-gray-800" style={{
+          left: sidebarCollapsed ? '5rem' : '18rem',
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between h-full px-4">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
+              onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
             <UserMenu />
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-40 */}
-        <main className="flex-1 pt-40 p-6 bg-black min-h-screen">
+        {/* Main Content */}
+        <main className="pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
-            {/* Breadcrumb - Now visible with proper spacing */}
-            <div className="bg-black mb-4">
+            {/* Breadcrumb */}
+            <div className="mb-4">
               <CourseBreadcrumb items={breadcrumbItems} />
             </div>
 
             {/* Page Header */}
-            <div className="text-center mb-8 bg-black">
+            <div className="text-center mb-8">
               <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                 Interview Preparation
               </h1>
@@ -203,7 +203,7 @@ const InterviewPrepPage = () => {
               </div>
             </div>
 
-            {/* Course Cards Grid - Same design as DSA Sheets */}
+            {/* Course Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);
