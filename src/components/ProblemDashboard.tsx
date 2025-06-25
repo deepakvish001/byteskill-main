@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import StatusProgressBox from "./StatusProgressBox";
 
 interface Problem {
   id: number;
@@ -234,6 +233,163 @@ const mockSheets: Record<string, Sheet> = {
             problems: []
           }
         ]
+      },
+      {
+        id: "step2",
+        title: "Step 2: Learn Important Sorting Techniques",
+        expanded: false,
+        totalProblems: 7,
+        completedProblems: 0,
+        lectures: [
+          {
+            id: "lec7",
+            title: "Lec 1: Sorting-I",
+            expanded: false,
+            totalProblems: 7,
+            completedProblems: 0,
+            problems: []
+          }
+        ]
+      },
+      {
+        id: "step3",
+        title: "Step 3: Solve Problems on Arrays [Easy -> Medium -> Hard]",
+        expanded: false,
+        totalProblems: 40,
+        completedProblems: 0,
+        lectures: [
+          {
+            id: "lec8",
+            title: "Lec 1: Easy",
+            expanded: false,
+            totalProblems: 13,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec9",
+            title: "Lec 2: Medium",
+            expanded: false,
+            totalProblems: 15,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec10",
+            title: "Lec 3: Hard",
+            expanded: false,
+            totalProblems: 12,
+            completedProblems: 0,
+            problems: []
+          }
+        ]
+      },
+      {
+        id: "step4",
+        title: "Step 4: Binary Search [1D, 2D Arrays, Search Space]",
+        expanded: false,
+        totalProblems: 32,
+        completedProblems: 0,
+        lectures: [
+          {
+            id: "lec11",
+            title: "Lec 1: Learning Binary Search on 1D Arrays",
+            expanded: false,
+            totalProblems: 8,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec12",
+            title: "Lec 2: BS on Answers",
+            expanded: false,
+            totalProblems: 11,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec13",
+            title: "Lec 3: BS on 2D Arrays",
+            expanded: false,
+            totalProblems: 4,
+            completedProblems: 0,
+            problems: []
+          }
+        ]
+      },
+      {
+        id: "step5",
+        title: "Step 5: Strings [Basic and Medium]",
+        expanded: false,
+        totalProblems: 15,
+        completedProblems: 0,
+        lectures: [
+          {
+            id: "lec14",
+            title: "Lec 1: Basic and Easy String Problems",
+            expanded: false,
+            totalProblems: 8,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec15",
+            title: "Lec 2: Medium String Problems",
+            expanded: false,
+            totalProblems: 7,
+            completedProblems: 0,
+            problems: []
+          }
+        ]
+      },
+      {
+        id: "step6",
+        title: "Step 6: Learn LinkedList [Single/Double LL, Medium, Hard Problems]",
+        expanded: false,
+        totalProblems: 31,
+        completedProblems: 0,
+        lectures: [
+          {
+            id: "lec16",
+            title: "Lec 1: Learn 1D LinkedList",
+            expanded: false,
+            totalProblems: 9,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec17",
+            title: "Lec 2: Learn Doubly LinkedList",
+            expanded: false,
+            totalProblems: 4,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec18",
+            title: "Lec 3: Medium Problems of LL",
+            expanded: false,
+            totalProblems: 12,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec19",
+            title: "Lec 4: Medium Problems of DLL",
+            expanded: false,
+            totalProblems: 2,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec20",
+            title: "Lec 5: Hard Problems of LL",
+            expanded: false,
+            totalProblems: 4,
+            completedProblems: 0,
+            problems: []
+          }
+        ]
       }
     ]
   }
@@ -342,9 +498,6 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
   return (
     <div className="text-white space-y-6 bg-black min-h-screen">
-      {/* Status Progress Section */}
-      <StatusProgressBox />
-
       {/* Header Section */}
       <div className="bg-black space-y-4">
         <div>
@@ -361,27 +514,6 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
             <p className="text-red-300 text-sm mt-2">
               Remember, you started using our website because of our content and not because of some third party links :)
             </p>
-          </div>
-        </div>
-
-        {/* Progress Summary */}
-        <div className="grid grid-cols-4 gap-6 mb-6">
-          <div className="text-center bg-gray-900/50 rounded-xl p-4 border border-gray-800 hover:border-gray-700 transition-colors">
-            <div className="text-sm text-gray-400 mb-1">Total Progress</div>
-            <div className="text-2xl font-bold text-white">0 / 455</div>
-            <div className="text-sm text-blue-400 font-medium">0%</div>
-          </div>
-          <div className="text-center bg-gray-900/50 rounded-xl p-4 border border-gray-800 hover:border-gray-700 transition-colors">
-            <div className="text-sm text-gray-400 mb-1">Easy</div>
-            <div className="text-lg font-bold text-green-400">0 / 131 <span className="text-sm text-gray-500">completed</span></div>
-          </div>
-          <div className="text-center bg-gray-900/50 rounded-xl p-4 border border-gray-800 hover:border-gray-700 transition-colors">
-            <div className="text-sm text-gray-400 mb-1">Medium</div>
-            <div className="text-lg font-bold text-yellow-400">0 / 187 <span className="text-sm text-gray-500">completed</span></div>
-          </div>
-          <div className="text-center bg-gray-900/50 rounded-xl p-4 border border-gray-800 hover:border-gray-700 transition-colors">
-            <div className="text-sm text-gray-400 mb-1">Hard</div>
-            <div className="text-lg font-bold text-red-400">0 / 136 <span className="text-sm text-gray-500">completed</span></div>
           </div>
         </div>
 
