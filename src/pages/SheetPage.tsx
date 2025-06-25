@@ -82,8 +82,8 @@ const SheetPage = () => {
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-35 */}
-        <main className="flex-1 pt-35 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to pt-40 */}
+        <main className="flex-1 pt-40 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Breadcrumb - Now visible with proper spacing */}
             <div className="mb-6">
