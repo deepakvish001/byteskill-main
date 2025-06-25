@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,6 +24,8 @@ import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
 import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 import CourseContent from "@/components/CourseContent";
+import CoursePageToolbar from "@/components/CoursePageToolbar";
+import CourseProgressStats from "@/components/CourseProgressStats";
 
 interface Course {
   id: string;
@@ -44,6 +47,15 @@ interface Enrollment {
   completed_at: string | null;
 }
 
+interface AdvancedFilters {
+  difficulty: string;
+  status: string;
+  hasArticle: boolean;
+  hasVideo: boolean;
+  hasPractice: boolean;
+  searchQuery: string;
+}
+
 const CoursePage = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
@@ -52,6 +64,16 @@ const CoursePage = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [allStepsCollapsed, setAllStepsCollapsed] = useState(false);
+  const [allLecturesCollapsed, setAllLecturesCollapsed] = useState(false);
+  const [filters, setFilters] = useState<AdvancedFilters>({
+    difficulty: "all",
+    status: "all",
+    hasArticle: false,
+    hasVideo: false,
+    hasPractice: false,
+    searchQuery: ""
+  });
 
   useEffect(() => {
     if (courseId) {
@@ -157,6 +179,26 @@ const CoursePage = () => {
     return categoryMap[course.category] || '/courses';
   };
 
+  const handleRevisionModeToggle = () => {
+    console.log("Revision mode toggled");
+  };
+
+  const handleCollapseAllSteps = () => {
+    setAllStepsCollapsed(true);
+  };
+
+  const handleExpandAllSteps = () => {
+    setAllStepsCollapsed(false);
+  };
+
+  const handleCollapseAllLectures = () => {
+    setAllLecturesCollapsed(true);
+  };
+
+  const handleExpandAllLectures = () => {
+    setAllLecturesCollapsed(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -208,11 +250,11 @@ const CoursePage = () => {
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-35 */}
-        <main className="flex-1 pt-35 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with proper spacing */}
+        <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Breadcrumb - Now visible with proper spacing */}
-            <div className="mb-6">
+            {/* Breadcrumb with proper spacing */}
+            <div className="mb-8 mt-4">
               <CourseBreadcrumb 
                 items={getBreadcrumbItems()}
                 showBackButton={true}
@@ -221,10 +263,10 @@ const CoursePage = () => {
             </div>
 
             {/* Course Header */}
-            <div className="mb-6">
+            <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-white mb-2">{course?.title}</h1>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{course?.title}</h1>
                   <p className="text-gray-400 text-lg">{course?.description}</p>
                 </div>
                 {!enrollment && course && (
@@ -260,6 +302,33 @@ const CoursePage = () => {
                 </div>
               )}
             </div>
+
+            {/* Progress Stats - Only show if enrolled */}
+            {enrollment && (
+              <CourseProgressStats
+                totalProblems={course.total_lessons}
+                solvedProblems={Math.floor((enrollment.progress_percentage / 100) * course.total_lessons)}
+                attemptedProblems={Math.floor(((enrollment.progress_percentage + 10) / 100) * course.total_lessons)}
+                averageTime={22}
+                streak={4}
+                completionRate={enrollment.progress_percentage}
+              />
+            )}
+
+            {/* Course Toolbar - Only show if enrolled */}
+            {enrollment && (
+              <CoursePageToolbar
+                onRevisionModeToggle={handleRevisionModeToggle}
+                onCollapseAllSteps={handleCollapseAllSteps}
+                onExpandAllSteps={handleExpandAllSteps}
+                onCollapseAllLectures={handleCollapseAllLectures}
+                onExpandAllLectures={handleExpandAllLectures}
+                allStepsCollapsed={allStepsCollapsed}
+                allLecturesCollapsed={allLecturesCollapsed}
+                filters={filters}
+                onFiltersChange={setFilters}
+              />
+            )}
 
             {/* Course Content - Using CourseContent component */}
             <CourseContent 

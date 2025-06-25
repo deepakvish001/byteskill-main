@@ -1,18 +1,39 @@
 
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 import ProblemDashboard from "@/components/ProblemDashboard";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
 import CourseBreadcrumb from "@/components/CourseBreadcrumb";
-import { useState } from "react";
+import CoursePageToolbar from "@/components/CoursePageToolbar";
+import CourseProgressStats from "@/components/CourseProgressStats";
+
+interface AdvancedFilters {
+  difficulty: string;
+  status: string;
+  hasArticle: boolean;
+  hasVideo: boolean;
+  hasPractice: boolean;
+  searchQuery: string;
+}
 
 const SheetPage = () => {
   const { sheetId } = useParams<{ sheetId: string }>();
   const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [allStepsCollapsed, setAllStepsCollapsed] = useState(false);
+  const [allLecturesCollapsed, setAllLecturesCollapsed] = useState(false);
+  const [filters, setFilters] = useState<AdvancedFilters>({
+    difficulty: "all",
+    status: "all",
+    hasArticle: false,
+    hasVideo: false,
+    hasPractice: false,
+    searchQuery: ""
+  });
 
   const getBreadcrumbItems = () => {
     const sheetNames: { [key: string]: string } = {
@@ -29,6 +50,26 @@ const SheetPage = () => {
       { label: 'DSA Sheets', href: '/dsa-sheets' },
       { label: sheetNames[sheetId || ''] || sheetId || 'Sheet' }
     ];
+  };
+
+  const handleRevisionModeToggle = () => {
+    console.log("Revision mode toggled");
+  };
+
+  const handleCollapseAllSteps = () => {
+    setAllStepsCollapsed(true);
+  };
+
+  const handleExpandAllSteps = () => {
+    setAllStepsCollapsed(false);
+  };
+
+  const handleCollapseAllLectures = () => {
+    setAllLecturesCollapsed(true);
+  };
+
+  const handleExpandAllLectures = () => {
+    setAllLecturesCollapsed(false);
   };
 
   if (loading) {
@@ -82,17 +123,50 @@ const SheetPage = () => {
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-40 */}
-        <main className="flex-1 pt-40 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with proper spacing */}
+        <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
-            {/* Breadcrumb - Now visible with proper spacing */}
-            <div className="mb-6">
+            {/* Breadcrumb with proper spacing */}
+            <div className="mb-8 mt-4">
               <CourseBreadcrumb 
                 items={getBreadcrumbItems()}
                 showBackButton={true}
                 backUrl="/dsa-sheets"
               />
             </div>
+
+            {/* Course Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                {getBreadcrumbItems()[2]?.label}
+              </h1>
+              <p className="text-gray-400 text-lg">
+                Complete this curated set of coding problems to master data structures and algorithms
+              </p>
+            </div>
+
+            {/* Progress Stats */}
+            <CourseProgressStats
+              totalProblems={180}
+              solvedProblems={45}
+              attemptedProblems={23}
+              averageTime={28}
+              streak={5}
+              completionRate={25}
+            />
+
+            {/* Course Toolbar */}
+            <CoursePageToolbar
+              onRevisionModeToggle={handleRevisionModeToggle}
+              onCollapseAllSteps={handleCollapseAllSteps}
+              onExpandAllSteps={handleExpandAllSteps}
+              onCollapseAllLectures={handleCollapseAllLectures}
+              onExpandAllLectures={handleExpandAllLectures}
+              allStepsCollapsed={allStepsCollapsed}
+              allLecturesCollapsed={allLecturesCollapsed}
+              filters={filters}
+              onFiltersChange={setFilters}
+            />
             
             <ProblemDashboard 
               selectedSheet={sheetId || "striver-a2z"} 
