@@ -31,7 +31,11 @@ const Index = () => {
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
           left: sidebarCollapsed ? '5rem' : '18rem'
         }}>
-          <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+          <Header 
+            searchQuery={searchQuery} 
+            onSearchChange={setSearchQuery}
+            sidebarCollapsed={sidebarCollapsed}
+          />
         </div>
         
         {/* Main Content with top padding to account for fixed header */}

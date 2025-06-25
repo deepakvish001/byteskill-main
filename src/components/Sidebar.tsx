@@ -1,4 +1,3 @@
-
 import { ChevronDown, ChevronRight, FileText, Users, BookOpen, Cpu, Network, Settings, Trophy, Target, TrendingUp, Star, Code, GitBranch, ChevronLeft, Menu, Award, Calendar, Brain, Timer, Bookmark, PenTool, MessageCircle, Lightbulb, History } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -224,10 +223,13 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
         <div className="p-4 border-b border-gray-900">
           <div className="flex items-center justify-between">
             {collapsed ? (
-              // Minimized state - show logo and expand button
+              // Minimized state - show only minimal logo and expand button
               <div className="flex flex-col items-center space-y-3 w-full">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-                  <span className="text-black font-bold text-xl">BS</span>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-sm opacity-50"></div>
+                  <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl">
+                    <BookOpen className="w-6 h-6 text-white" />
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
@@ -235,22 +237,28 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                   onClick={onToggleCollapse}
                   className="text-gray-400 hover:bg-gray-900 hover:text-white rounded-lg p-2"
                 >
-                  <Menu className="w-6 h-6" />
+                  <Menu className="w-5 h-5" />
                 </Button>
               </div>
             ) : (
-              // Expanded state - show full header
+              // Expanded state - show full animated branding
               <>
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-                    <span className="text-black font-bold text-lg">BS</span>
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
+                    <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-3 rounded-xl shadow-2xl">
+                      <BookOpen className="w-8 h-8 text-white animate-bounce" />
+                    </div>
                   </div>
                   <div>
-                    <span className="text-xl font-bold text-white">
-                      Dashboard
+                    <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
+                      Byteskill
                     </span>
-                    <div className="text-xs text-gray-400 flex items-center space-x-1">
-                      <span>Learning Platform</span>
+                    <div className="flex items-center space-x-2">
+                      <Trophy className="w-4 h-4 text-yellow-400 animate-spin" style={{ animationDuration: '3s' }} />
+                      <span className="text-sm bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">
+                        Dashboard
+                      </span>
                     </div>
                   </div>
                 </div>
