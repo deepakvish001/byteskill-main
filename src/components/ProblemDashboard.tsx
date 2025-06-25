@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Code, Bookmark, Minimize2, Maximize2, Trophy, Medal, Target, Crown, Brain, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProgressSection from "@/components/ProgressSection";
-import CourseSummary from "@/components/CourseSummary";
+import StatsOverview from "@/components/StatsOverview";
 import AdvancedFilter from "@/components/AdvancedFilter";
 import ProblemTable from "@/components/ProblemTable";
 import NoteDialog from "@/components/NoteDialog";
@@ -680,7 +681,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
           </div>
         </div>
 
-        <CourseSummary 
+        <StatsOverview 
           totalPoints={totalPoints}
           totalArticlesRead={totalArticlesRead}
           totalVideosWatched={totalVideosWatched}
