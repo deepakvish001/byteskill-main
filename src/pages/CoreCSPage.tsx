@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,6 +19,7 @@ import {
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
+import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 
 interface Course {
   id: string;
@@ -47,6 +47,10 @@ const CoreCSPage = () => {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterQuery, setFilterQuery] = useState("");
+  const breadcrumbItems = [
+    { label: 'Home', href: '/dashboard' },
+    { label: 'Core CS' }
+  ];
 
   useEffect(() => {
     fetchData();
@@ -156,7 +160,7 @@ const CoreCSPage = () => {
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
@@ -167,8 +171,11 @@ const CoreCSPage = () => {
         </div>
         
         {/* Main Content */}
-        <main className="flex-1 pt-16 sm:pt-20 p-3 sm:p-6 bg-black min-h-screen">
+        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-6">
+            {/* Breadcrumb */}
+            <CourseBreadcrumb items={breadcrumbItems} />
+
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent mb-2">

@@ -16,7 +16,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: SidebarProps) => {
-  const [expandedSections, setExpandedSections] = useState<string[]>(["dsa-sheet", "courses"]);
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const navigate = useNavigate();
 
   const toggleSection = (section: string) => {
@@ -28,29 +28,19 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
     );
   };
 
-  const handleSheetClick = (sheetId: string) => {
-    onSheetChange(sheetId);
-    navigate(`/sheet/${sheetId}`);
-  };
-
-  const handleCourseClick = (courseId: string) => {
-    onSheetChange(courseId);
-    navigate(`/course/${courseId}`);
-  };
-
   const handleDashboardClick = () => {
     onSheetChange("dashboard");
     navigate("/dashboard");
   };
 
-  const handleCoursesClick = () => {
-    onSheetChange("courses");
-    navigate("/courses");
-  };
-
   const handleDSASheetsClick = () => {
     onSheetChange("dsa-sheets");
     navigate("/dsa-sheets");
+  };
+
+  const handleCoursesClick = () => {
+    onSheetChange("courses");
+    navigate("/courses");
   };
 
   const handleInterviewPrepClick = () => {
@@ -73,54 +63,31 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
       action: handleDashboardClick
     },
     {
-      id: "dsa-sheet",
+      id: "dsa-sheets",
       label: "DSA Sheets",
       icon: FileText,
-      items: [
-        { id: "striver-a2z", label: "Striver A2Z Sheet", progress: 45 },
-        { id: "striver-sde", label: "Striver SDE Sheet", progress: 78 },
-        { id: "striver-79", label: "Striver 79 Sheet", progress: 23 },
-        { id: "blind-75", label: "Blind 75 Sheet", progress: 67 },
-        { id: "neetcode-150", label: "NeetCode 150", progress: 34 },
-        { id: "top-interview", label: "Top Interview Questions", progress: 89 }
-      ],
+      items: [],
       action: handleDSASheetsClick
     },
     {
       id: "courses",
       label: "Courses",
       icon: GraduationCap,
-      items: [
-        { id: "dsa-fundamentals", label: "DSA Fundamentals", progress: 65, badge: "New", action: () => handleCourseClick("dsa-fundamentals") },
-        { id: "system-design", label: "System Design", progress: 30, badge: "Pro", action: () => handleCourseClick("system-design") },
-        { id: "algorithms-advanced", label: "Advanced Algorithms", progress: 20, action: () => handleCourseClick("algorithms-advanced") },
-        { id: "competitive-programming", label: "Competitive Programming", progress: 40, action: () => handleCourseClick("competitive-programming") },
-        { id: "interview-prep", label: "Interview Preparation", progress: 85, badge: "Popular", action: () => handleCourseClick("interview-prep") }
-      ],
+      items: [],
       action: handleCoursesClick
     },
     {
-      id: "interview",
+      id: "interview-prep",
       label: "Interview Prep",
       icon: Users,
-      items: [
-        { id: "behavioral", label: "Behavioral Questions", action: () => handleCourseClick("behavioral") },
-        { id: "company-specific", label: "Company Specific", action: () => handleCourseClick("company-specific") },
-        { id: "salary-negotiation", label: "Salary Negotiation", badge: "Pro", action: () => handleCourseClick("salary-negotiation") },
-        { id: "resume-review", label: "Resume Review", badge: "Pro" }
-      ],
+      items: [],
       action: handleInterviewPrepClick
     },
     {
-      id: "core-subjects",
+      id: "core-cs",
       label: "Core CS",
       icon: Cpu,
-      items: [
-        { id: "dbms", label: "Database Management", progress: 45, action: () => handleCourseClick("dbms") },
-        { id: "operating-system", label: "Operating Systems", progress: 23, action: () => handleCourseClick("operating-system") },
-        { id: "computer-networks", label: "Computer Networks", progress: 67, action: () => handleCourseClick("computer-networks") },
-        { id: "oops", label: "Object Oriented Programming", progress: 89, action: () => handleCourseClick("oops") }
-      ],
+      items: [],
       action: handleCoreCSClick
     }
   ];
@@ -268,78 +235,10 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
             {menuItems.map((item) => (
               <div key={item.id}>
                 <SidebarButton item={item} isActive={selectedSheet === item.id} />
-                
-                {!collapsed && expandedSections.includes(item.id) && item.items.length > 0 && (
-                  <div className="ml-6 mt-2 space-y-1 border-l border-gray-900 pl-4">
-                    {item.items.map((subItem) => (
-                      <button
-                        key={subItem.id}
-                        onClick={() => {
-                          if (subItem.action) {
-                            subItem.action();
-                          } else {
-                            handleSheetClick(subItem.id);
-                          }
-                        }}
-                        className={cn(
-                          "w-full text-left p-2 rounded-lg text-sm transition-all duration-200 group flex items-center justify-between",
-                          selectedSheet === subItem.id 
-                            ? "text-white bg-gray-900 font-medium" 
-                            : "text-gray-400 hover:text-white hover:bg-gray-900"
-                        )}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <span>{subItem.label}</span>
-                          {subItem.badge && (
-                            <Badge className={cn(
-                              "text-xs px-1.5 py-0.5",
-                              subItem.badge === "New" && "bg-green-900 text-green-400",
-                              subItem.badge === "Hot" && "bg-red-900 text-red-400",
-                              subItem.badge === "Live" && "bg-red-900 text-red-400 animate-pulse",
-                              subItem.badge === "Beta" && "bg-purple-900 text-purple-400",
-                              subItem.badge === "Pro" && "bg-yellow-900 text-yellow-400",
-                              subItem.badge === "Popular" && "bg-orange-900 text-orange-400"
-                            )}>
-                              {subItem.badge}
-                            </Badge>
-                          )}
-                        </div>
-                        {subItem.progress && (
-                          <div className="flex items-center space-x-2">
-                            <div className="w-12 bg-gray-800 rounded-full h-1">
-                              <div 
-                                className="bg-white h-1 rounded-full transition-all" 
-                                style={{ width: `${subItem.progress}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs text-gray-500">{subItem.progress}%</span>
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
           </nav>
         </ScrollArea>
-
-        {/* Footer */}
-        {!collapsed && (
-          <div className="p-4 border-t border-gray-900">
-            <div className="bg-black border border-gray-800 rounded-lg p-3">
-              <div className="flex items-center space-x-3 mb-2">
-                <Target className="w-4 h-4 text-white" />
-                <span className="text-sm font-medium text-gray-300">Today's Goal</span>
-              </div>
-              <div className="text-xs text-gray-400">Solve 5 problems</div>
-              <div className="w-full bg-gray-800 rounded-full h-1 mt-2">
-                <div className="bg-white h-1 rounded-full" style={{ width: '60%' }}></div>
-              </div>
-              <div className="text-xs text-gray-500 mt-1">3/5 completed</div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

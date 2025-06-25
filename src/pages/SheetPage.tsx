@@ -5,6 +5,7 @@ import ProblemDashboard from "@/components/ProblemDashboard";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
+import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 import { useState } from "react";
 
 const SheetPage = () => {
@@ -12,6 +13,23 @@ const SheetPage = () => {
   const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const getBreadcrumbItems = () => {
+    const sheetNames: { [key: string]: string } = {
+      'striver-a2z': 'Striver A2Z Sheet',
+      'striver-sde': 'Striver SDE Sheet',
+      'striver-79': 'Striver 79 Sheet',
+      'blind-75': 'Blind 75 Sheet',
+      'neetcode-150': 'NeetCode 150',
+      'top-interview': 'Top Interview Questions'
+    };
+
+    return [
+      { label: 'Home', href: '/dashboard' },
+      { label: 'DSA Sheets', href: '/dsa-sheets' },
+      { label: sheetNames[sheetId || ''] || sheetId || 'Sheet' }
+    ];
+  };
 
   if (loading) {
     return (
@@ -39,7 +57,7 @@ const SheetPage = () => {
         sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
       }`}>
         <Sidebar 
-          selectedSheet={sheetId || "striver-a2z"} 
+          selectedSheet="dsa-sheets" 
           onSheetChange={() => {}}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -54,7 +72,7 @@ const SheetPage = () => {
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
@@ -65,11 +83,20 @@ const SheetPage = () => {
         </div>
         
         {/* Main Content with responsive padding */}
-        <main className="flex-1 pt-16 sm:pt-20 p-3 sm:p-6 bg-black min-h-screen">
-          <ProblemDashboard 
-            selectedSheet={sheetId || "striver-a2z"} 
-            searchQuery={searchQuery} 
-          />
+        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
+          <div className="max-w-7xl mx-auto">
+            {/* Breadcrumb */}
+            <CourseBreadcrumb 
+              items={getBreadcrumbItems()}
+              showBackButton={true}
+              backUrl="/dsa-sheets"
+            />
+            
+            <ProblemDashboard 
+              selectedSheet={sheetId || "striver-a2z"} 
+              searchQuery={searchQuery} 
+            />
+          </div>
         </main>
       </div>
     </div>

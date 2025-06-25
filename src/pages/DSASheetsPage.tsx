@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,20 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
-  BookOpen, 
+  FileText, 
   Clock, 
-  Users, 
   Star,
   Search,
   Target,
-  Zap,
   CheckCircle,
-  Lock,
-  TrendingUp
+  Lock
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
+import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 
 interface Course {
   id: string;
@@ -49,6 +46,10 @@ const DSASheetsPage = () => {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterQuery, setFilterQuery] = useState("");
+  const breadcrumbItems = [
+    { label: 'Home', href: '/dashboard' },
+    { label: 'DSA Sheets' }
+  ];
 
   useEffect(() => {
     fetchData();
@@ -158,7 +159,7 @@ const DSASheetsPage = () => {
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-4 bg-black border-b border-gray-900">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
@@ -169,14 +170,17 @@ const DSASheetsPage = () => {
         </div>
         
         {/* Main Content */}
-        <main className="flex-1 pt-16 sm:pt-20 p-3 sm:p-6 bg-black min-h-screen">
+        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-6">
+            {/* Breadcrumb */}
+            <CourseBreadcrumb items={breadcrumbItems} />
+
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
                 DSA Practice Sheets
               </h1>
-              <p className="text-gray-400">Master Data Structures & Algorithms with curated problem sets</p>
+              <p className="text-gray-400">Master data structures and algorithms with curated problem sets</p>
             </div>
 
             {/* Search */}
@@ -205,7 +209,7 @@ const DSASheetsPage = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-blue-900/50 rounded-lg">
-                            <BookOpen className="w-5 h-5 text-blue-400" />
+                            <FileText className="w-5 h-5 text-blue-400" />
                           </div>
                           <div>
                             <CardTitle className="text-white text-lg">{course.title}</CardTitle>
