@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, CheckCircle2, Circle, X } from "lucide-react";
+import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, CheckCircle2, Circle, X, ChevronDown, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -20,62 +20,220 @@ interface Problem {
   article?: string;
   video?: string;
   notes?: string;
+  hasArticle?: boolean;
+  hasVideo?: boolean;
+  hasPractice?: boolean;
+}
+
+interface Lecture {
+  id: string;
+  title: string;
+  problems: Problem[];
+  expanded: boolean;
+  totalProblems: number;
+  completedProblems: number;
+}
+
+interface Step {
+  id: string;
+  title: string;
+  lectures: Lecture[];
+  expanded: boolean;
+  totalProblems: number;
+  completedProblems: number;
 }
 
 interface Sheet {
   id: string;
   name: string;
-  problems: Problem[];
   description: string;
   totalTime: number;
   completion: number;
+  steps: Step[];
 }
 
 const mockSheets: Record<string, Sheet> = {
-  "striver-sde": {
-    id: "striver-sde",
-    name: "Striver SDE Sheet",
-    description: "180 most important coding interview problems",
+  "striver-a2z": {
+    id: "striver-a2z",
+    name: "Striver A2Z DSA Course",
+    description: "This course is made for people who want to learn DSA from A to Z for free in a well-organized and structured manner.",
     totalTime: 2400,
-    completion: 78,
-    problems: [
+    completion: 0,
+    steps: [
       {
-        id: 1,
-        title: "Set Matrix Zeroes",
-        difficulty: "Medium",
-        status: "Solved",
-        tags: ["Array", "Matrix"],
-        companies: ["Google", "Microsoft", "Amazon"],
-        timeSpent: 45,
-        rating: 4,
-        bookmarked: true,
-        article: "https://takeuforward.org/data-structure/set-matrix-zero/",
-        video: "https://www.youtube.com/watch?v=M65xBewcqcI",
-        notes: "https://takeuforward.org/notes/set-matrix-zero"
-      },
-      {
-        id: 2,
-        title: "Pascal's Triangle",
-        difficulty: "Easy",
-        status: "Attempted",
-        tags: ["Array", "Dynamic Programming"],
-        companies: ["Apple", "Facebook"],
-        timeSpent: 30,
-        rating: 3,
-        article: "https://takeuforward.org/data-structure/program-to-generate-pascals-triangle/",
-        video: "https://www.youtube.com/watch?v=6FLvhQjZqvM",
-        notes: "https://takeuforward.org/notes/pascals-triangle"
-      },
-      {
-        id: 3,
-        title: "Next Permutation",
-        difficulty: "Medium",
-        status: "Not Started",
-        tags: ["Array", "Two Pointers"],
-        companies: ["Google", "Amazon"],
-        article: "https://takeuforward.org/data-structure/next_permutation-find-next-lexicographically-greater-permutation/",
-        video: "https://www.youtube.com/watch?v=LuLCLgMElus",
-        notes: "https://takeuforward.org/notes/next-permutation"
+        id: "step1",
+        title: "Step 1: Learn the basics",
+        expanded: true,
+        totalProblems: 31,
+        completedProblems: 0,
+        lectures: [
+          {
+            id: "lec1",
+            title: "Lec 1: Things to Know in C++/Java/Python or any language",
+            expanded: true,
+            totalProblems: 9,
+            completedProblems: 0,
+            problems: [
+              {
+                id: 1,
+                title: "User Input / Output",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Basics"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/c/c-basic-input-output/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              },
+              {
+                id: 2,
+                title: "Data Types",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Basics"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/c/data-types-in-c/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              },
+              {
+                id: 3,
+                title: "If Else statements",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Basics"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/if-else/if-else-statements-in-c/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              },
+              {
+                id: 4,
+                title: "Switch Statement",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Basics"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/switch/switch-statement-in-c/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              },
+              {
+                id: 5,
+                title: "What are arrays, strings?",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Array", "String"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/arrays/introduction-to-arrays/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              },
+              {
+                id: 6,
+                title: "For loops",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Loops"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/loops/for-loop-in-c/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              },
+              {
+                id: 7,
+                title: "While loops",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Loops"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/loops/while-loop-in-c/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              },
+              {
+                id: 8,
+                title: "Functions (Pass by Reference and Value)",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Functions"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/functions/functions-in-c/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              },
+              {
+                id: 9,
+                title: "Time Complexity (Learn Basics, and then analyse in next Steps)",
+                difficulty: "Easy",
+                status: "Not Started",
+                tags: ["Time Complexity"],
+                companies: [],
+                hasArticle: true,
+                hasVideo: true,
+                hasPractice: false,
+                article: "https://takeuforward.org/time-complexity/time-complexity-analysis/",
+                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
+              }
+            ]
+          },
+          {
+            id: "lec2",
+            title: "Lec 2: Build-up Logical Thinking",
+            expanded: false,
+            totalProblems: 1,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec3",
+            title: "Lec 3: Learn STL/Java-Collections or similar thing in your language",
+            expanded: false,
+            totalProblems: 1,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec4",
+            title: "Lec 4: Know Basic Maths",
+            expanded: false,
+            totalProblems: 7,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec5",
+            title: "Lec 5: Learn Basic Recursion",
+            expanded: false,
+            totalProblems: 9,
+            completedProblems: 0,
+            problems: []
+          },
+          {
+            id: "lec6",
+            title: "Lec 6: Learn Basic Hashing",
+            expanded: false,
+            totalProblems: 3,
+            completedProblems: 0,
+            problems: []
+          }
+        ]
       }
     ]
   }
@@ -87,13 +245,12 @@ interface ProblemDashboardProps {
 }
 
 const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps) => {
-  const [filteredProblems, setFilteredProblems] = useState<Problem[]>([]);
+  const [expandedSteps, setExpandedSteps] = useState<string[]>(["step1"]);
+  const [expandedLectures, setExpandedLectures] = useState<string[]>(["lec1"]);
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("default");
   const [currentTime, setCurrentTime] = useState<string>("");
 
-  const sheet = mockSheets[selectedSheet];
+  const sheet = mockSheets[selectedSheet] || mockSheets["striver-a2z"];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -102,259 +259,269 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    if (!sheet) return;
-    
-    let filtered = sheet.problems.filter(problem => {
-      const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          problem.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesDifficulty = difficultyFilter === "all" || problem.difficulty === difficultyFilter;
-      const matchesStatus = statusFilter === "all" || problem.status === statusFilter;
-      
-      return matchesSearch && matchesDifficulty && matchesStatus;
-    });
+  const toggleStep = (stepId: string) => {
+    setExpandedSteps(prev => 
+      prev.includes(stepId) 
+        ? prev.filter(id => id !== stepId)
+        : [...prev, stepId]
+    );
+  };
 
-    if (sortBy === "difficulty") {
-      const difficultyOrder = { "Easy": 1, "Medium": 2, "Hard": 3 };
-      filtered.sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
-    } else if (sortBy === "status") {
-      const statusOrder = { "Solved": 1, "Attempted": 2, "Not Started": 3 };
-      filtered.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-    }
-
-    setFilteredProblems(filtered);
-  }, [sheet, searchQuery, difficultyFilter, statusFilter, sortBy]);
+  const toggleLecture = (lectureId: string) => {
+    setExpandedLectures(prev => 
+      prev.includes(lectureId) 
+        ? prev.filter(id => id !== lectureId)
+        : [...prev, lectureId]
+    );
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "Easy": return "text-green-400 bg-green-900/20 border-green-800";
-      case "Medium": return "text-yellow-400 bg-yellow-900/20 border-yellow-800";
-      case "Hard": return "text-red-400 bg-red-900/20 border-red-800";
-      default: return "text-gray-400 bg-gray-900/20 border-gray-800";
+      case "Easy": return "text-green-500";
+      case "Medium": return "text-yellow-500";
+      case "Hard": return "text-red-500";
+      default: return "text-gray-400";
     }
   };
 
-  const getStatusIndicator = (status: string) => {
+  const getStatusCheckbox = (status: string) => {
     switch (status) {
       case "Solved":
-        return <CheckCircle2 className="w-5 h-5 text-green-400 fill-current" />;
+        return <div className="w-4 h-4 bg-green-500 rounded border-2 border-green-500 flex items-center justify-center">
+          <CheckCircle2 className="w-3 h-3 text-white" />
+        </div>;
       case "Attempted":
-        return <Circle className="w-5 h-5 text-yellow-400" />;
+        return <div className="w-4 h-4 bg-yellow-500 rounded border-2 border-yellow-500 flex items-center justify-center">
+          <Circle className="w-2 h-2 text-white fill-white" />
+        </div>;
       default:
-        return <Circle className="w-5 h-5 text-gray-500" />;
+        return <div className="w-4 h-4 border-2 border-gray-500 rounded"></div>;
     }
   };
 
-  const handleSolveClick = (problemId: number) => {
-    window.open(`https://leetcode.com/problems/${problemId}`, '_blank');
-  };
-
-  if (!sheet) {
-    return (
-      <div className="text-white p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">Sheet not found</h2>
-        <p className="text-gray-400">The selected sheet could not be loaded.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="text-white space-y-8 animate-fade-in">
+    <div className="text-white space-y-6 bg-black min-h-screen">
       {/* Status Progress Section */}
       <StatusProgressBox />
 
       {/* Header Section */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
-              {sheet.name}
-            </h1>
-            <p className="text-gray-400 text-lg">{sheet.description}</p>
-            <div className="flex items-center space-x-4 mt-3">
-              <Badge className="bg-blue-900/50 text-blue-400 border-blue-800">
-                {filteredProblems.length} Problems
-              </Badge>
-              <Badge className="bg-green-900/50 text-green-400 border-green-800">
-                {sheet.completion}% Complete
-              </Badge>
-              <div className="flex items-center space-x-2 text-gray-400">
-                <Clock className="w-4 h-4" />
-                <span className="text-sm font-mono">{currentTime}</span>
-              </div>
-            </div>
+      <div className="bg-black space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-2">
+            {sheet.name}
+          </h1>
+          <p className="text-gray-400 text-sm mb-4">
+            {sheet.description} <span className="text-orange-500 cursor-pointer hover:underline">Know More</span>
+          </p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+            <p className="text-red-800 text-sm">
+              <strong>Note:</strong> You can find <strong>LeetCode</strong> links for problems available on the internet. However few problems are not there on <strong>LeetCode</strong> for which you will not find a practice link attached. We cannot use third-party links due to legal constraints. Also the newly added TUF+ practice links are to give you a free trial of TUF+ which a lot of people asked for. If you don't wish to upgrade, you can still use the TUF platform, nothing has changed.
+            </p>
+            <p className="text-red-800 text-sm mt-2">
+              Remember, you started using our website because of our content and not because of some third party links :)
+            </p>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <div className="flex items-center space-x-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <span className="text-sm text-gray-400">Filters:</span>
+        {/* Progress Summary */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="text-center">
+            <div className="text-sm text-gray-400">Total Progress</div>
+            <div className="text-lg font-bold">0 / 455</div>
+            <div className="text-sm text-gray-500">0%</div>
           </div>
-          
-          <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-            <SelectTrigger className="w-40 bg-gray-800 border-gray-700 text-white">
-              <SelectValue placeholder="Difficulty" />
-            </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
-              <SelectItem value="all">All Levels</SelectItem>
-              <SelectItem value="Easy">Easy</SelectItem>
-              <SelectItem value="Medium">Medium</SelectItem>
-              <SelectItem value="Hard">Hard</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="text-center">
+            <div className="text-sm text-gray-400">Easy</div>
+            <div className="text-lg font-bold">0 / 131 <span className="text-sm text-gray-500">completed</span></div>
+          </div>
+          <div className="text-center">
+            <div className="text-sm text-gray-400">Medium</div>
+            <div className="text-lg font-bold">0 / 187 <span className="text-sm text-gray-500">completed</span></div>
+          </div>
+          <div className="text-center">
+            <div className="text-sm text-gray-400">Hard</div>
+            <div className="text-lg font-bold">0 / 136 <span className="text-sm text-gray-500">completed</span></div>
+          </div>
+        </div>
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40 bg-gray-800 border-gray-700 text-white">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="Solved">Solved</SelectItem>
-              <SelectItem value="Attempted">Attempted</SelectItem>
-              <SelectItem value="Not Started">Not Started</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40 bg-gray-800 border-gray-700 text-white">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
-              <SelectItem value="default">Default</SelectItem>
-              <SelectItem value="difficulty">Difficulty</SelectItem>
-              <SelectItem value="status">Status</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Filter Tabs */}
+        <div className="flex space-x-2 mb-6">
+          <Button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+            All Problems
+          </Button>
+          <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 px-4 py-2 rounded">
+            Revision
+          </Button>
+          <div className="ml-auto flex items-center space-x-2">
+            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 px-3 py-2 rounded">
+              <Search className="w-4 h-4" />
+            </Button>
+            <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+              <SelectTrigger className="w-32 bg-gray-800 border-gray-600 text-white">
+                <SelectValue placeholder="Difficulty" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectItem value="all">Difficulty</SelectItem>
+                <SelectItem value="Easy">Easy</SelectItem>
+                <SelectItem value="Medium">Medium</SelectItem>
+                <SelectItem value="Hard">Hard</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 px-3 py-2 rounded">
+              Pick Random
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Problems List */}
-      <div className="space-y-4">
-        {filteredProblems.map((problem, index) => (
-          <div
-            key={problem.id}
-            className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-gray-700 transition-all duration-300 hover:scale-[1.02] group"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-4 flex-1">
-                {/* Status Indicator */}
-                <div className="flex-shrink-0 mt-1">
-                  {getStatusIndicator(problem.status)}
+      {/* Steps and Lectures */}
+      <div className="space-y-2">
+        {sheet.steps.map((step) => (
+          <div key={step.id} className="bg-black border border-gray-800 rounded">
+            <div 
+              className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-900"
+              onClick={() => toggleStep(step.id)}
+            >
+              <div className="flex items-center space-x-3">
+                {expandedSteps.includes(step.id) ? 
+                  <ChevronDown className="w-4 h-4 text-white" /> : 
+                  <ChevronRight className="w-4 h-4 text-white" />
+                }
+                <span className="font-medium text-white">{step.title}</span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="w-32 bg-gray-700 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '0%' }}></div>
                 </div>
+                <span className="text-sm text-gray-400">0 / {step.totalProblems}</span>
+              </div>
+            </div>
 
-                {/* Problem Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="text-gray-400 font-mono text-sm">
-                      Lec {index + 1}
-                    </span>
-                    <h3 className="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors">
-                      {problem.title}
-                    </h3>
-                    {problem.bookmarked && (
-                      <Bookmark className="w-5 h-5 text-yellow-400 fill-current" />
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <Badge className={getDifficultyColor(problem.difficulty)}>
-                      {problem.difficulty}
-                    </Badge>
-                    <Badge className="bg-gray-800 text-gray-300 border-gray-700">
-                      {problem.status}
-                    </Badge>
-                    {problem.timeSpent && (
-                      <div className="flex items-center space-x-1 text-sm text-gray-400">
-                        <Clock className="w-4 h-4" />
-                        <span>{problem.timeSpent}min</span>
+            {expandedSteps.includes(step.id) && (
+              <div className="border-t border-gray-800">
+                {step.lectures.map((lecture) => (
+                  <div key={lecture.id}>
+                    <div 
+                      className="flex items-center justify-between p-4 pl-12 cursor-pointer hover:bg-gray-900 border-b border-gray-800"
+                      onClick={() => toggleLecture(lecture.id)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {expandedLectures.includes(lecture.id) ? 
+                          <ChevronDown className="w-4 h-4 text-white" /> : 
+                          <ChevronRight className="w-4 h-4 text-white" />
+                        }
+                        <span className="text-white">{lecture.title}</span>
                       </div>
-                    )}
-                    {problem.rating && (
-                      <div className="flex items-center space-x-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < problem.rating ? "text-yellow-400 fill-current" : "text-gray-600"
-                            }`}
-                          />
+                      <div className="flex items-center space-x-4">
+                        <div className="w-32 bg-gray-700 rounded-full h-2">
+                          <div className="bg-blue-500 h-2 rounded-full" style={{ width: '0%' }}></div>
+                        </div>
+                        <span className="text-sm text-gray-400">0 / {lecture.totalProblems}</span>
+                      </div>
+                    </div>
+
+                    {expandedLectures.includes(lecture.id) && (
+                      <div className="bg-black">
+                        {/* Table Header */}
+                        <div className="grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800 text-xs font-medium text-gray-400 uppercase">
+                          <div className="col-span-1">Status</div>
+                          <div className="col-span-3">Problem</div>
+                          <div className="col-span-1">TUF+</div>
+                          <div className="col-span-1">Resource (Art)</div>
+                          <div className="col-span-1">Resource (Yt)</div>
+                          <div className="col-span-1">Practice</div>
+                          <div className="col-span-1">Note</div>
+                          <div className="col-span-1">Revision</div>
+                          <div className="col-span-2">Difficulty</div>
+                        </div>
+
+                        {/* Problems */}
+                        {lecture.problems.map((problem) => (
+                          <div key={problem.id} className="grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800 hover:bg-gray-900 text-sm">
+                            <div className="col-span-1 flex items-center">
+                              {getStatusCheckbox(problem.status)}
+                            </div>
+                            <div className="col-span-3 flex items-center">
+                              <span className="text-white">{problem.title}</span>
+                            </div>
+                            <div className="col-span-1 flex items-center">
+                              <Button 
+                                onClick={() => window.open('https://takeuforward.org/tuf-plus', '_blank')}
+                                className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 text-xs rounded"
+                              >
+                                Solve
+                              </Button>
+                            </div>
+                            <div className="col-span-1 flex items-center">
+                              {problem.hasArticle ? (
+                                <Button
+                                  onClick={() => window.open(problem.article, '_blank')}
+                                  className="bg-orange-500 hover:bg-orange-600 text-white p-1 rounded"
+                                  size="sm"
+                                >
+                                  <FileText className="w-3 h-3" />
+                                </Button>
+                              ) : (
+                                <span className="text-gray-500">-</span>
+                              )}
+                            </div>
+                            <div className="col-span-1 flex items-center">
+                              {problem.hasVideo ? (
+                                <Button
+                                  onClick={() => window.open(problem.video, '_blank')}
+                                  className="bg-red-500 hover:bg-red-600 text-white p-1 rounded"
+                                  size="sm"
+                                >
+                                  <Video className="w-3 h-3" />
+                                </Button>
+                              ) : (
+                                <span className="text-gray-500">-</span>
+                              )}
+                            </div>
+                            <div className="col-span-1 flex items-center">
+                              {problem.hasPractice ? (
+                                <Button
+                                  className="bg-gray-500 hover:bg-gray-600 text-white p-1 rounded"
+                                  size="sm"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                </Button>
+                              ) : (
+                                <span className="text-gray-500">-</span>
+                              )}
+                            </div>
+                            <div className="col-span-1 flex items-center">
+                              <Button
+                                className="bg-transparent hover:bg-gray-700 text-gray-400 p-1 rounded"
+                                size="sm"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </Button>
+                            </div>
+                            <div className="col-span-1 flex items-center">
+                              <Button
+                                className="bg-transparent hover:bg-gray-700 text-gray-400 p-1 rounded"
+                                size="sm"
+                              >
+                                <Star className="w-3 h-3" />
+                              </Button>
+                            </div>
+                            <div className="col-span-2 flex items-center">
+                              <Badge className={`${getDifficultyColor(problem.difficulty)} bg-transparent border-0 text-sm`}>
+                                {problem.difficulty}
+                              </Badge>
+                            </div>
+                          </div>
                         ))}
                       </div>
                     )}
                   </div>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {problem.tags.map((tag) => (
-                      <Badge key={tag} className="bg-blue-900/30 text-blue-400 border-blue-900 hover:bg-blue-900/50 transition-colors">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {problem.companies.map((company) => (
-                      <Badge key={company} className="bg-purple-900/30 text-purple-400 border-purple-900">
-                        {company}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col space-y-3 ml-4">
-                <Button
-                  onClick={() => handleSolveClick(problem.id)}
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-2 rounded-lg transition-all duration-200 hover:scale-105 flex items-center space-x-2"
-                >
-                  <Play className="w-4 h-4" />
-                  <span>Solve</span>
-                </Button>
-
-                <div className="flex space-x-2">
-                  {problem.article && (
-                    <Button
-                      onClick={() => window.open(problem.article, '_blank')}
-                      size="sm"
-                      className="bg-orange-900/30 hover:bg-orange-900/50 text-orange-400 border-orange-900 p-2"
-                    >
-                      <FileText className="w-4 h-4" />
-                    </Button>
-                  )}
-                  {problem.video && (
-                    <Button
-                      onClick={() => window.open(problem.video, '_blank')}
-                      size="sm"
-                      className="bg-red-900/30 hover:bg-red-900/50 text-red-400 border-red-900 p-2"
-                    >
-                      <Video className="w-4 h-4" />
-                    </Button>
-                  )}
-                  {problem.notes && (
-                    <Button
-                      onClick={() => window.open(problem.notes, '_blank')}
-                      size="sm"
-                      className="bg-blue-900/30 hover:bg-blue-900/50 text-blue-400 border-blue-900 p-2"
-                    >
-                      <BookOpen className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
-
-      {filteredProblems.length === 0 && (
-        <div className="text-center py-12">
-          <Search className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-400 mb-2">No problems found</h3>
-          <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
-        </div>
-      )}
     </div>
   );
 };
