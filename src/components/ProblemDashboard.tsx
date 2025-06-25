@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import { Play, ExternalLink, BookOpen, Video, FileText, Clock, Filter, Search, Star, Bookmark, CheckCircle2, Circle, X, ChevronDown, ChevronRight, Plus, Save, Edit3, Minimize2, Maximize2, Code, Trophy, Target, Award, Medal, Zap, Brain, Crown } from "lucide-react";
+import { Code, Bookmark, Minimize2, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Slider } from "@/components/ui/slider";
+import ProgressSection from "@/components/ProgressSection";
+import CourseSummary from "@/components/CourseSummary";
+import AdvancedFilter from "@/components/AdvancedFilter";
+import ProblemTable from "@/components/ProblemTable";
+import NoteDialog from "@/components/NoteDialog";
 
 interface Problem {
   id: number;
@@ -421,7 +419,6 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
   const [problemStatuses, setProblemStatuses] = useState<Record<number, "Solved" | "Attempted" | "Not Started">>({});
   const [allStepsCollapsed, setAllStepsCollapsed] = useState(false);
   const [allLecturesCollapsed, setAllLecturesCollapsed] = useState(false);
-  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState({
     difficulty: "all",
     status: "all",
@@ -483,13 +480,6 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     });
   };
 
-  const addNote = (problemId: number, note: string) => {
-    setProblemNotes(prev => ({
-      ...prev,
-      [problemId]: note
-    }));
-  };
-
   const collapseAllSteps = () => {
     if (allStepsCollapsed) {
       setExpandedSteps(sheet.steps.map(step => step.id));
@@ -507,49 +497,6 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
       setExpandedLectures([]);
     }
     setAllLecturesCollapsed(!allLecturesCollapsed);
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "Easy": return "text-green-400";
-      case "Medium": return "text-yellow-400";  
-      case "Hard": return "text-red-400";
-      default: return "text-gray-400";
-    }
-  };
-
-  const getStatusCheckbox = (problemId: number, status: string, onClick?: () => void) => {
-    const currentStatus = problemStatuses[problemId] || status;
-    const baseClasses = "w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110";
-    
-    switch (currentStatus) {
-      case "Solved":
-        return (
-          <div className={`${baseClasses} bg-green-500 border-green-500`} onClick={onClick}>
-            <CheckCircle2 className="w-3 h-3 text-white" />
-          </div>
-        );
-      case "Attempted":
-        return (
-          <div className={`${baseClasses} bg-yellow-500 border-yellow-500`} onClick={onClick}>
-            <Circle className="w-2 h-2 text-white fill-white" />
-          </div>
-        );
-      default:
-        return (
-          <div className={`${baseClasses} border-gray-500 hover:border-gray-400`} onClick={onClick}></div>
-        );
-    }
-  };
-
-  const handleRandomProblem = () => {
-    const allProblems = sheet.steps.flatMap(step => 
-      step.lectures.flatMap(lecture => lecture.problems)
-    );
-    if (allProblems.length > 0) {
-      const randomProblem = allProblems[Math.floor(Math.random() * allProblems.length)];
-      console.log("Random problem selected:", randomProblem.title);
-    }
   };
 
   const filteredStepsAndLectures = () => {
@@ -685,13 +632,12 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     setNoteDialogOpen(true);
   };
 
-  const saveNote = () => {
+  const saveNote = (content: string) => {
     if (currentProblemId) {
       setProblemNotes(prev => ({
         ...prev,
-        [currentProblemId]: noteContent
+        [currentProblemId]: content
       }));
-      setNoteDialogOpen(false);
       setCurrentProblemId(null);
       setNoteContent("");
       setNoteTitle("");
@@ -734,135 +680,14 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
           </div>
         </div>
 
-        {/* Course Summary and Awards Section */}
-        <div className="bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center justify-center sm:justify-start">
-            <div className="w-2 h-6 bg-gradient-to-b from-yellow-500 to-orange-500 rounded-full mr-3"></div>
-            Course Summary & Achievements
-          </h2>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Points and Stats */}
-            <div className="space-y-4">
-              <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-4 border border-purple-500/30">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-300">Total Points Earned</span>
-                  <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                </div>
-                <div className="text-2xl font-bold text-yellow-400">{totalPoints.toLocaleString()}</div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-blue-600/20 rounded-lg p-3 border border-blue-500/30">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <BookOpen className="w-4 h-4 text-blue-400" />
-                    <span className="text-xs text-gray-300">Articles Read</span>
-                  </div>
-                  <div className="text-lg font-bold text-blue-400">{totalArticlesRead}</div>
-                </div>
-                
-                <div className="bg-red-600/20 rounded-lg p-3 border border-red-500/30">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <Video className="w-4 h-4 text-red-400" />
-                    <span className="text-xs text-gray-300">Videos Watched</span>
-                  </div>
-                  <div className="text-lg font-bold text-red-400">{totalVideosWatched}</div>
-                </div>
-              </div>
-            </div>
+        <CourseSummary 
+          totalPoints={totalPoints}
+          totalArticlesRead={totalArticlesRead}
+          totalVideosWatched={totalVideosWatched}
+          awards={awards}
+        />
 
-            {/* Awards */}
-            <div className="space-y-4">
-              <h3 className="text-base font-semibold text-white flex items-center">
-                <Trophy className="w-5 h-5 text-yellow-400 mr-2" />
-                Your Awards ({awards.length})
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {awards.map((award, index) => (
-                  <div key={index} className="bg-gray-800/50 rounded-lg p-3 border border-gray-600/30 flex items-center space-x-3">
-                    <award.icon className={`w-5 h-5 ${award.color}`} />
-                    <span className="text-sm font-medium text-white">{award.name}</span>
-                  </div>
-                ))}
-                {awards.length === 0 && (
-                  <div className="col-span-2 text-center text-gray-400 py-4">
-                    <Award className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Start solving problems to earn awards!</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Section with Dark Black Background */}
-        <div className="bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center justify-center sm:justify-start">
-            <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full mr-3"></div>
-            DSA Progress Overview
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {/* Total Progress */}
-            <div className="bg-black rounded-lg p-3 sm:p-4 border border-gray-700/30">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-blue-400" />
-                  <span className="text-xs sm:text-sm font-medium text-gray-300">Total Progress</span>
-                </div>
-                <span className="text-xs text-gray-400">{progress.total.percentage}%</span>
-              </div>
-              <div className="text-base sm:text-lg font-bold text-blue-400 mb-2">
-                {progress.total.solved} / {progress.total.total}
-              </div>
-              <Progress value={progress.total.percentage} className="h-2" />
-            </div>
-
-            {/* Easy Progress */}
-            <div className="bg-black rounded-lg p-3 sm:p-4 border border-gray-700/30">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-400" />
-                  <span className="text-xs sm:text-sm font-medium text-gray-300">Easy</span>
-                </div>
-                <span className="text-xs text-gray-400">{progress.easy.percentage}%</span>
-              </div>
-              <div className="text-base sm:text-lg font-bold text-green-400 mb-2">
-                {progress.easy.solved} / {progress.easy.total} completed
-              </div>
-              <Progress value={progress.easy.percentage} className="h-2" />
-            </div>
-
-            {/* Medium Progress */}
-            <div className="bg-black rounded-lg p-3 sm:p-4 border border-gray-700/30">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-yellow-400" />
-                  <span className="text-xs sm:text-sm font-medium text-gray-300">Medium</span>
-                </div>
-                <span className="text-xs text-gray-400">{progress.medium.percentage}%</span>
-              </div>
-              <div className="text-base sm:text-lg font-bold text-yellow-400 mb-2">
-                {progress.medium.solved} / {progress.medium.total} completed
-              </div>
-              <Progress value={progress.medium.percentage} className="h-2" />
-            </div>
-
-            {/* Hard Progress */}
-            <div className="bg-black rounded-lg p-3 sm:p-4 border border-gray-700/30">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-red-400" />
-                  <span className="text-xs sm:text-sm font-medium text-gray-300">Hard</span>
-                </div>
-                <span className="text-xs text-gray-400">{progress.hard.percentage}%</span>
-              </div>
-              <div className="text-base sm:text-lg font-bold text-red-400 mb-2">
-                {progress.hard.solved} / {progress.hard.total} completed
-              </div>
-              <Progress value={progress.hard.percentage} className="h-2" />
-            </div>
-          </div>
-        </div>
+        <ProgressSection progress={progress} />
 
         {/* Enhanced Filter Tabs with Collapse Controls - Responsive */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 mb-6">
@@ -908,434 +733,38 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
               <span className="sm:hidden">{allLecturesCollapsed ? "Expand L" : "Collapse L"}</span>
             </Button>
             
-            {/* Advanced Filter Dialog */}
-            <Dialog open={advancedFilterOpen} onOpenChange={setAdvancedFilterOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg shadow-purple-600/20 text-xs sm:text-sm">
-                  <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Advanced Filter</span>
-                  <span className="sm:hidden">Filter</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-black border-gray-700 text-white max-w-xs sm:max-w-md mx-2 sm:mx-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-lg font-semibold text-white">Advanced Filters</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-300">Search Problems</Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input 
-                        placeholder="Search problems..." 
-                        className="pl-10 bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-lg" 
-                        value={advancedFilters.searchQuery}
-                        onChange={(e) => setAdvancedFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-300">Difficulty</Label>
-                      <Select value={advancedFilters.difficulty} onValueChange={(value) => setAdvancedFilters(prev => ({ ...prev, difficulty: value }))}>
-                        <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-900 border-gray-700">
-                          <SelectItem value="all">All Levels</SelectItem>
-                          <SelectItem value="Easy">Easy</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-300">Status</Label>
-                      <Select value={advancedFilters.status} onValueChange={(value) => setAdvancedFilters(prev => ({ ...prev, status: value }))}>
-                        <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-900 border-gray-700">
-                          <SelectItem value="all">All Status</SelectItem>
-                          <SelectItem value="Solved">Solved</SelectItem>
-                          <SelectItem value="Attempted">Attempted</SelectItem>
-                          <SelectItem value="Not Started">Not Started</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-gray-300">Content Type</Label>
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={advancedFilters.hasArticle}
-                          onChange={(e) => setAdvancedFilters(prev => ({ ...prev, hasArticle: e.target.checked }))}
-                          className="rounded border-gray-600 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-300">Has Article</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={advancedFilters.hasVideo}
-                          onChange={(e) => setAdvancedFilters(prev => ({ ...prev, hasVideo: e.target.checked }))}
-                          className="rounded border-gray-600 text-red-600 focus:ring-red-500"
-                        />
-                        <span className="text-sm text-gray-300">Has Video</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={advancedFilters.hasPractice}
-                          onChange={(e) => setAdvancedFilters(prev => ({ ...prev, hasPractice: e.target.checked }))}
-                          className="rounded border-gray-600 text-green-600 focus:ring-green-500"
-                        />
-                        <span className="text-sm text-gray-300">Has Practice</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdvancedFilters({
-                        difficulty: "all",
-                        status: "all",
-                        hasArticle: false,
-                        hasVideo: false,
-                        hasPractice: false,
-                        searchQuery: ""
-                      });
-                    }}
-                    className="border-gray-600 text-white bg-black hover:bg-gray-800"
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    onClick={() => setAdvancedFilterOpen(false)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                  >
-                    Apply Filters
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <AdvancedFilter 
+              filters={advancedFilters}
+              onFiltersChange={setAdvancedFilters}
+            />
           </div>
         </div>
       </div>
 
-      {/* Steps and Lectures with Enhanced Progress Sliders - Responsive */}
-      <div className="space-y-2">
-        {filteredStepsAndLectures().map((step) => {
-          const stepProgress = calculateStepProgress(step);
-          const stepSolved = step.lectures.flatMap(lecture => lecture.problems).filter(problem => 
-            (problemStatuses[problem.id] || problem.status) === "Solved"
-          ).length;
-          
-          return (
-            <div key={step.id} className="bg-black border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors">
-              <div 
-                className="flex items-center justify-between p-3 sm:p-4 cursor-pointer hover:bg-gray-900/50 transition-colors"
-                onClick={() => toggleStep(step.id)}
-              >
-                <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-                  {expandedSteps.includes(step.id) ? 
-                    <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 flex-shrink-0" /> : 
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
-                  }
-                  <span className="font-semibold text-white text-sm sm:text-base lg:text-lg truncate">{step.title}</span>
-                </div>
-                <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-                  <div className="w-20 sm:w-32 lg:w-40 bg-gray-800 rounded-full h-2 sm:h-3 overflow-hidden">
-                    <div 
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 sm:h-3 rounded-full transition-all duration-700" 
-                      style={{ width: `${stepProgress}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs sm:text-sm text-gray-400 font-medium min-w-12 sm:min-w-20 text-right">{stepSolved} / {step.totalProblems}</span>
-                </div>
-              </div>
+      <ProblemTable 
+        steps={filteredStepsAndLectures()}
+        expandedSteps={expandedSteps}
+        expandedLectures={expandedLectures}
+        problemStatuses={problemStatuses}
+        bookmarkedProblems={bookmarkedProblems}
+        problemNotes={problemNotes}
+        onToggleStep={toggleStep}
+        onToggleLecture={toggleLecture}
+        onToggleProblemStatus={toggleProblemStatus}
+        onToggleBookmark={toggleBookmark}
+        onOpenNoteDialog={openNoteDialog}
+        applyAdvancedFilters={applyAdvancedFilters}
+        calculateStepProgress={calculateStepProgress}
+        calculateLectureProgress={calculateLectureProgress}
+      />
 
-              {expandedSteps.includes(step.id) && (
-                <div className="border-t border-gray-800">
-                  {step.lectures.map((lecture) => {
-                    const lectureProgress = calculateLectureProgress(lecture);
-                    const lectureSolved = lecture.problems.filter(problem => 
-                      (problemStatuses[problem.id] || problem.status) === "Solved"
-                    ).length;
-                    
-                    return (
-                      <div key={lecture.id}>
-                        <div 
-                          className="flex items-center justify-between p-3 sm:p-4 pl-8 sm:pl-12 cursor-pointer hover:bg-gray-900/30 border-b border-gray-800/50 transition-colors"
-                          onClick={() => toggleLecture(lecture.id)}
-                        >
-                          <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-                            {expandedLectures.includes(lecture.id) ? 
-                              <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-orange-400 flex-shrink-0" /> : 
-                              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                            }
-                            <span className="text-white font-medium text-xs sm:text-sm lg:text-base truncate">{lecture.title}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-                            <div className="w-16 sm:w-24 lg:w-32 bg-gray-800 rounded-full h-2 sm:h-2.5 overflow-hidden">
-                              <div 
-                                className="bg-gradient-to-r from-green-500 to-blue-500 h-2 sm:h-2.5 rounded-full transition-all duration-700" 
-                                style={{ width: `${lectureProgress}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs sm:text-sm text-gray-400 font-medium min-w-10 sm:min-w-16 text-right">{lectureSolved} / {lecture.totalProblems}</span>
-                          </div>
-                        </div>
-
-                        {expandedLectures.includes(lecture.id) && (
-                          <div className="bg-black">
-                            {/* Mobile-First Table Design */}
-                            <div className="hidden lg:grid lg:grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800 text-xs font-semibold text-gray-300 uppercase tracking-wider bg-gray-900/20">
-                              <div className="col-span-1">Status</div>
-                              <div className="col-span-3">Problem</div>
-                              <div className="col-span-1">Est. Time</div>
-                              <div className="col-span-1">Article</div>
-                              <div className="col-span-1">Video</div>
-                              <div className="col-span-1">Practice</div>
-                              <div className="col-span-1">Note</div>
-                              <div className="col-span-1">Bookmark</div>
-                              <div className="col-span-2">Difficulty</div>
-                            </div>
-
-                            {/* Mobile Card Layout */}
-                            <div className="lg:hidden">
-                              {applyAdvancedFilters(lecture.problems).map((problem, index) => (
-                                <div key={problem.id} className={`p-4 border-b border-gray-800/30 ${index % 2 === 0 ? 'bg-gray-950/20' : ''}`}>
-                                  <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center space-x-3">
-                                      {getStatusCheckbox(problem.id, problem.status, () => toggleProblemStatus(problem.id))}
-                                      <div>
-                                        <h4 className="text-white font-medium text-sm hover:text-orange-400 transition-colors cursor-pointer">{problem.title}</h4>
-                                        <div className="flex items-center space-x-2 mt-1">
-                                          <Badge className={`${getDifficultyColor(problem.difficulty)} bg-transparent border border-current text-xs px-2 py-0.5 rounded-full font-semibold`}>
-                                            {problem.difficulty}
-                                          </Badge>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <Button
-                                      onClick={() => toggleBookmark(problem.id)}
-                                      className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
-                                        bookmarkedProblems.includes(problem.id) 
-                                          ? 'text-yellow-400 hover:text-yellow-300' 
-                                          : 'text-gray-400 hover:text-white'
-                                      }`}
-                                      size="sm"
-                                    >
-                                      <Star className={`w-3 h-3 ${bookmarkedProblems.includes(problem.id) ? 'fill-current' : ''}`} />
-                                    </Button>
-                                  </div>
-                                  
-                                  <div className="flex items-center justify-between mt-3">
-                                    <div className="flex items-center space-x-1 text-gray-400">
-                                      <Clock className="w-3 h-3" />
-                                      <span className="text-xs">{problem.estimatedTime || 30}m</span>
-                                    </div>
-                                    
-                                    <div className="flex items-center space-x-2">
-                                      {problem.hasArticle && (
-                                        <Button
-                                          onClick={() => window.open(problem.article, '_blank')}
-                                          className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
-                                          size="sm"
-                                        >
-                                          <FileText className="w-3 h-3" />
-                                        </Button>
-                                      )}
-                                      {problem.hasVideo && (
-                                        <Button
-                                          onClick={() => window.open(problem.video, '_blank')}
-                                          className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
-                                          size="sm"
-                                        >
-                                          <Video className="w-3 h-3" />
-                                        </Button>
-                                      )}
-                                      {problem.hasPractice && (
-                                        <Button
-                                          onClick={() => window.open(`https://leetcode.com/problems/${problem.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}/`, '_blank')}
-                                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs rounded-full font-semibold shadow-md transition-all duration-200 hover:scale-105"
-                                          size="sm"
-                                        >
-                                          Solve
-                                        </Button>
-                                      )}
-                                      <Button
-                                        onClick={() => openNoteDialog(problem.id, problem.title)}
-                                        className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
-                                          problemNotes[problem.id] ? 'text-blue-400 hover:text-blue-300' : 'text-gray-400 hover:text-white'
-                                        }`}
-                                        size="sm"
-                                      >
-                                        <Edit3 className="w-3 h-3" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-
-                            {/* Desktop Table Layout */}
-                            <div className="hidden lg:block">
-                              {applyAdvancedFilters(lecture.problems).map((problem, index) => (
-                                <div key={problem.id} className={`grid grid-cols-12 gap-4 p-4 pl-16 border-b border-gray-800/30 hover:bg-gray-900/40 text-sm transition-all duration-200 ${index % 2 === 0 ? 'bg-gray-950/20' : ''}`}>
-                                  <div className="col-span-1 flex items-center">
-                                    {getStatusCheckbox(problem.id, problem.status, () => toggleProblemStatus(problem.id))}
-                                  </div>
-                                  <div className="col-span-3 flex items-center">
-                                    <span className="text-white font-medium hover:text-orange-400 transition-colors cursor-pointer">{problem.title}</span>
-                                  </div>
-                                  <div className="col-span-1 flex items-center">
-                                    <div className="flex items-center space-x-1 text-gray-400">
-                                      <Clock className="w-3 h-3" />
-                                      <span className="text-xs">{problem.estimatedTime || 30}m</span>
-                                    </div>
-                                  </div>
-                                  <div className="col-span-1 flex items-center">
-                                    {problem.hasArticle ? (
-                                      <Button
-                                        onClick={() => window.open(problem.article, '_blank')}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
-                                        size="sm"
-                                      >
-                                        <FileText className="w-3 h-3" />
-                                      </Button>
-                                    ) : (
-                                      <span className="text-gray-600 text-center w-full">-</span>
-                                    )}
-                                  </div>
-                                  <div className="col-span-1 flex items-center">
-                                    {problem.hasVideo ? (
-                                      <Button
-                                        onClick={() => window.open(problem.video, '_blank')}
-                                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg shadow-md transition-all duration-200 hover:scale-110"
-                                        size="sm"
-                                      >
-                                        <Video className="w-3 h-3" />
-                                      </Button>
-                                    ) : (
-                                      <span className="text-gray-600 text-center w-full">-</span>
-                                    )}
-                                  </div>
-                                  <div className="col-span-1 flex items-center">
-                                    {problem.hasPractice ? (
-                                      <Button
-                                        onClick={() => window.open(`https://leetcode.com/problems/${problem.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')}/`, '_blank')}
-                                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs rounded-full font-semibold shadow-md transition-all duration-200 hover:scale-105"
-                                        size="sm"
-                                      >
-                                        Solve
-                                      </Button>
-                                    ) : (
-                                      <span className="text-gray-600 text-center w-full">-</span>
-                                    )}
-                                  </div>
-                                  <div className="col-span-1 flex items-center">
-                                    <Button
-                                      onClick={() => openNoteDialog(problem.id, problem.title)}
-                                      className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
-                                        problemNotes[problem.id] ? 'text-blue-400 hover:text-blue-300' : 'text-gray-400 hover:text-white'
-                                      }`}
-                                      size="sm"
-                                    >
-                                      <Edit3 className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                  <div className="col-span-1 flex items-center">
-                                    <Button
-                                      onClick={() => toggleBookmark(problem.id)}
-                                      className={`bg-transparent hover:bg-gray-700 p-2 rounded-lg transition-all duration-200 ${
-                                        bookmarkedProblems.includes(problem.id) 
-                                          ? 'text-yellow-400 hover:text-yellow-300' 
-                                          : 'text-gray-400 hover:text-white'
-                                      }`}
-                                      size="sm"
-                                    >
-                                      <Star className={`w-3 h-3 ${bookmarkedProblems.includes(problem.id) ? 'fill-current' : ''}`} />
-                                    </Button>
-                                  </div>
-                                  <div className="col-span-2 flex items-center">
-                                    <Badge className={`${getDifficultyColor(problem.difficulty)} bg-transparent border border-current text-sm px-3 py-1 rounded-full font-semibold`}>
-                                      {problem.difficulty}
-                                    </Badge>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            {applyAdvancedFilters(lecture.problems).length === 0 && (
-                              <div className="p-8 text-center text-gray-500">
-                                <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                <p>No problems match your current filters</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Advanced Note Taking Dialog with Dark Black Background */}
-      <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
-        <DialogContent className="bg-black border-gray-700 text-white max-w-xs sm:max-w-2xl mx-2 sm:mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl font-semibold text-white">
-              {noteTitle}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="note-content" className="text-sm font-medium text-gray-300">
-                Your Notes
-              </Label>
-              <Textarea
-                id="note-content"
-                placeholder="Write your notes, observations, solution approach, time complexity, etc..."
-                value={noteContent}
-                onChange={(e) => setNoteContent(e.target.value)}
-                className="min-h-[150px] sm:min-h-[200px] bg-black border-gray-600 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/20 resize-none"
-              />
-            </div>
-            <div className="flex items-center space-x-2 text-xs text-gray-400">
-              <span>💡 Tip: Include approach, complexity, and key insights</span>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
-            <Button
-              variant="outline"
-              onClick={() => setNoteDialogOpen(false)}
-              className="border-gray-600 text-white bg-black hover:bg-gray-800 w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={saveNote}
-              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save Note
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <NoteDialog 
+        open={noteDialogOpen}
+        onOpenChange={setNoteDialogOpen}
+        noteTitle={noteTitle}
+        noteContent={noteContent}
+        onSave={saveNote}
+      />
     </div>
   );
 };
