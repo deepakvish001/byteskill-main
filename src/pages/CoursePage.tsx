@@ -16,7 +16,12 @@ import {
   CheckCircle,
   PlayCircle,
   Lock,
-  Zap
+  Zap,
+  ChevronDown,
+  Filter,
+  RotateCcw,
+  Video,
+  Award
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
@@ -52,6 +57,8 @@ const CoursePage = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stepsCollapsed, setStepsCollapsed] = useState(false);
+  const [lecturesCollapsed, setLecturesCollapsed] = useState(false);
 
   useEffect(() => {
     if (courseId) {
@@ -208,8 +215,8 @@ const CoursePage = () => {
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-35 */}
-        <main className="flex-1 pt-35 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with increased top padding to pt-48 */}
+        <main className="flex-1 pt-48 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Breadcrumb - Now visible with proper spacing */}
             <div className="mb-6">
@@ -221,7 +228,7 @@ const CoursePage = () => {
             </div>
 
             {/* Course Header */}
-            <div className="mb-6">
+            <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h1 className="text-3xl font-bold text-white mb-2">{course?.title}</h1>
@@ -239,7 +246,7 @@ const CoursePage = () => {
               </div>
 
               {course && (
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 mb-6">
                   <Badge className="bg-blue-900 text-blue-400 border-blue-800">
                     {course.difficulty}
                   </Badge>
@@ -259,6 +266,78 @@ const CoursePage = () => {
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Filter and Progress Section */}
+            <div className="mb-6 space-y-4">
+              {/* Control Buttons Row */}
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center space-x-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-white border-gray-700 hover:bg-gray-800"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    All Problems Revision (0)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setStepsCollapsed(!stepsCollapsed)}
+                    className="text-white border-gray-700 hover:bg-gray-800"
+                  >
+                    <ChevronDown className={`w-4 h-4 mr-2 transition-transform ${stepsCollapsed ? 'rotate-180' : ''}`} />
+                    Collapse Steps
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setLecturesCollapsed(!lecturesCollapsed)}
+                    className="text-white border-gray-700 hover:bg-gray-800"
+                  >
+                    <ChevronDown className={`w-4 h-4 mr-2 transition-transform ${lecturesCollapsed ? 'rotate-180' : ''}`} />
+                    Collapse Lectures
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-white border-gray-700 hover:bg-gray-800"
+                  >
+                    <Filter className="w-4 h-4 mr-2" />
+                    Advanced Filter
+                  </Button>
+                </div>
+              </div>
+
+              {/* Progress Stats Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-white mb-1">0</div>
+                  <div className="text-sm text-gray-400">Total Points</div>
+                </div>
+                <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-white mb-1 flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 mr-1" />
+                    3
+                  </div>
+                  <div className="text-sm text-gray-400">Articles Read</div>
+                </div>
+                <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-white mb-1 flex items-center justify-center">
+                    <Video className="w-5 h-5 mr-1" />
+                    1
+                  </div>
+                  <div className="text-sm text-gray-400">Videos Watched</div>
+                </div>
+                <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-white mb-1 flex items-center justify-center">
+                    <Award className="w-5 h-5 mr-1" />
+                    1
+                  </div>
+                  <div className="text-sm text-gray-400">Awards Earned</div>
+                </div>
+              </div>
             </div>
 
             {/* Course Content - Using CourseContent component */}
