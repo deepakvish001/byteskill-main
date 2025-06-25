@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,7 +54,6 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
   const togglePublishMutation = useMutation({
     mutationFn: async ({ courseId, isPublished }: { courseId: string; isPublished: boolean }) => {
       const { error } = await supabase
-        .from('courses')
         .update({ is_published: !isPublished })
         .eq('id', courseId);
       
@@ -72,6 +72,29 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
     },
   });
 
+  // Delete course
+  const deleteMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', courseId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-interview-prep'] });
+      toast({ title: "Interview prep deleted successfully" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error deleting interview prep", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    },
+  });
+
   const getDifficultyBadgeVariant = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner': return 'secondary';
@@ -79,6 +102,16 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
       case 'advanced': return 'destructive';
       default: return 'outline';
     }
+  };
+
+  const handleEditCourse = (course: any) => {
+    setSelectedCourse(course);
+    setShowCourseForm(true);
+  };
+
+  const handleAddLessons = (course: any) => {
+    setSelectedCourse(course);
+    setShowLessonForm(true);
   };
 
   return (
@@ -135,8 +168,11 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleEditCourse(course)}>
                           <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleAddLessons(course)}>
+                          <BookOpen className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
@@ -148,7 +184,15 @@ const InterviewPrepManagement = ({ searchQuery }: InterviewPrepManagementProps) 
                         >
                           {course.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </Button>
-                        <Button size="sm" variant="destructive">
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this interview prep?')) {
+                              deleteMutation.mutate(course.id);
+                            }
+                          }}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
