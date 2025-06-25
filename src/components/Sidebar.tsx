@@ -150,15 +150,15 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
       <button
         onClick={() => item.items.length > 0 ? toggleSection(item.id) : onSheetChange(item.id)}
         className={cn(
-          "w-full flex items-center justify-between p-3 rounded-xl text-left hover:bg-gray-800 transition-all duration-200 group",
-          isActive && "bg-gray-800 border border-gray-700",
+          "w-full flex items-center justify-between p-3 rounded-xl text-left hover:bg-gray-900 transition-all duration-200 group",
+          isActive && "bg-gray-900 border border-gray-800",
           collapsed && "justify-center p-4"
         )}
       >
         <div className="flex items-center space-x-3">
           <item.icon className={cn(
             "transition-colors",
-            collapsed ? "w-6 h-6" : "w-5 h-5",
+            collapsed ? "w-7 h-7" : "w-5 h-5",
             isActive ? "text-white" : "text-gray-400 group-hover:text-white"
           )} />
           {!collapsed && (
@@ -216,36 +216,54 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
 
   return (
     <div className={cn(
-      "h-screen bg-black border-r border-gray-800 text-white transition-all duration-300",
-      collapsed ? "w-16" : "w-72"
+      "h-screen bg-black border-r border-gray-900 text-white transition-all duration-300",
+      collapsed ? "w-20" : "w-72"
     )}>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="p-4 border-b border-gray-800">
+        <div className="p-4 border-b border-gray-900">
           <div className="flex items-center justify-between">
-            {!collapsed && (
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-                  <span className="text-black font-bold text-lg">BS</span>
+            {collapsed ? (
+              // Minimized state - show logo and expand button
+              <div className="flex flex-col items-center space-y-3 w-full">
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                  <span className="text-black font-bold text-xl">BS</span>
                 </div>
-                <div>
-                  <span className="text-xl font-bold text-white">
-                    Byteskill
-                  </span>
-                  <div className="text-xs text-gray-400 flex items-center space-x-1">
-                    <span>Learning Platform</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleCollapse}
+                  className="text-gray-400 hover:bg-gray-900 hover:text-white rounded-lg p-2"
+                >
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </div>
+            ) : (
+              // Expanded state - show full header
+              <>
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
+                    <span className="text-black font-bold text-lg">BS</span>
+                  </div>
+                  <div>
+                    <span className="text-xl font-bold text-white">
+                      Dashboard
+                    </span>
+                    <div className="text-xs text-gray-400 flex items-center space-x-1">
+                      <span>Learning Platform</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleCollapse}
+                  className="text-gray-400 hover:bg-gray-900 hover:text-white rounded-lg"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+              </>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggleCollapse}
-              className="text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg"
-            >
-              {collapsed ? <Menu className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-            </Button>
           </div>
         </div>
 
@@ -257,7 +275,7 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                 <SidebarButton item={item} isActive={selectedSheet === item.id} />
                 
                 {!collapsed && expandedSections.includes(item.id) && item.items.length > 0 && (
-                  <div className="ml-6 mt-2 space-y-1 border-l border-gray-800 pl-4">
+                  <div className="ml-6 mt-2 space-y-1 border-l border-gray-900 pl-4">
                     {item.items.map((subItem) => (
                       <button
                         key={subItem.id}
@@ -265,8 +283,8 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                         className={cn(
                           "w-full text-left p-2 rounded-lg text-sm transition-all duration-200 group flex items-center justify-between",
                           selectedSheet === subItem.id 
-                            ? "text-white bg-gray-800 font-medium" 
-                            : "text-gray-400 hover:text-white hover:bg-gray-800"
+                            ? "text-white bg-gray-900 font-medium" 
+                            : "text-gray-400 hover:text-white hover:bg-gray-900"
                         )}
                       >
                         <div className="flex items-center space-x-2">
@@ -288,7 +306,7 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
                         </div>
                         {subItem.progress && (
                           <div className="flex items-center space-x-2">
-                            <div className="w-12 bg-gray-700 rounded-full h-1">
+                            <div className="w-12 bg-gray-800 rounded-full h-1">
                               <div 
                                 className="bg-white h-1 rounded-full transition-all" 
                                 style={{ width: `${subItem.progress}%` }}
@@ -308,14 +326,14 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
 
         {/* Footer */}
         {!collapsed && (
-          <div className="p-4 border-t border-gray-800">
-            <div className="bg-black border border-gray-700 rounded-lg p-3">
+          <div className="p-4 border-t border-gray-900">
+            <div className="bg-black border border-gray-800 rounded-lg p-3">
               <div className="flex items-center space-x-3 mb-2">
                 <Target className="w-4 h-4 text-white" />
                 <span className="text-sm font-medium text-gray-300">Today's Goal</span>
               </div>
               <div className="text-xs text-gray-400">Solve 5 problems</div>
-              <div className="w-full bg-gray-700 rounded-full h-1 mt-2">
+              <div className="w-full bg-gray-800 rounded-full h-1 mt-2">
                 <div className="bg-white h-1 rounded-full" style={{ width: '60%' }}></div>
               </div>
               <div className="text-xs text-gray-500 mt-1">3/5 completed</div>

@@ -13,7 +13,7 @@ const Index = () => {
     <div className="min-h-screen bg-black flex relative overflow-hidden">
       {/* Fixed Sidebar */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
-        sidebarCollapsed ? 'w-16' : 'w-72'
+        sidebarCollapsed ? 'w-20' : 'w-72'
       }`}>
         <Sidebar 
           selectedSheet={selectedSheet} 
@@ -25,11 +25,11 @@ const Index = () => {
       
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${
-        sidebarCollapsed ? 'ml-16' : 'ml-72'
+        sidebarCollapsed ? 'ml-20' : 'ml-72'
       }`}>
         {/* Fixed Header */}
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
-          left: sidebarCollapsed ? '4rem' : '18rem'
+          left: sidebarCollapsed ? '5rem' : '18rem'
         }}>
           <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
         </div>
