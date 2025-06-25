@@ -7,8 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
+import DashboardPage from "./pages/DashboardPage";
 import UserDashboard from "./pages/UserDashboard";
 import SheetPage from "./pages/SheetPage";
+import PublicProfile from "./pages/PublicProfile";
 import AuthPage from "./components/auth/AuthPage";
 import UserProfile from "./components/profile/UserProfile";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -25,6 +27,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/profile/:username" element={<PublicProfile />} />
             <Route 
               path="/" 
               element={
@@ -37,7 +40,7 @@ const App = () => (
               path="/dashboard" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <DashboardPage />
                 </ProtectedRoute>
               } 
             />

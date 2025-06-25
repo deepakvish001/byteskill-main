@@ -30,8 +30,12 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
 
   const handleSheetClick = (sheetId: string) => {
     onSheetChange(sheetId);
-    // Navigate to the specific sheet page
     navigate(`/sheet/${sheetId}`);
+  };
+
+  const handleDashboardClick = () => {
+    onSheetChange("dashboard");
+    navigate("/dashboard");
   };
 
   const menuItems = [
@@ -41,7 +45,7 @@ const Sidebar = ({ selectedSheet, onSheetChange, collapsed, onToggleCollapse }: 
       icon: TrendingUp,
       items: [],
       badge: "Home",
-      action: () => navigate("/dashboard")
+      action: handleDashboardClick
     },
     {
       id: "dsa-sheet",
