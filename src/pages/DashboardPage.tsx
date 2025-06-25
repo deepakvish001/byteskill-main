@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import UserMenu from '@/components/UserMenu';
 import StatsOverview from '@/components/StatsOverview';
 import ProgressSection from '@/components/ProgressSection';
+import { Trophy, Flame, Target } from 'lucide-react';
 
 const DashboardPage = () => {
   const { user } = useAuth();
@@ -15,28 +16,19 @@ const DashboardPage = () => {
   // Mock awards data with proper Award type structure
   const mockAwards = [
     { 
-      id: '1', 
       name: 'First Problem Solved', 
-      description: 'Solved your first coding problem', 
-      icon: '🏆', 
-      earnedAt: new Date().toISOString(),
-      color: 'gold'
+      icon: Trophy, 
+      color: 'text-yellow-400'
     },
     { 
-      id: '2', 
       name: 'Streak Master', 
-      description: 'Maintained a 7-day solving streak', 
-      icon: '🔥', 
-      earnedAt: new Date().toISOString(),
-      color: 'red'
+      icon: Flame, 
+      color: 'text-red-400'
     },
     { 
-      id: '3', 
       name: 'Problem Hunter', 
-      description: 'Solved 50 problems', 
-      icon: '🎯', 
-      earnedAt: new Date().toISOString(),
-      color: 'blue'
+      icon: Target, 
+      color: 'text-blue-400'
     }
   ];
 
