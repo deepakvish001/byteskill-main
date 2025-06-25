@@ -36,6 +36,36 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action_type: string
+          actor_id: string
+          id: string
+          payload: Json | null
+          target_id: string | null
+          target_type: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          action_type: string
+          actor_id: string
+          id?: string
+          payload?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          action_type?: string
+          actor_id?: string
+          id?: string
+          payload?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
       course_enrollments: {
         Row: {
           completed_at: string | null
@@ -128,6 +158,7 @@ export type Database = {
           estimated_hours: number | null
           id: string
           is_premium: boolean | null
+          is_published: boolean | null
           prerequisites: string[] | null
           tags: string[] | null
           title: string
@@ -143,6 +174,7 @@ export type Database = {
           estimated_hours?: number | null
           id?: string
           is_premium?: boolean | null
+          is_published?: boolean | null
           prerequisites?: string[] | null
           tags?: string[] | null
           title: string
@@ -158,6 +190,7 @@ export type Database = {
           estimated_hours?: number | null
           id?: string
           is_premium?: boolean | null
+          is_published?: boolean | null
           prerequisites?: string[] | null
           tags?: string[] | null
           title?: string
@@ -232,6 +265,7 @@ export type Database = {
           current_streak: number | null
           full_name: string
           id: string
+          is_banned: boolean | null
           max_streak: number | null
           mobile_number: string | null
           problems_solved: number | null
@@ -245,6 +279,7 @@ export type Database = {
           current_streak?: number | null
           full_name: string
           id: string
+          is_banned?: boolean | null
           max_streak?: number | null
           mobile_number?: string | null
           problems_solved?: number | null
@@ -258,6 +293,7 @@ export type Database = {
           current_streak?: number | null
           full_name?: string
           id?: string
+          is_banned?: boolean | null
           max_streak?: number | null
           mobile_number?: string | null
           problems_solved?: number | null
@@ -339,6 +375,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -347,6 +404,10 @@ export type Database = {
       cleanup_old_login_attempts: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      has_role: {
+        Args: { user_uuid: string; required_role: string }
+        Returns: boolean
       }
       update_user_stats: {
         Args: { user_uuid: string }

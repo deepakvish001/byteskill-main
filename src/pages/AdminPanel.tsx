@@ -1,24 +1,22 @@
 
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { 
   Users, 
   BookOpen, 
   FileText, 
-  Brain, 
-  Settings, 
-  Search, 
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  Shield,
-  Activity
+  BrainCircuit, 
+  Code, 
+  Shield, 
+  Settings,
+  Search
 } from 'lucide-react';
 import UserManagement from '@/components/admin/UserManagement';
 import CourseManagement from '@/components/admin/CourseManagement';
@@ -29,61 +27,178 @@ import AuditTrail from '@/components/admin/AuditTrail';
 import RoleManagement from '@/components/admin/RoleManagement';
 
 const AdminPanel = () => {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('users');
 
+  // Check if user has admin role
+  const { data: userRole, isLoading: roleLoading } = useQuery({
+    queryKey: ['user-role', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error) return null;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Get dashboard stats
+  const { data: stats } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: async () => {
+      const [usersCount, coursesCount, dsaSheetsCount, interviewPrepCount] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact' }),
+        supabase.from('courses').select('id', { count: 'exact' }).eq('category', 'course'),
+        supabase.from('courses').select('id', { count: 'exact' }).eq('category', 'dsa-sheet'),
+        supabase.from('courses').select('id', { count: 'exact' }).eq('category', 'interview-prep'),
+      ]);
+
+      return {
+        users: usersCount.count || 0,
+        courses: coursesCount.count || 0,
+        dsaSheets: dsaSheetsCount.count || 0,
+        interviewPrep: interviewPrepCount.count || 0,
+      };
+    },
+  });
+
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!userRole || !['admin', 'super_admin'].includes(userRole.role)) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Card className="bg-gray-900 border-gray-700">
+          <CardContent className="p-6 text-center">
+            <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Access Denied</h2>
+            <p className="text-gray-400">You don't have permission to access the admin panel.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-black text-white">
+      <div className="container mx-auto p-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Panel</h1>
-          <p className="text-gray-600">Manage your platform content and users</p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Admin Panel</h1>
+            <p className="text-gray-400 mt-1">Manage your platform content and users</p>
+          </div>
+          <Badge variant="destructive" className="text-sm">
+            {userRole.role.replace('_', ' ').toUpperCase()}
+          </Badge>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gray-900 border-gray-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Total Users</p>
+                  <p className="text-2xl font-bold text-white">{stats?.users || 0}</p>
+                </div>
+                <Users className="w-8 h-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900 border-gray-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Courses</p>
+                  <p className="text-2xl font-bold text-white">{stats?.courses || 0}</p>
+                </div>
+                <BookOpen className="w-8 h-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900 border-gray-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">DSA Sheets</p>
+                  <p className="text-2xl font-bold text-white">{stats?.dsaSheets || 0}</p>
+                </div>
+                <Code className="w-8 h-8 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900 border-gray-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Interview Prep</p>
+                  <p className="text-2xl font-bold text-white">{stats?.interviewPrep || 0}</p>
+                </div>
+                <BrainCircuit className="w-8 h-8 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Search Bar */}
         <div className="mb-6">
-          <div className="relative">
+          <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search across all content..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 max-w-md"
+              className="pl-10 bg-gray-900 border-gray-700 text-white"
             />
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
+          <TabsList className="bg-gray-900 border-gray-700">
+            <TabsTrigger value="users" className="data-[state=active]:bg-gray-700">
+              <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
-            <TabsTrigger value="courses" className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
+            <TabsTrigger value="courses" className="data-[state=active]:bg-gray-700">
+              <BookOpen className="w-4 h-4 mr-2" />
               Courses
             </TabsTrigger>
-            <TabsTrigger value="dsa-sheets" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
+            <TabsTrigger value="dsa-sheets" className="data-[state=active]:bg-gray-700">
+              <Code className="w-4 h-4 mr-2" />
               DSA Sheets
             </TabsTrigger>
-            <TabsTrigger value="interview-prep" className="flex items-center gap-2">
-              <Brain className="w-4 h-4" />
+            <TabsTrigger value="interview-prep" className="data-[state=active]:bg-gray-700">
+              <BrainCircuit className="w-4 h-4 mr-2" />
               Interview Prep
             </TabsTrigger>
-            <TabsTrigger value="core-cs" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
+            <TabsTrigger value="core-cs" className="data-[state=active]:bg-gray-700">
+              <FileText className="w-4 h-4 mr-2" />
               Core CS
             </TabsTrigger>
-            <TabsTrigger value="roles" className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
+            <TabsTrigger value="roles" className="data-[state=active]:bg-gray-700">
+              <Shield className="w-4 h-4 mr-2" />
               Roles
             </TabsTrigger>
-            <TabsTrigger value="audit" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              Audit Trail
+            <TabsTrigger value="audit" className="data-[state=active]:bg-gray-700">
+              <Settings className="w-4 h-4 mr-2" />
+              Audit
             </TabsTrigger>
           </TabsList>
 

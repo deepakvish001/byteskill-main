@@ -58,10 +58,15 @@ const DashboardPage = () => {
             </div>
 
             {/* Stats Overview */}
-            <StatsOverview />
+            <StatsOverview 
+              totalPoints={1250}
+              totalArticlesRead={45}
+              totalVideosWatched={32}
+              awards={8}
+            />
             
             {/* Progress Section */}
-            <ProgressSection />
+            <ProgressSection progress={[]} />
           </div>
         </main>
       </div>
