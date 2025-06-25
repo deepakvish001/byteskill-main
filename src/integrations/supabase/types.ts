@@ -9,13 +9,184 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          description: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          description: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      login_attempts: {
+        Row: {
+          attempted_at: string | null
+          email: string
+          id: string
+          ip_address: string
+          success: boolean | null
+        }
+        Insert: {
+          attempted_at?: string | null
+          email: string
+          id?: string
+          ip_address: string
+          success?: boolean | null
+        }
+        Update: {
+          attempted_at?: string | null
+          email?: string
+          id?: string
+          ip_address?: string
+          success?: boolean | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          current_streak: number | null
+          full_name: string
+          id: string
+          max_streak: number | null
+          mobile_number: string | null
+          problems_solved: number | null
+          updated_at: string | null
+          username: string
+          xp_points: number | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          current_streak?: number | null
+          full_name: string
+          id: string
+          max_streak?: number | null
+          mobile_number?: string | null
+          problems_solved?: number | null
+          updated_at?: string | null
+          username: string
+          xp_points?: number | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          current_streak?: number | null
+          full_name?: string
+          id?: string
+          max_streak?: number | null
+          mobile_number?: string | null
+          problems_solved?: number | null
+          updated_at?: string | null
+          username?: string
+          xp_points?: number | null
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          code: string
+          created_at: string | null
+          execution_time: number | null
+          id: string
+          language: string
+          memory_used: number | null
+          problem_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          execution_time?: number | null
+          id?: string
+          language: string
+          memory_used?: number | null
+          problem_id: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          execution_time?: number | null
+          id?: string
+          language?: string
+          memory_used?: number | null
+          problem_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          created_at: string | null
+          difficulty: string | null
+          id: string
+          notes: string | null
+          problem_id: string
+          solved_at: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty?: string | null
+          id?: string
+          notes?: string | null
+          problem_id: string
+          solved_at?: string | null
+          status: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          difficulty?: string | null
+          id?: string
+          notes?: string | null
+          problem_id?: string
+          solved_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_old_login_attempts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_user_stats: {
+        Args: { user_uuid: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
