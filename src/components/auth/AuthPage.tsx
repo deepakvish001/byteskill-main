@@ -64,7 +64,15 @@ const AuthPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <LoginForm onForgotPassword={() => setForgotPassword(true)} />
+                  <LoginForm onToggle={() => {}} />
+                  <div className="mt-4 text-center">
+                    <button
+                      onClick={() => setForgotPassword(true)}
+                      className="text-blue-400 hover:text-blue-300 underline text-sm"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
