@@ -94,10 +94,10 @@ const CoreCSPage = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-900 text-green-400 border-green-800';
-      case 'intermediate': return 'bg-yellow-900 text-yellow-400 border-yellow-800';
-      case 'advanced': return 'bg-red-900 text-red-400 border-red-800';
-      default: return 'bg-gray-900 text-gray-400 border-gray-800';
+      case 'beginner': return 'bg-green-900/80 text-green-300 border-green-700';
+      case 'intermediate': return 'bg-yellow-900/80 text-yellow-300 border-yellow-700';
+      case 'advanced': return 'bg-red-900/80 text-red-300 border-red-700';
+      default: return 'bg-gray-900/80 text-gray-300 border-gray-700';
     }
   };
 
@@ -174,24 +174,26 @@ const CoreCSPage = () => {
           </div>
         </div>
         
-        {/* Main Content */}
-        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
+        {/* Main Content with proper spacing */}
+        <main className="flex-1 pt-24 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Breadcrumb */}
-            <CourseBreadcrumb items={breadcrumbItems} />
+            <div className="bg-black">
+              <CourseBreadcrumb items={breadcrumbItems} />
+            </div>
 
-            {/* Header */}
-            <div className="text-center mb-8">
+            {/* Page Header */}
+            <div className="text-center mb-8 bg-black">
               <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-red-400 bg-clip-text text-transparent mb-4">
                 Core Computer Science
               </h1>
-              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              <p className="text-gray-300 text-lg max-w-2xl mx-auto">
                 Master fundamental CS concepts with comprehensive courses in algorithms, systems, and theory
               </p>
             </div>
 
-            {/* Search */}
-            <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+            {/* Search Card */}
+            <Card className="bg-gray-900/90 border-gray-700 backdrop-blur-sm">
               <CardContent className="p-6">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -199,7 +201,7 @@ const CoreCSPage = () => {
                     placeholder="Search core CS topics, algorithms, or system design..."
                     value={filterQuery}
                     onChange={(e) => setFilterQuery(e.target.value)}
-                    className="pl-12 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 h-12 text-lg"
+                    className="pl-12 bg-gray-800/70 border-gray-600 text-white placeholder-gray-400 h-12 text-lg"
                   />
                 </div>
               </CardContent>
@@ -211,10 +213,10 @@ const CoreCSPage = () => {
                 const enrollment = getEnrollmentStatus(course.course_id);
                 
                 return (
-                  <Card key={course.id} className="group bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 overflow-hidden">
+                  <Card key={course.id} className="group bg-gray-900/90 border-gray-700 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 overflow-hidden backdrop-blur-sm">
                     <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
-                    <CardHeader className="relative pb-4">
+                    <CardHeader className="relative pb-4 bg-gray-900/50">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
                           <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl">
@@ -244,25 +246,25 @@ const CoreCSPage = () => {
                           </div>
                         </div>
                       </div>
-                      <CardDescription className="text-gray-300 text-sm leading-relaxed">
+                      <CardDescription className="text-gray-300 text-sm leading-relaxed bg-transparent">
                         {course.description}
                       </CardDescription>
                     </CardHeader>
                     
-                    <CardContent className="relative pt-0">
+                    <CardContent className="relative pt-0 bg-gray-900/50">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4 text-sm text-gray-400">
                           <div className="flex items-center space-x-1">
                             <Database className="w-4 h-4 text-yellow-400" />
-                            <span className="font-medium">{course.total_lessons} topics</span>
+                            <span className="font-medium text-gray-300">{course.total_lessons} topics</span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Clock className="w-4 h-4 text-green-400" />
-                            <span className="font-medium">{course.estimated_hours}h</span>
+                            <span className="font-medium text-gray-300">{course.estimated_hours}h</span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Star className="w-4 h-4 text-orange-400" />
-                            <span className="font-medium">4.9</span>
+                            <span className="font-medium text-gray-300">4.9</span>
                           </div>
                         </div>
                       </div>
@@ -320,29 +322,29 @@ const CoreCSPage = () => {
 
             {/* Stats Section */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-              <Card className="bg-gradient-to-br from-yellow-900/20 to-yellow-800/20 border-yellow-700/30">
-                <CardContent className="p-6 text-center">
+              <Card className="bg-gradient-to-br from-yellow-900/30 to-yellow-800/30 border-yellow-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
                   <Cpu className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">{filteredCourses.length}</div>
                   <div className="text-sm text-yellow-300">CS Courses</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-orange-900/20 to-orange-800/20 border-orange-700/30">
-                <CardContent className="p-6 text-center">
+              <Card className="bg-gradient-to-br from-orange-900/30 to-orange-800/30 border-orange-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
                   <Database className="w-8 h-8 text-orange-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">20+</div>
                   <div className="text-sm text-orange-300">Core Topics</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-red-900/20 to-red-800/20 border-red-700/30">
-                <CardContent className="p-6 text-center">
+              <Card className="bg-gradient-to-br from-red-900/30 to-red-800/30 border-red-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
                   <Users className="w-8 h-8 text-red-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">15k+</div>
                   <div className="text-sm text-red-300">Students</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border-purple-700/30">
-                <CardContent className="p-6 text-center">
+              <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/30 border-purple-700/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
                   <Zap className="w-8 h-8 text-purple-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">4.9</div>
                   <div className="text-sm text-purple-300">Avg Rating</div>

@@ -11,13 +11,14 @@ import {
   FileText, 
   Clock, 
   Search,
-  Target,
   CheckCircle,
   Lock,
-  Users,
+  Target,
   Star,
   BookOpen,
-  TrendingUp
+  TrendingUp,
+  Users,
+  Play
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
@@ -93,10 +94,10 @@ const DSASheetsPage = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-900 text-green-400 border-green-800';
-      case 'intermediate': return 'bg-yellow-900 text-yellow-400 border-yellow-800';
-      case 'advanced': return 'bg-red-900 text-red-400 border-red-800';
-      default: return 'bg-gray-900 text-gray-400 border-gray-800';
+      case 'beginner': return 'bg-green-500/20 text-green-400 border-green-500/50';
+      case 'intermediate': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
+      case 'advanced': return 'bg-red-500/20 text-red-400 border-red-500/50';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
     }
   };
 
@@ -142,7 +143,7 @@ const DSASheetsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black flex relative overflow-hidden">
+    <div className="min-h-screen bg-black flex relative">
       {/* Fixed Sidebar */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
         sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
@@ -156,14 +157,14 @@ const DSASheetsPage = () => {
       </div>
       
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+      <div className={`flex-1 transition-all duration-300 ${
         sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'
       }`}>
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 z-30 bg-black border-b border-gray-800 transition-all duration-300" style={{
+        <div className="fixed top-0 right-0 z-30 bg-black border-b border-gray-800/50 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-4 bg-black">
             <Header 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
@@ -174,144 +175,146 @@ const DSASheetsPage = () => {
         </div>
         
         {/* Main Content */}
-        <main className="flex-1 pt-20 p-3 sm:p-6 bg-black min-h-screen">
-          <div className="max-w-7xl mx-auto space-y-8">
+        <main className="pt-20 p-6 bg-black min-h-screen">
+          <div className="max-w-7xl mx-auto space-y-6">
             {/* Breadcrumb */}
-            <CourseBreadcrumb items={breadcrumbItems} />
+            <div className="bg-black">
+              <CourseBreadcrumb items={breadcrumbItems} />
+            </div>
 
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+            {/* Page Header */}
+            <div className="text-center mb-8 bg-black">
+              <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                 DSA Practice Sheets
               </h1>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Master data structures and algorithms with curated problem sets designed for coding interviews
+                Master Data Structures and Algorithms with curated problem sets from top competitive programmers
               </p>
             </div>
 
-            {/* Search */}
-            <Card className="bg-gray-900/50 border-gray-700 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
-                    placeholder="Search DSA sheets by name, difficulty, or topics..."
-                    value={filterQuery}
-                    onChange={(e) => setFilterQuery(e.target.value)}
-                    className="pl-12 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 h-12 text-lg"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <Input
+                  placeholder="Search DSA sheets, algorithms, or data structures..."
+                  value={filterQuery}
+                  onChange={(e) => setFilterQuery(e.target.value)}
+                  className="pl-12 bg-black border-gray-800 text-white placeholder-gray-500 h-12 text-lg focus:border-blue-500"
+                />
+              </div>
+            </div>
 
-            {/* Course Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* Course Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);
+                const cardColors = [
+                  'from-blue-600 to-blue-800',
+                  'from-teal-600 to-cyan-700', 
+                  'from-purple-600 to-violet-800',
+                  'from-cyan-500 to-blue-600'
+                ];
+                const cardColor = cardColors[filteredCourses.indexOf(course) % cardColors.length];
                 
                 return (
-                  <Card key={course.id} className="group bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Card key={course.id} className={`group bg-gradient-to-br ${cardColor} border-0 text-white relative overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer`}>
+                    {/* Free Badge */}
+                    {!course.is_premium && (
+                      <div className="absolute top-3 right-3 z-10">
+                        <Badge className="bg-green-500/90 text-white border-0 text-xs font-bold px-2 py-1">
+                          FREE
+                        </Badge>
+                      </div>
+                    )}
                     
-                    <CardHeader className="relative pb-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl">
-                            <FileText className="w-6 h-6 text-blue-400" />
-                          </div>
-                          <div className="flex-1">
-                            <CardTitle className="text-white text-xl font-bold group-hover:text-blue-400 transition-colors">
-                              {course.title}
-                            </CardTitle>
-                            <div className="flex items-center space-x-2 mt-2">
-                              <Badge className={`${getDifficultyColor(course.difficulty)} text-xs font-medium`}>
-                                {course.difficulty}
-                              </Badge>
-                              {course.is_premium && (
-                                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 text-xs">
-                                  <Lock className="w-3 h-3 mr-1" />
-                                  Pro
-                                </Badge>
-                              )}
-                              {enrollment && (
-                                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs">
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  Enrolled
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
+                    {/* Enrolled Badge */}
+                    {enrollment && (
+                      <div className="absolute top-3 left-3 z-10">
+                        <Badge className="bg-white/20 text-white border-0 text-xs font-bold px-2 py-1">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          ENROLLED
+                        </Badge>
+                      </div>
+                    )}
+
+                    <CardHeader className="pb-4 bg-transparent relative z-10">
+                      <div className="flex items-center justify-center mb-4">
+                        <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                          <FileText className="w-8 h-8 text-white" />
                         </div>
                       </div>
-                      <CardDescription className="text-gray-300 text-sm leading-relaxed">
+                      
+                      <CardTitle className="text-white text-xl font-bold text-center mb-2">
+                        {course.title}
+                      </CardTitle>
+                      
+                      <CardDescription className="text-white/80 text-sm text-center leading-relaxed">
                         {course.description}
                       </CardDescription>
+                      
+                      <div className="flex items-center justify-center mt-3">
+                        <Badge className={`${getDifficultyColor(course.difficulty)} text-xs font-medium border`}>
+                          {course.difficulty.toUpperCase()}
+                        </Badge>
+                      </div>
                     </CardHeader>
                     
-                    <CardContent className="relative pt-0">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-4 text-sm text-gray-400">
-                          <div className="flex items-center space-x-1">
-                            <Target className="w-4 h-4 text-blue-400" />
-                            <span className="font-medium">{course.total_lessons} problems</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4 text-green-400" />
-                            <span className="font-medium">{course.estimated_hours}h</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Users className="w-4 h-4 text-purple-400" />
-                            <span className="font-medium">2.1k</span>
-                          </div>
+                    <CardContent className="pt-0 bg-transparent relative z-10">
+                      <div className="flex items-center justify-center space-x-6 mb-6 text-white/80">
+                        <div className="flex items-center space-x-1 text-sm">
+                          <Target className="w-4 h-4" />
+                          <span>{course.total_lessons} Qs</span>
+                        </div>
+                        <div className="flex items-center space-x-1 text-sm">
+                          <Clock className="w-4 h-4" />
+                          <span>{course.estimated_hours}h</span>
+                        </div>
+                        <div className="flex items-center space-x-1 text-sm">
+                          <Star className="w-4 h-4 text-yellow-400" />
+                          <span>4.8</span>
                         </div>
                       </div>
                       
                       {enrollment && (
-                        <div className="mb-6">
-                          <div className="flex items-center justify-between text-sm mb-2">
-                            <span className="text-gray-400 font-medium">Progress</span>
-                            <span className="text-white font-bold">{enrollment.progress_percentage}%</span>
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between text-sm mb-2 text-white/80">
+                            <span>Progress</span>
+                            <span className="font-bold text-white">{enrollment.progress_percentage}%</span>
                           </div>
-                          <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                          <div className="w-full bg-white/20 rounded-full h-2">
                             <div 
-                              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500" 
+                              className="bg-white h-2 rounded-full transition-all duration-500" 
                               style={{ width: `${enrollment.progress_percentage}%` }}
                             />
                           </div>
                         </div>
                       )}
 
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {course.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs bg-gray-800/50 text-gray-300 border-gray-600 hover:bg-gray-700/50">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {course.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs bg-gray-800/50 text-gray-300 border-gray-600">
-                            +{course.tags.length - 3} more
-                          </Badge>
-                        )}
-                      </div>
-
-                      <div className="flex space-x-3">
+                      <div className="space-y-2">
+                        <Button 
+                          onClick={() => navigate(`/sheet/${course.course_id}`)}
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border-0 font-medium py-2 transition-all duration-200"
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          View Course
+                        </Button>
+                        
                         {!enrollment && (
                           <Button 
                             onClick={() => handleEnrollment(course.course_id)}
-                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium py-2.5 transition-all duration-200"
+                            className="w-full bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium py-2 transition-all duration-200"
                           >
-                            Free Enroll
+                            Enroll Now
                           </Button>
                         )}
-                        <Button 
-                          onClick={() => navigate(`/sheet/${course.course_id}`)}
-                          className={`${enrollment ? 'flex-1' : 'flex-1'} bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium py-2.5 transition-all duration-200`}
-                        >
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          {enrollment ? 'Continue Practice' : 'View Course'}
-                        </Button>
                       </div>
                     </CardContent>
+
+                    {/* Decorative elements */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                    <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/10 rounded-full blur-xl" />
+                    <div className="absolute -bottom-5 -left-5 w-16 h-16 bg-white/5 rounded-full blur-lg" />
                   </Card>
                 );
               })}
@@ -319,32 +322,32 @@ const DSASheetsPage = () => {
 
             {/* Stats Section */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-              <Card className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 border-blue-700/30">
-                <CardContent className="p-6 text-center">
+              <Card className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 border-blue-500/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
                   <FileText className="w-8 h-8 text-blue-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">{filteredCourses.length}</div>
                   <div className="text-sm text-blue-300">DSA Sheets</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-green-900/20 to-green-800/20 border-green-700/30">
-                <CardContent className="p-6 text-center">
-                  <Target className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">500+</div>
-                  <div className="text-sm text-green-300">Problems</div>
+              <Card className="bg-gradient-to-br from-cyan-600/20 to-cyan-800/20 border-cyan-500/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
+                  <Target className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">450+</div>
+                  <div className="text-sm text-cyan-300">Problems</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border-purple-700/30">
-                <CardContent className="p-6 text-center">
-                  <Users className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">10k+</div>
-                  <div className="text-sm text-purple-300">Students</div>
+              <Card className="bg-gradient-to-br from-teal-600/20 to-teal-800/20 border-teal-500/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
+                  <Users className="w-8 h-8 text-teal-400 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-white">25k+</div>
+                  <div className="text-sm text-teal-300">Students</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-yellow-900/20 to-yellow-800/20 border-yellow-700/30">
-                <CardContent className="p-6 text-center">
-                  <TrendingUp className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+              <Card className="bg-gradient-to-br from-green-600/20 to-green-800/20 border-green-500/30 backdrop-blur-sm">
+                <CardContent className="p-6 text-center bg-transparent">
+                  <TrendingUp className="w-8 h-8 text-green-400 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white">95%</div>
-                  <div className="text-sm text-yellow-300">Success Rate</div>
+                  <div className="text-sm text-green-300">Success Rate</div>
                 </CardContent>
               </Card>
             </div>
