@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +18,6 @@ import {
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
-import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 
 interface Course {
   id: string;
@@ -47,10 +45,10 @@ const CoursesOverview = () => {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterQuery, setFilterQuery] = useState("");
-  const breadcrumbItems = [
-    { label: 'Home', href: '/dashboard' },
-    { label: 'All Courses' }
-  ];
+
+  const handleExpandSidebar = () => {
+    setSidebarCollapsed(false);
+  };
 
   useEffect(() => {
     fetchData();
@@ -165,19 +163,15 @@ const CoursesOverview = () => {
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
+              onExpandSidebar={handleExpandSidebar}
             />
             <UserMenu />
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-40 */}
-        <main className="flex-1 pt-40 p-6 bg-black min-h-screen">
+        {/* Main Content */}
+        <main className="flex-1 pt-24 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
-            {/* Breadcrumb - Now visible with proper spacing */}
-            <div className="bg-black mb-6">
-              <CourseBreadcrumb items={breadcrumbItems} />
-            </div>
-
             {/* Page Header */}
             <div className="text-center mb-8 bg-black">
               <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
@@ -298,7 +292,7 @@ const CoursesOverview = () => {
                         
                         {!enrollment && (
                           <Button 
-                            onClick={() => handleEnrollment(course.course_id)}
+                            onclick={() => handleEnrollment(course.course_id)}
                             className="w-full bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium py-2 transition-all duration-200"
                           >
                             Enroll Now

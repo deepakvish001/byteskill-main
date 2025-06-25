@@ -1,13 +1,6 @@
 
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import ProblemDashboard from "@/components/ProblemDashboard";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import UserMenu from "@/components/UserMenu";
-import CourseStatsCard from "@/components/CourseStatsCard";
-import ProgressOverviewCard from "@/components/ProgressOverviewCard";
-import CourseActionButtons from "@/components/CourseActionButtons";
 import { useState } from "react";
 import { 
   BookOpen, 
@@ -15,9 +8,16 @@ import {
   Trophy, 
   Target
 } from "lucide-react";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import UserMenu from "@/components/UserMenu";
+import CourseStatsCard from "@/components/CourseStatsCard";
+import ProgressOverviewCard from "@/components/ProgressOverviewCard";
+import CourseActionButtons from "@/components/CourseActionButtons";
+import ProblemDashboard from "@/components/ProblemDashboard";
 
-const SheetPage = () => {
-  const { sheetId } = useParams<{ sheetId: string }>();
+const InterviewPrepItemPage = () => {
+  const { itemId } = useParams<{ itemId: string }>();
   const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -49,23 +49,20 @@ const SheetPage = () => {
 
   return (
     <div className="min-h-screen bg-black flex relative overflow-hidden">
-      {/* Fixed Sidebar - Responsive */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
         sidebarCollapsed ? 'w-16 sm:w-20' : 'w-64 sm:w-72'
       }`}>
         <Sidebar 
-          selectedSheet="dsa-sheets" 
+          selectedSheet="interview-prep" 
           onSheetChange={() => {}}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
       </div>
       
-      {/* Main Content Area - Responsive */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${
         sidebarCollapsed ? 'ml-16 sm:ml-20' : 'ml-64 sm:ml-72'
       }`}>
-        {/* Fixed Header - Responsive */}
         <div className="fixed top-0 right-0 z-30 transition-all duration-300" style={{
           left: sidebarCollapsed ? '4rem' : '16rem',
         }}>
@@ -80,10 +77,8 @@ const SheetPage = () => {
           </div>
         </div>
         
-        {/* Main Content */}
         <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <CourseStatsCard
                 title="Total Points"
@@ -111,19 +106,17 @@ const SheetPage = () => {
               />
             </div>
 
-            {/* Progress Overview */}
             <ProgressOverviewCard
               totalProgress={0}
               totalCompleted={0}
-              totalProblems={455}
+              totalProblems={250}
               progressItems={[
-                { label: "Easy", completed: 0, total: 131, color: "green" },
-                { label: "Medium", completed: 0, total: 187, color: "yellow" },
-                { label: "Hard", completed: 0, total: 136, color: "red" }
+                { label: "Easy", completed: 0, total: 75, color: "green" },
+                { label: "Medium", completed: 0, total: 125, color: "yellow" },
+                { label: "Hard", completed: 0, total: 50, color: "red" }
               ]}
             />
 
-            {/* Course Action Buttons */}
             <CourseActionButtons
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -137,7 +130,7 @@ const SheetPage = () => {
             />
             
             <ProblemDashboard 
-              selectedSheet={sheetId || "striver-a2z"} 
+              selectedSheet={itemId || "interview-prep"} 
               searchQuery={searchQuery} 
             />
           </div>
@@ -147,4 +140,4 @@ const SheetPage = () => {
   );
 };
 
-export default SheetPage;
+export default InterviewPrepItemPage;

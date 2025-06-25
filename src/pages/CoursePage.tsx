@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -16,13 +15,17 @@ import {
   CheckCircle,
   PlayCircle,
   Lock,
-  Zap
+  Zap,
+  Video
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
 import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 import CourseContent from "@/components/CourseContent";
+import CourseStatsCard from "@/components/CourseStatsCard";
+import ProgressOverviewCard from "@/components/ProgressOverviewCard";
+import CourseActionButtons from "@/components/CourseActionButtons";
 
 interface Course {
   id: string;
@@ -49,9 +52,15 @@ const CoursePage = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [stepsCollapsed, setStepsCollapsed] = useState(false);
+  const [lecturesCollapsed, setLecturesCollapsed] = useState(false);
   const [course, setCourse] = useState<Course | null>(null);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleExpandSidebar = () => {
+    setSidebarCollapsed(false);
+  };
 
   useEffect(() => {
     if (courseId) {
@@ -203,14 +212,15 @@ const CoursePage = () => {
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery}
               sidebarCollapsed={sidebarCollapsed}
+              onExpandSidebar={handleExpandSidebar}
             />
             <UserMenu />
           </div>
         </div>
         
-        {/* Main Content with increased top padding to pt-35 */}
-        <main className="flex-1 pt-35 p-3 sm:p-6 bg-black min-h-screen">
-          <div className="max-w-7xl mx-auto">
+        {/* Main Content */}
+        <main className="flex-1 pt-24 p-3 sm:p-6 bg-black min-h-screen">
+          <div className="max-w-7xl mx-auto space-y-6">
             {/* Breadcrumb - Now visible with proper spacing */}
             <div className="mb-6">
               <CourseBreadcrumb 
@@ -260,6 +270,59 @@ const CoursePage = () => {
                 </div>
               )}
             </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <CourseStatsCard
+                title="Total Points"
+                value={0}
+                icon={<Target className="w-5 h-5 text-white" />}
+                color="bg-blue-600"
+              />
+              <CourseStatsCard
+                title="Articles Read"
+                value={0}
+                icon={<BookOpen className="w-5 h-5 text-white" />}
+                color="bg-green-600"
+              />
+              <CourseStatsCard
+                title="Videos Watched"
+                value={2}
+                icon={<Video className="w-5 h-5 text-white" />}
+                color="bg-purple-600"
+              />
+              <CourseStatsCard
+                title="Awards Earned"
+                value={0}
+                icon={<Trophy className="w-5 h-5 text-white" />}
+                color="bg-yellow-600"
+              />
+            </div>
+
+            {/* Progress Overview */}
+            <ProgressOverviewCard
+              totalProgress={enrollment?.progress_percentage || 0}
+              totalCompleted={0}
+              totalProblems={course?.total_lessons || 0}
+              progressItems={[
+                { label: "Easy", completed: 0, total: Math.floor((course?.total_lessons || 0) * 0.3), color: "green" },
+                { label: "Medium", completed: 0, total: Math.floor((course?.total_lessons || 0) * 0.5), color: "yellow" },
+                { label: "Hard", completed: 0, total: Math.floor((course?.total_lessons || 0) * 0.2), color: "red" }
+              ]}
+            />
+
+            {/* Course Action Buttons */}
+            <CourseActionButtons
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              stepsCollapsed={stepsCollapsed}
+              lecturesCollapsed={lecturesCollapsed}
+              onToggleSteps={() => setStepsCollapsed(!stepsCollapsed)}
+              onToggleLectures={() => setLecturesCollapsed(!lecturesCollapsed)}
+              revisionCount={0}
+              onRevision={() => console.log("Revision clicked")}
+              onAdvancedFilter={() => console.log("Advanced filter clicked")}
+            />
 
             {/* Course Content - Using CourseContent component */}
             <CourseContent 

@@ -1,5 +1,5 @@
 
-import { Search, Menu, BookOpen, Trophy } from "lucide-react";
+import { Search, Menu, BookOpen, Trophy, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -7,9 +7,10 @@ interface HeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   sidebarCollapsed: boolean;
+  onExpandSidebar?: () => void;
 }
 
-const Header = ({ searchQuery, onSearchChange, sidebarCollapsed }: HeaderProps) => {
+const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onExpandSidebar }: HeaderProps) => {
   return (
     <header className="w-full bg-black border-b border-gray-800 px-3 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
@@ -34,6 +35,17 @@ const Header = ({ searchQuery, onSearchChange, sidebarCollapsed }: HeaderProps) 
                   </span>
                 </div>
               </div>
+              {/* Expand Sidebar Button */}
+              {onExpandSidebar && (
+                <Button
+                  onClick={onExpandSidebar}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl p-2 ml-2"
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              )}
             </div>
           )}
         </div>
