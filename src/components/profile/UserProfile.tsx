@@ -2,15 +2,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Mail, Phone, Calendar, Trophy, Target, Zap, Activity } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { Trophy, Target, Flame, Calendar } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -23,124 +23,77 @@ interface Profile {
   current_streak: number;
   max_streak: number;
   created_at: string;
-  updated_at: string;
-}
-
-interface ActivityLog {
-  id: string;
-  activity_type: string;
-  description: string;
-  created_at: string;
-  metadata: any;
 }
 
 const UserProfile = () => {
-  const { user, updateProfile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
-    username: '',
-    mobile_number: ''
+    mobile_number: '',
   });
 
   useEffect(() => {
     if (user) {
       fetchProfile();
-      fetchActivityLogs();
     }
   }, [user]);
 
   const fetchProfile = async () => {
-    if (!user) return;
-
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', user?.id)
         .single();
 
       if (error) throw error;
-
+      
       setProfile(data);
       setFormData({
         full_name: data.full_name || '',
-        username: data.username || '',
-        mobile_number: data.mobile_number || ''
+        mobile_number: data.mobile_number || '',
       });
-    } catch (error) {
-      console.error('Error fetching profile:', error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to load profile data",
-        variant: "destructive"
+        description: "Failed to load profile",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchActivityLogs = async () => {
-    if (!user) return;
-
+  const handleSave = async () => {
     try {
-      const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: formData.full_name,
+          mobile_number: formData.mobile_number,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user?.id);
 
       if (error) throw error;
-      setActivityLogs(data || []);
-    } catch (error) {
-      console.error('Error fetching activity logs:', error);
-    }
-  };
 
-  const handleSaveProfile = async () => {
-    setSaving(true);
-
-    try {
-      const { error } = await updateProfile(formData);
-      if (!error) {
-        setEditMode(false);
-        await fetchProfile();
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const getXPBadge = (xp: number) => {
-    if (xp >= 10000) return { name: 'Master', color: 'bg-purple-600', icon: '👑' };
-    if (xp >= 5000) return { name: 'Expert', color: 'bg-blue-600', icon: '🏆' };
-    if (xp >= 2000) return { name: 'Advanced', color: 'bg-green-600', icon: '⭐' };
-    if (xp >= 500) return { name: 'Intermediate', color: 'bg-yellow-600', icon: '🔥' };
-    return { name: 'Beginner', color: 'bg-gray-600', icon: '🌱' };
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'login': return '🔐';
-      case 'logout': return '👋';
-      case 'registration': return '🎉';
-      case 'profile_update': return '✏️';
-      case 'problem_solved': return '✅';
-      default: return '📝';
+      await fetchProfile();
+      setEditing(false);
+      
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
     }
   };
 
@@ -155,222 +108,188 @@ const UserProfile = () => {
   if (!profile) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white">Profile not found</p>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Profile Not Found</h1>
+          <p className="text-gray-400">Unable to load your profile information.</p>
+        </div>
       </div>
     );
   }
 
-  const xpBadge = getXPBadge(profile.xp_points);
+  const getXPBadge = (xp: number) => {
+    if (xp >= 10000) return { name: "Legendary", color: "bg-purple-600" };
+    if (xp >= 5000) return { name: "Expert", color: "bg-red-600" };
+    if (xp >= 2500) return { name: "Advanced", color: "bg-orange-600" };
+    if (xp >= 1000) return { name: "Intermediate", color: "bg-blue-600" };
+    if (xp >= 500) return { name: "Beginner", color: "bg-green-600" };
+    return { name: "Newbie", color: "bg-gray-600" };
+  };
+
+  const badge = getXPBadge(profile.xp_points);
 
   return (
-    <div className="min-h-screen bg-black p-4 sm:p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Profile Header */}
         <Card className="bg-gray-900 border-gray-700">
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-              <Avatar className="w-24 h-24">
-                <AvatarImage src={profile.avatar_url || ''} />
-                <AvatarFallback className="bg-blue-600 text-white text-xl">
-                  {profile.full_name.charAt(0).toUpperCase()}
+          <CardHeader>
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={profile.avatar_url || undefined} />
+                <AvatarFallback className="bg-blue-600 text-white text-2xl">
+                  {profile.full_name?.charAt(0) || profile.username?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
-              
-              <div className="flex-1 text-center sm:text-left">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                  <h1 className="text-2xl font-bold text-white">{profile.full_name}</h1>
-                  <Badge className={`${xpBadge.color} text-white`}>
-                    {xpBadge.icon} {xpBadge.name}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-3xl font-bold text-white">{profile.full_name || profile.username}</h1>
+                  <Badge className={`${badge.color} text-white`}>
+                    {badge.name}
                   </Badge>
                 </div>
-                <p className="text-gray-400 mb-2">@{profile.username}</p>
-                <p className="text-gray-300 flex items-center justify-center sm:justify-start">
-                  <Mail className="w-4 h-4 mr-2" />
-                  {user?.email}
-                </p>
-                {profile.mobile_number && (
-                  <p className="text-gray-300 flex items-center justify-center sm:justify-start mt-1">
-                    <Phone className="w-4 h-4 mr-2" />
-                    {profile.mobile_number}
-                  </p>
-                )}
-                <p className="text-gray-400 flex items-center justify-center sm:justify-start mt-1">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Joined {formatDate(profile.created_at)}
+                <p className="text-gray-400">@{profile.username}</p>
+                <p className="text-sm text-gray-500">
+                  Member since {new Date(profile.created_at).toLocaleDateString()}
                 </p>
               </div>
-
               <Button
-                onClick={() => setEditMode(!editMode)}
+                onClick={() => setEditing(!editing)}
                 variant="outline"
-                className="bg-gray-800 border-gray-600 text-white hover:bg-gray-700"
+                className="border-gray-600 text-white hover:bg-gray-800"
               >
-                {editMode ? 'Cancel' : 'Edit Profile'}
+                {editing ? 'Cancel' : 'Edit Profile'}
               </Button>
             </div>
-          </CardContent>
+          </CardHeader>
         </Card>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-gray-900 border-gray-700">
-            <CardContent className="p-4 text-center">
-              <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-white">{profile.xp_points}</p>
-              <p className="text-gray-400 text-sm">XP Points</p>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">XP Points</p>
+                  <p className="text-2xl font-bold text-white">{profile.xp_points}</p>
+                </div>
+                <Trophy className="h-8 w-8 text-yellow-500" />
+              </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-900 border-gray-700">
-            <CardContent className="p-4 text-center">
-              <Target className="w-8 h-8 text-green-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-white">{profile.problems_solved}</p>
-              <p className="text-gray-400 text-sm">Problems Solved</p>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Problems Solved</p>
+                  <p className="text-2xl font-bold text-white">{profile.problems_solved}</p>
+                </div>
+                <Target className="h-8 w-8 text-green-500" />
+              </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-900 border-gray-700">
-            <CardContent className="p-4 text-center">
-              <Zap className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-white">{profile.current_streak}</p>
-              <p className="text-gray-400 text-sm">Current Streak</p>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Current Streak</p>
+                  <p className="text-2xl font-bold text-white">{profile.current_streak}</p>
+                </div>
+                <Flame className="h-8 w-8 text-orange-500" />
+              </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-900 border-gray-700">
-            <CardContent className="p-4 text-center">
-              <Activity className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-white">{profile.max_streak}</p>
-              <p className="text-gray-400 text-sm">Max Streak</p>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Max Streak</p>
+                  <p className="text-2xl font-bold text-white">{profile.max_streak}</p>
+                </div>
+                <Calendar className="h-8 w-8 text-blue-500" />
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Profile Details */}
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-800 border-gray-700">
-            <TabsTrigger value="profile" className="text-white data-[state=active]:bg-blue-600">
-              Profile Details
-            </TabsTrigger>
-            <TabsTrigger value="activity" className="text-white data-[state=active]:bg-blue-600">
-              Activity Log
-            </TabsTrigger>
-          </TabsList>
+        {/* Profile Information */}
+        <Card className="bg-gray-900 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white">Profile Information</CardTitle>
+            <CardDescription className="text-gray-400">
+              Manage your personal information
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="full_name" className="text-white">Full Name</Label>
+                <Input
+                  id="full_name"
+                  value={editing ? formData.full_name : profile.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  disabled={!editing}
+                  className="bg-gray-800 border-gray-600 text-white"
+                />
+              </div>
 
-          <TabsContent value="profile">
-            <Card className="bg-gray-900 border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-white">Profile Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {editMode ? (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="full_name" className="text-white">Full Name</Label>
-                      <Input
-                        id="full_name"
-                        value={formData.full_name}
-                        onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                        className="bg-gray-800 border-gray-600 text-white"
-                      />
-                    </div>
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-white">Username</Label>
+                <Input
+                  id="username"
+                  value={profile.username}
+                  disabled
+                  className="bg-gray-800 border-gray-600 text-white opacity-50"
+                />
+              </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="username" className="text-white">Username</Label>
-                      <Input
-                        id="username"
-                        value={formData.username}
-                        onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                        className="bg-gray-800 border-gray-600 text-white"
-                      />
-                    </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white">Email</Label>
+                <Input
+                  id="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="bg-gray-800 border-gray-600 text-white opacity-50"
+                />
+              </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="mobile_number" className="text-white">Mobile Number</Label>
-                      <Input
-                        id="mobile_number"
-                        value={formData.mobile_number}
-                        onChange={(e) => setFormData(prev => ({ ...prev, mobile_number: e.target.value }))}
-                        className="bg-gray-800 border-gray-600 text-white"
-                      />
-                    </div>
+              <div className="space-y-2">
+                <Label htmlFor="mobile_number" className="text-white">Mobile Number</Label>
+                <Input
+                  id="mobile_number"
+                  value={editing ? formData.mobile_number : (profile.mobile_number || '')}
+                  onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value })}
+                  disabled={!editing}
+                  className="bg-gray-800 border-gray-600 text-white"
+                  placeholder="Enter your mobile number"
+                />
+              </div>
+            </div>
 
-                    <Button
-                      onClick={handleSaveProfile}
-                      disabled={saving}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      {saving ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                  </>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <User className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-white font-medium">Full Name</p>
-                        <p className="text-gray-400">{profile.full_name}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <User className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-white font-medium">Username</p>
-                        <p className="text-gray-400">@{profile.username}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <Mail className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-white font-medium">Email</p>
-                        <p className="text-gray-400">{user?.email}</p>
-                      </div>
-                    </div>
-
-                    {profile.mobile_number && (
-                      <div className="flex items-center space-x-3">
-                        <Phone className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <p className="text-white font-medium">Mobile Number</p>
-                          <p className="text-gray-400">{profile.mobile_number}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="activity">
-            <Card className="bg-gray-900 border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-white">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {activityLogs.map((log) => (
-                    <div key={log.id} className="flex items-start space-x-3 p-3 bg-gray-800 rounded-lg">
-                      <span className="text-xl">{getActivityIcon(log.activity_type)}</span>
-                      <div className="flex-1">
-                        <p className="text-white">{log.description}</p>
-                        <p className="text-gray-400 text-sm">
-                          {new Date(log.created_at).toLocaleDateString()} at{' '}
-                          {new Date(log.created_at).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {activityLogs.length === 0 && (
-                    <p className="text-gray-400 text-center py-8">No activity logs found</p>
-                  )}
+            {editing && (
+              <>
+                <Separator className="bg-gray-700" />
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    onClick={() => setEditing(false)}
+                    variant="outline"
+                    className="border-gray-600 text-white hover:bg-gray-800"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Save Changes
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
