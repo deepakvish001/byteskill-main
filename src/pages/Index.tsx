@@ -1,11 +1,20 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import Sidebar from "@/components/Sidebar";
+import ProblemDashboard from "@/components/ProblemDashboard";
+import Header from "@/components/Header";
 
 const Index = () => {
+  const [selectedSheet, setSelectedSheet] = useState("sde-sheet");
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gray-50 flex">
+      <Sidebar selectedSheet={selectedSheet} onSheetChange={setSelectedSheet} />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <main className="flex-1 p-6">
+          <ProblemDashboard />
+        </main>
       </div>
     </div>
   );
