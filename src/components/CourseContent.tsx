@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +34,7 @@ interface Problem {
   estimatedTime?: number;
   practice_link?: string;
   description?: string;
+  content_id?: string; // Add content_id to track the actual database record
 }
 
 interface Lecture {
@@ -71,6 +73,7 @@ const CourseContent = ({
   const [loading, setLoading] = useState(true);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [currentProblem, setCurrentProblem] = useState<{ id: number; title: string } | null>(null);
+  const [contentIdMap, setContentIdMap] = useState<Record<number, string>>({});
 
   // Handle collapse/expand controls from parent
   useEffect(() => {
@@ -144,6 +147,9 @@ const CourseContent = ({
 
       if (contentError) throw contentError;
 
+      // Create content ID mapping
+      const idMap: Record<number, string> = {};
+      
       // Transform data to match the expected structure
       const transformedSteps: Step[] = modules.map(module => {
         const moduleChapters = chapters?.filter(c => c.module_id === module.id) || [];
@@ -151,22 +157,28 @@ const CourseContent = ({
         const lectures: Lecture[] = moduleChapters.map(chapter => {
           const chapterContent = content?.filter(c => c.chapter_id === chapter.id) || [];
           
-          const problems: Problem[] = chapterContent.map(item => ({
-            id: parseInt(item.id.replace(/-/g, '').substring(0, 8), 16), // Convert UUID to number
-            title: item.title,
-            difficulty: (item.difficulty as "Easy" | "Medium" | "Hard") || "Easy",
-            status: "Not Started" as const,
-            tags: item.tags || [],
-            companies: [],
-            hasArticle: !!item.article_content,
-            hasVideo: !!item.video_url,
-            hasPractice: !!item.practice_link,
-            estimatedTime: item.estimated_time_minutes || 30,
-            article: item.article_content || undefined,
-            video: item.video_url || undefined,
-            practice_link: item.practice_link || undefined,
-            description: item.description || undefined
-          }));
+          const problems: Problem[] = chapterContent.map(item => {
+            const problemId = parseInt(item.id.replace(/-/g, '').substring(0, 8), 16);
+            idMap[problemId] = item.id; // Store the mapping
+            
+            return {
+              id: problemId,
+              title: item.title,
+              difficulty: (item.difficulty as "Easy" | "Medium" | "Hard") || "Easy",
+              status: "Not Started" as const,
+              tags: item.tags || [],
+              companies: [],
+              hasArticle: !!item.article_content,
+              hasVideo: !!item.video_url,
+              hasPractice: !!item.practice_link,
+              estimatedTime: item.estimated_time_minutes || 30,
+              article: item.article_content || undefined,
+              video: item.video_url || undefined,
+              practice_link: item.practice_link || undefined,
+              description: item.description || undefined,
+              content_id: item.id
+            };
+          });
 
           return {
             id: chapter.id,
@@ -189,6 +201,7 @@ const CourseContent = ({
       });
 
       setSteps(transformedSteps);
+      setContentIdMap(idMap);
     } catch (error) {
       console.error('Error fetching course data:', error);
       toast.error('Failed to load course content');
@@ -288,9 +301,13 @@ const CourseContent = ({
       [problemId]: newStatus
     }));
 
-    // Find the content_id for this problem
-    const contentId = findContentIdByProblemId(problemId);
-    if (!contentId) return;
+    // Get the actual content ID from our mapping
+    const contentId = contentIdMap[problemId];
+    if (!contentId) {
+      console.error('Content ID not found for problem:', problemId);
+      toast.error('Failed to update progress - content not found');
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -309,7 +326,6 @@ const CourseContent = ({
       if (error) throw error;
       
       toast.success(`Problem marked as ${newStatus.toLowerCase()}`);
-      fetchUserProgress();
     } catch (error) {
       console.error('Error updating problem status:', error);
       toast.error('Failed to update progress');
@@ -327,8 +343,13 @@ const CourseContent = ({
     }
 
     const isBookmarked = bookmarkedProblems.includes(problemId);
-    const contentId = findContentIdByProblemId(problemId);
-    if (!contentId) return;
+    const contentId = contentIdMap[problemId];
+    
+    if (!contentId) {
+      console.error('Content ID not found for problem:', problemId);
+      toast.error('Failed to update bookmark - content not found');
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -370,8 +391,12 @@ const CourseContent = ({
   const handleSaveNote = async (noteContent: string) => {
     if (!user || !currentProblem) return;
 
-    const contentId = findContentIdByProblemId(currentProblem.id);
-    if (!contentId) return;
+    const contentId = contentIdMap[currentProblem.id];
+    if (!contentId) {
+      console.error('Content ID not found for problem:', currentProblem.id);
+      toast.error('Failed to save note - content not found');
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -400,18 +425,6 @@ const CourseContent = ({
   };
 
   // Helper functions to find IDs
-  const findContentIdByProblemId = (problemId: number): string => {
-    for (const step of steps) {
-      for (const lecture of step.lectures) {
-        const problem = lecture.problems.find(p => p.id === problemId);
-        if (problem) {
-          return lecture.id; // Using chapter ID as content ID for now
-        }
-      }
-    }
-    return '';
-  };
-
   const findModuleIdByProblemId = (problemId: number): string => {
     for (const step of steps) {
       for (const lecture of step.lectures) {
