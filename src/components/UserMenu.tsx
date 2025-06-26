@@ -13,13 +13,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, Settings, LogOut, Trophy, Shield } from 'lucide-react';
+import { User, LogOut, Shield } from 'lucide-react';
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
     const checkAdminRole = async () => {
@@ -43,16 +44,44 @@ const UserMenu = () => {
       }
     };
 
+    const fetchUsername = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', user.id)
+          .single();
+
+        if (!error && data) {
+          setUsername(data.username);
+        } else {
+          setUsername(user.email?.split('@')[0] || 'user');
+        }
+      } catch (error) {
+        console.error('Error fetching username:', error);
+        setUsername(user.email?.split('@')[0] || 'user');
+      }
+    };
+
     checkAdminRole();
+    fetchUsername();
   }, [user]);
 
   const handleSignOut = async () => {
     setLoading(true);
     try {
       await signOut();
-      navigate('/auth');
+      navigate('/');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (username) {
+      navigate(`/u/${username}`);
     }
   };
 
@@ -85,18 +114,11 @@ const UserMenu = () => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-gray-700" />
         <DropdownMenuItem 
-          onClick={() => navigate('/profile')}
+          onClick={handleProfileClick}
           className="text-white hover:bg-gray-800 cursor-pointer"
         >
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => navigate('/profile')}
-          className="text-white hover:bg-gray-800 cursor-pointer"
-        >
-          <Trophy className="mr-2 h-4 w-4" />
-          <span>Achievements</span>
         </DropdownMenuItem>
         {isAdmin && (
           <>

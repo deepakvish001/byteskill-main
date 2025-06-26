@@ -27,6 +27,10 @@ const Sidebar = ({
     setExpandedSections(prev => prev.includes(section) ? prev.filter(s => s !== section) : [...prev, section]);
   };
 
+  const handleHomeClick = () => {
+    navigate("/");
+  };
+
   const handleDashboardClick = () => {
     onSheetChange("dashboard");
     navigate("/dashboard");
@@ -54,11 +58,19 @@ const Sidebar = ({
 
   const menuItems = [
     {
+      id: "home",
+      label: "Home",
+      icon: BookOpen,
+      items: [],
+      badge: "Home",
+      action: handleHomeClick
+    },
+    {
       id: "dashboard",
       label: "Dashboard",
       icon: TrendingUp,
       items: [],
-      badge: "Home",
+      badge: "Track",
       action: handleDashboardClick
     },
     {
