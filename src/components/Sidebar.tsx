@@ -191,15 +191,15 @@ const Sidebar = ({
           <div className="flex items-center justify-center">
             {collapsed ? (
               <div className="flex flex-col items-center space-y-3 w-full">
-                <div className="relative">
+                <Link to="/" className="relative hover:opacity-80 transition-opacity">
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-sm opacity-50"></div>
                   <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl">
                     <BookOpen className="w-6 h-6 text-white" />
                   </div>
-                </div>
+                </Link>
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
+              <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
                   <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-3 rounded-xl shadow-2xl">
@@ -217,7 +217,7 @@ const Sidebar = ({
                     </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             )}
           </div>
         </div>

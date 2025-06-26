@@ -30,7 +30,7 @@ const Index = () => {
       <header className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-3">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
                 <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-3 rounded-xl shadow-2xl">
@@ -48,7 +48,7 @@ const Index = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
             <nav className="hidden md:flex space-x-8">
               <Link to="/dsa-sheets" className="text-gray-300 hover:text-white transition-colors">DSA Sheets</Link>
               <Link to="/courses" className="text-gray-300 hover:text-white transition-colors">Courses</Link>
@@ -56,12 +56,12 @@ const Index = () => {
               <Link to="/interview-prep" className="text-gray-300 hover:text-white transition-colors">Interview Prep</Link>
             </nav>
             <div className="flex items-center space-x-4">
-              <Link to="/auth">
+              <Link to="/login">
                 <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-800">
                   Sign In
                 </Button>
               </Link>
-              <Link to="/auth">
+              <Link to="/login">
                 <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
                   Get Started
                 </Button>
@@ -89,7 +89,7 @@ const Index = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link to="/auth">
+            <Link to="/login">
               <Button size="lg" className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
                 Start Learning Free
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -197,7 +197,7 @@ const Index = () => {
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-white mb-4">Ready to Start Your Journey?</h2>
           <p className="text-xl text-gray-300 mb-8">Join thousands of developers who have transformed their careers with Byteskill</p>
-          <Link to="/auth">
+          <Link to="/login">
             <Button size="lg" className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
               Get Started for Free
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -211,7 +211,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1">
-              <div className="flex items-center space-x-3 mb-4">
+              <Link to="/" className="flex items-center space-x-3 mb-4">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg blur-sm opacity-50"></div>
                   <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-lg">
@@ -221,7 +221,7 @@ const Index = () => {
                 <span className="text-xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
                   Byteskill
                 </span>
-              </div>
+              </Link>
               <p className="text-gray-400 text-sm">
                 Master coding skills with our comprehensive learning platform designed for developers.
               </p>

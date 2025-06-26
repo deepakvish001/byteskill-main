@@ -2,6 +2,7 @@
 import { Search, Menu, BookOpen, Trophy, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   searchQuery: string;
@@ -31,7 +32,7 @@ const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onToggleSidebar
 
           {/* Logo section - Only show when sidebar is collapsed */}
           {sidebarCollapsed && (
-            <div className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
                 <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl shadow-2xl">
@@ -49,7 +50,7 @@ const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onToggleSidebar
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
           )}
         </div>
         

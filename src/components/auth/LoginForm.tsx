@@ -4,9 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
   onToggle: () => void;
@@ -14,60 +13,32 @@ interface LoginFormProps {
 
 const LoginForm = ({ onToggle }: LoginFormProps) => {
   const { signIn } = useAuth();
-  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Check rate limiting before attempting login
-      await supabase.rpc('check_login_rate_limit', {
-        email_param: email,
-        ip_param: null // Client-side doesn't have access to real IP
-      });
-
-      // Record login attempt
-      await supabase.from('login_attempts').insert({
-        email,
-        ip_address: 'unknown', // Will be improved with edge functions
-        success: false // Will update if successful
-      });
-
       const { error } = await signIn(email, password);
       
       if (error) {
-        // Log failed attempt
         console.error('Login failed:', error.message);
-        
-        toast({
-          title: 'Login failed',
+        toast.error('Login failed', {
           description: error.message,
-          variant: 'destructive',
         });
       } else {
-        // Update successful login attempt
-        await supabase
-          .from('login_attempts')
-          .update({ success: true })
-          .eq('email', email)
-          .order('attempted_at', { ascending: false })
-          .limit(1);
-
-        toast({
-          title: 'Welcome back!',
+        toast.success('Welcome back!', {
           description: 'You have been signed in successfully.',
         });
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      toast({
-        title: 'Login error',
+      toast.error('Login error', {
         description: error.message || 'An unexpected error occurred',
-        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -75,57 +46,61 @@ const LoginForm = ({ onToggle }: LoginFormProps) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto bg-gray-900 border-gray-800">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center text-white">Sign In</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-white">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={loading}
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </Button>
-        </form>
-        <div className="mt-4 text-center">
-          <p className="text-gray-400">
-            Don't have an account?{' '}
-            <button
-              onClick={onToggle}
-              className="text-blue-400 hover:text-blue-300 underline"
-            >
-              Sign up
-            </button>
-          </p>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="email" className="text-white font-medium">Email Address</Label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+            className="bg-gray-800 border-gray-700 text-white pl-10 h-12 focus:border-orange-500 focus:ring-orange-500/20"
+          />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="password" className="text-white font-medium">Password</Label>
+        <div className="relative">
+          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            required
+            className="bg-gray-800 border-gray-700 text-white pl-10 pr-10 h-12 focus:border-orange-500 focus:ring-orange-500/20"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+      
+      <Button 
+        type="submit" 
+        className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-base shadow-lg"
+        disabled={loading}
+      >
+        {loading ? (
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <span>Signing in...</span>
+          </div>
+        ) : (
+          'Sign In'
+        )}
+      </Button>
+    </form>
   );
 };
 

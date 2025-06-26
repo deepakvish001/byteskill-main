@@ -27,7 +27,7 @@ function App() {
             <Toaster />
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<AuthPageWrapper />} />
+              <Route path="/login" element={<AuthPageWrapper />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/dsa-sheets" element={<DSASheetsPage />} />
               <Route path="/courses" element={<CoursesOverview />} />

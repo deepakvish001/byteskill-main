@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import UserMenu from '@/components/UserMenu';
-import { Shield, Users, FileText, Book, Settings, BarChart3, Database, Activity, GraduationCap, Cpu, Target, Code } from 'lucide-react';
+import { Shield, Users, FileText, Book, Settings, BarChart3, Database, Activity, GraduationCap, Cpu, Target, Code, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -58,7 +57,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
     );
   }
@@ -77,6 +76,13 @@ const AdminDashboard = () => {
 
   // Admin sidebar menu items
   const adminMenuItems = [
+    {
+      id: 'home',
+      label: 'Home',
+      icon: BookOpen,
+      description: 'Go to main website',
+      action: () => window.location.href = '/'
+    },
     {
       id: 'overview',
       label: 'Overview',
@@ -129,10 +135,10 @@ const AdminDashboard = () => {
 
   // Mock admin stats
   const adminStats = [
-    { title: 'Total Users', value: '1,234', icon: Users, trend: '+12%' },
-    { title: 'Active Courses', value: '89', icon: Book, trend: '+8%' },
-    { title: 'DSA Sheets', value: '25', icon: FileText, trend: '+3%' },
-    { title: 'System Health', value: '99.9%', icon: Activity, trend: 'Stable' }
+    { title: 'Total Users', value: '1,234', icon: Users, trend: '+12%', color: 'text-blue-400' },
+    { title: 'Active Courses', value: '89', icon: Book, trend: '+8%', color: 'text-green-400' },
+    { title: 'DSA Sheets', value: '25', icon: FileText, trend: '+3%', color: 'text-purple-400' },
+    { title: 'System Health', value: '99.9%', icon: Activity, trend: 'Stable', color: 'text-orange-400' }
   ];
 
   const renderContent = () => {
@@ -143,16 +149,17 @@ const AdminDashboard = () => {
             {/* Admin Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {adminStats.map((stat, index) => (
-                <Card key={index} className="bg-gray-900 border-gray-800">
+                <Card key={index} className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-colors">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-gray-400">
                       {stat.title}
                     </CardTitle>
-                    <stat.icon className="h-4 w-4 text-gray-400" />
+                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-white">{stat.value}</div>
-                    <p className="text-xs text-green-400 mt-1">
+                    <div className="text-3xl font-bold text-white">{stat.value}</div>
+                    <p className="text-xs text-green-400 mt-1 flex items-center">
+                      <span className="mr-1">↗</span>
                       {stat.trend}
                     </p>
                   </CardContent>
@@ -163,42 +170,78 @@ const AdminDashboard = () => {
             {/* Quick Actions */}
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
+                <CardTitle className="text-white text-xl">Quick Actions</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Manage your platform content efficiently
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Button 
                     variant="outline" 
-                    className="h-16 flex flex-col space-y-2"
+                    className="h-20 flex flex-col space-y-2 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-orange-500 transition-all"
                     onClick={() => setActiveSection('courses')}
                   >
-                    <GraduationCap className="w-6 h-6" />
-                    <span>Add Course</span>
+                    <GraduationCap className="w-8 h-8 text-orange-400" />
+                    <span className="text-white font-medium">Add Course</span>
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="h-16 flex flex-col space-y-2"
+                    className="h-20 flex flex-col space-y-2 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-blue-500 transition-all"
                     onClick={() => setActiveSection('dsa-sheets')}
                   >
-                    <FileText className="w-6 h-6" />
-                    <span>Add DSA Sheet</span>
+                    <FileText className="w-8 h-8 text-blue-400" />
+                    <span className="text-white font-medium">Add DSA Sheet</span>
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="h-16 flex flex-col space-y-2"
+                    className="h-20 flex flex-col space-y-2 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-green-500 transition-all"
                     onClick={() => setActiveSection('interview-prep')}
                   >
-                    <Target className="w-6 h-6" />
-                    <span>Add Interview Prep</span>
+                    <Target className="w-8 h-8 text-green-400" />
+                    <span className="text-white font-medium">Add Interview Prep</span>
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="h-16 flex flex-col space-y-2"
+                    className="h-20 flex flex-col space-y-2 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-purple-500 transition-all"
                     onClick={() => setActiveSection('core-cs')}
                   >
-                    <Cpu className="w-6 h-6" />
-                    <span>Add Core CS</span>
+                    <Cpu className="w-8 h-8 text-purple-400" />
+                    <span className="text-white font-medium">Add Core CS</span>
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-white text-xl">Recent Activity</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Latest updates and changes to your platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { action: 'New user registered', user: 'john.doe@example.com', time: '2 minutes ago', type: 'user' },
+                    { action: 'Course "Advanced React" published', user: 'admin', time: '1 hour ago', type: 'course' },
+                    { action: 'DSA Sheet "Binary Trees" updated', user: 'admin', time: '3 hours ago', type: 'sheet' },
+                    { action: 'Interview prep questions added', user: 'admin', time: '1 day ago', type: 'interview' }
+                  ].map((activity, index) => (
+                    <div key={index} className="flex items-center space-x-4 p-3 bg-gray-800 rounded-lg">
+                      <div className={`w-2 h-2 rounded-full ${
+                        activity.type === 'user' ? 'bg-blue-400' :
+                        activity.type === 'course' ? 'bg-green-400' :
+                        activity.type === 'sheet' ? 'bg-purple-400' : 'bg-orange-400'
+                      }`} />
+                      <div className="flex-1">
+                        <p className="text-white text-sm font-medium">{activity.action}</p>
+                        <p className="text-gray-400 text-xs">by {activity.user}</p>
+                      </div>
+                      <span className="text-gray-500 text-xs">{activity.time}</span>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -299,7 +342,13 @@ const AdminDashboard = () => {
             {adminMenuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => {
+                  if (item.action) {
+                    item.action();
+                  } else {
+                    setActiveSection(item.id);
+                  }
+                }}
                 className={`w-full flex items-center p-3 rounded-xl text-left hover:bg-gray-900 transition-all duration-200 group ${
                   activeSection === item.id ? 'bg-gray-900 border border-gray-800' : ''
                 } ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}
@@ -307,7 +356,7 @@ const AdminDashboard = () => {
                 <item.icon className={`${
                   sidebarCollapsed ? 'w-7 h-7' : 'w-5 h-5'
                 } ${
-                  activeSection === item.id ? 'text-white' : 'text-gray-400 group-hover:text-white'
+                  activeSection === item.id ? 'text-orange-400' : 'text-gray-400 group-hover:text-white'
                 } transition-colors`} />
                 {!sidebarCollapsed && (
                   <div className="ml-3">
@@ -355,7 +404,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center space-x-3 mb-2">
                   <Shield className="w-8 h-8 text-orange-400" />
                   <h1 className="text-4xl font-bold text-white">Admin Dashboard</h1>
-                  <Badge className="bg-orange-900 text-orange-400 border-orange-800">
+                  <Badge className="bg-orange-900 text-orange-400 border-orange-800 px-3 py-1">
                     Administrator
                   </Badge>
                 </div>
