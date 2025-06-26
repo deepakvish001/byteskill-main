@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Code, Bookmark, Minimize2, Maximize2, Trophy, Medal, Target, Crown, Brain, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import StatsOverview from "@/components/StatsOverview";
 import AdvancedFilter from "@/components/AdvancedFilter";
 import ProblemTable from "@/components/ProblemTable";
 import NoteDialog from "@/components/NoteDialog";
+import CoursePageToolbar from "@/components/CoursePageToolbar";
 
 interface Problem {
   id: number;
@@ -647,7 +647,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
   return (
     <div className="text-white space-y-4 sm:space-y-6 bg-black min-h-screen px-2 sm:px-4 lg:px-0">
-      {/* Enhanced Header Section with Single Icon and Dark Black Background */}
+      {/* Enhanced Header Section with Dark Black Background */}
       <div className="bg-black space-y-4 sm:space-y-6">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl blur-xl"></div>
@@ -690,55 +690,42 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
         <ProgressSection progress={progress} />
 
-        {/* Enhanced Filter Tabs with Collapse Controls - Responsive */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 mb-6">
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              onClick={() => setSelectedTab("all")}
-              className={`px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm ${
-                selectedTab === "all" 
-                  ? "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20" 
-                  : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
-              }`}
-            >
-              All Problems
-            </Button>
-            <Button 
-              onClick={() => setSelectedTab("revision")}
-              className={`px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm ${
-                selectedTab === "revision" 
-                  ? "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20" 
-                  : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
-              }`}
-            >
-              <Bookmark className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              Revision ({bookmarkedProblems.length})
-            </Button>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <Button
-              onClick={collapseAllSteps}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm"
-            >
-              {allStepsCollapsed ? <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> : <Minimize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />}
-              <span className="hidden sm:inline">{allStepsCollapsed ? "Expand Steps" : "Collapse Steps"}</span>
-              <span className="sm:hidden">{allStepsCollapsed ? "Expand" : "Collapse"}</span>
-            </Button>
-            <Button
-              onClick={collapseAllLectures}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm"
-            >
-              {allLecturesCollapsed ? <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> : <Minimize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />}
-              <span className="hidden sm:inline">{allLecturesCollapsed ? "Expand Lectures" : "Collapse Lectures"}</span>
-              <span className="sm:hidden">{allLecturesCollapsed ? "Expand L" : "Collapse L"}</span>
-            </Button>
-            
-            <AdvancedFilter 
-              filters={advancedFilters}
-              onFiltersChange={setAdvancedFilters}
-            />
-          </div>
+        {/* Course Page Toolbar - Always show default options */}
+        <CoursePageToolbar
+          onRevisionModeToggle={() => setSelectedTab(selectedTab === "revision" ? "all" : "revision")}
+          onCollapseAllSteps={collapseAllSteps}
+          onExpandAllSteps={() => collapseAllSteps()}
+          onCollapseAllLectures={collapseAllLectures}
+          onExpandAllLectures={() => collapseAllLectures()}
+          allStepsCollapsed={allStepsCollapsed}
+          allLecturesCollapsed={allLecturesCollapsed}
+          filters={advancedFilters}
+          onFiltersChange={setAdvancedFilters}
+        />
+
+        {/* Enhanced Filter Tabs */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Button 
+            onClick={() => setSelectedTab("all")}
+            className={`px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm ${
+              selectedTab === "all" 
+                ? "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20" 
+                : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
+            }`}
+          >
+            All Problems
+          </Button>
+          <Button 
+            onClick={() => setSelectedTab("revision")}
+            className={`px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm ${
+              selectedTab === "revision" 
+                ? "bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20" 
+                : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
+            }`}
+          >
+            <Bookmark className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            Revision ({bookmarkedProblems.length})
+          </Button>
         </div>
       </div>
 
