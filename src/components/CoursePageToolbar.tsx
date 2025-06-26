@@ -80,7 +80,7 @@ const CoursePageToolbar = ({
           </Button>
 
           {/* Advanced Options Toggle */}
-          <Button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)} variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white text-xs">
+          <Button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)} variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:text-white text-xs bg-zinc-950 hover:bg-zinc-800">
             <Settings className="w-3 h-3 mr-1" />
             Advanced
           </Button>
