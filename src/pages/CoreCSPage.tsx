@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -82,26 +83,6 @@ const CoreCSPage = () => {
 
   const getEnrollmentStatus = (courseId: string) => {
     return enrollments?.find(e => e.course_id === courseId);
-  };
-
-  const handleEnrollment = async (courseId: string) => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('course_enrollments')
-        .insert({
-          user_id: user.id,
-          course_id: courseId
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error enrolling:', error);
-    }
   };
 
   const filteredCourses = courses?.filter(course => 
@@ -230,8 +211,8 @@ const CoreCSPage = () => {
                       </div>
                     )}
                     
-                    {/* Enrolled Badge */}
-                    {enrollment && (
+                    {/* Enrolled Badge - Only show for logged in users */}
+                    {user && enrollment && (
                       <div className="absolute top-3 left-3 z-10">
                         <Badge className="bg-white/20 text-white border-0 text-xs font-bold px-2 py-1">
                           <CheckCircle className="w-3 h-3 mr-1" />
@@ -278,7 +259,8 @@ const CoreCSPage = () => {
                         </div>
                       </div>
                       
-                      {enrollment && (
+                      {/* Progress Bar - Only show for logged in users */}
+                      {user && enrollment && (
                         <div className="mb-4">
                           <div className="flex items-center justify-between text-sm mb-2 text-white/80">
                             <span>Progress</span>
@@ -302,14 +284,13 @@ const CoreCSPage = () => {
                           View Course
                         </Button>
                         
-                        {!enrollment && (
-                          <Button 
-                            onClick={() => handleEnrollment(course.course_id)}
-                            className="w-full bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium py-2 transition-all duration-200"
-                          >
-                            Enroll Now
-                          </Button>
-                        )}
+                        <Button 
+                          onClick={() => navigate(`/course/${course.course_id}`)}
+                          className="w-full bg-white text-gray-900 hover:bg-gray-100 border-0 font-medium py-2 transition-all duration-200"
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          Start Now
+                        </Button>
                       </div>
                     </CardContent>
 

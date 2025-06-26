@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -127,33 +128,6 @@ const CoursePage = () => {
       toast.error('Failed to load course data');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleEnroll = async () => {
-    if (!user) {
-      toast.error('Please log in to enroll in this course');
-      return;
-    }
-    if (!course) return;
-    try {
-      const {
-        error
-      } = await supabase.from('course_enrollments').insert({
-        user_id: user.id,
-        course_id: course.course_id,
-        progress_percentage: 0
-      });
-      if (error) throw error;
-      toast.success('Successfully enrolled in the course!');
-      fetchCourseData(); // Refresh data
-    } catch (error: any) {
-      console.error('Error enrolling in course:', error);
-      if (error.code === '23505') {
-        toast.error('You are already enrolled in this course');
-      } else {
-        toast.error('Failed to enroll in course');
-      }
     }
   };
 
@@ -296,9 +270,6 @@ const CoursePage = () => {
                   )}
                   <p className="text-gray-400 text-lg">{course?.description}</p>
                 </div>
-                {!enrollment && course && <Button onClick={handleEnroll} className="bg-green-600 hover:bg-green-700 text-white" disabled={!user}>
-                    {user ? 'Free Enroll' : 'Login to Enroll'}
-                  </Button>}
               </div>
 
               {course && <div className="flex items-center space-x-4">
@@ -313,21 +284,21 @@ const CoursePage = () => {
                     <Clock className="w-4 h-4" />
                     <span>{course.estimated_hours}h</span>
                   </div>
-                  {enrollment && <Badge className="bg-green-900 text-green-400 border-green-800">
+                  {user && enrollment && <Badge className="bg-green-900 text-green-400 border-green-800">
                       <CheckCircle className="w-3 h-3 mr-1" />
                       Enrolled - {enrollment.progress_percentage}% Complete
                     </Badge>}
                 </div>}
             </div>
 
-            {/* Progress Stats - Only show if enrolled */}
-            {enrollment && <CourseProgressStats totalProblems={course.problem_count || 0} solvedProblems={Math.floor(enrollment.progress_percentage / 100 * (course.problem_count || 0))} attemptedProblems={Math.floor((enrollment.progress_percentage + 10) / 100 * (course.problem_count || 0))} averageTime={22} streak={4} completionRate={enrollment.progress_percentage} />}
+            {/* Progress Stats - Only show if enrolled and user is logged in */}
+            {user && enrollment && <CourseProgressStats totalProblems={course.problem_count || 0} solvedProblems={Math.floor(enrollment.progress_percentage / 100 * (course.problem_count || 0))} attemptedProblems={Math.floor((enrollment.progress_percentage + 10) / 100 * (course.problem_count || 0))} averageTime={22} streak={4} completionRate={enrollment.progress_percentage} />}
 
-            {/* Course Toolbar - Only show if enrolled */}
-            {enrollment && <CoursePageToolbar onRevisionModeToggle={handleRevisionModeToggle} onCollapseAllSteps={handleCollapseAllSteps} onExpandAllSteps={handleExpandAllSteps} onCollapseAllLectures={handleCollapseAllLectures} onExpandAllLectures={handleExpandAllLectures} allStepsCollapsed={allStepsCollapsed} allLecturesCollapsed={allLecturesCollapsed} filters={filters} onFiltersChange={setFilters} />}
+            {/* Course Toolbar - Show for all users */}
+            <CoursePageToolbar onRevisionModeToggle={handleRevisionModeToggle} onCollapseAllSteps={handleCollapseAllSteps} onExpandAllSteps={handleExpandAllSteps} onCollapseAllLectures={handleCollapseAllLectures} onExpandAllLectures={handleExpandAllLectures} allStepsCollapsed={allStepsCollapsed} allLecturesCollapsed={allLecturesCollapsed} filters={filters} onFiltersChange={setFilters} />
 
-            {/* Course Content - Using CourseContent component */}
-            <CourseContent selectedSheet={courseId || ""} searchQuery={searchQuery} isEnrolled={!!enrollment} />
+            {/* Course Content - Accessible to all users */}
+            <CourseContent selectedSheet={courseId || ""} searchQuery={searchQuery} isEnrolled={true} />
           </div>
         </main>
       </div>

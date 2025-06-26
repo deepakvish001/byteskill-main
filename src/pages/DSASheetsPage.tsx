@@ -257,21 +257,18 @@ const DSASheetsPage = () => {
                       {/* Action Buttons */}
                       <div className="space-y-2">
                         <Button 
-                          onClick={() => user ? navigate(`/sheet/${sheet.course_id}`) : navigate('/login')}
+                          onClick={() => navigate(`/sheet/${sheet.course_id}`)}
                           className="w-full bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm transition-all duration-200"
                         >
                           <Play className="w-4 h-4 mr-2" />
                           View Sheet
                         </Button>
                         <Button 
-                          onClick={() => user ? navigate(`/sheet/${sheet.course_id}`) : navigate('/login')}
+                          onClick={() => navigate(`/sheet/${sheet.course_id}`)}
                           className="w-full bg-white hover:bg-gray-100 text-gray-800 border-none font-semibold transition-all duration-200"
                         >
-                          {user ? (
-                            progress && progressPercentage > 0 ? (
-                              progressPercentage === 100 ? 'Review Sheet' : 'Continue Practice'
-                            ) : 'Enroll Now'
-                          ) : 'Enroll Now'}
+                          <Play className="w-4 h-4 mr-2" />
+                          Start Now
                         </Button>
                       </div>
                     </div>
