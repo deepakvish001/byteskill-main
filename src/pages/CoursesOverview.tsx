@@ -18,10 +18,10 @@ interface Course {
   title: string;
   description: string;
   difficulty: string;
-  estimated_duration: number;
+  estimated_hours: number; // Changed from estimated_duration
   tags: string[];
   created_at: string;
-  is_free: boolean;
+  is_premium: boolean; // Changed from is_free
   rating?: number;
   enrolled_count?: number;
   category: string;
@@ -186,7 +186,7 @@ const CoursesOverview = () => {
                     <span className="text-sm text-gray-400">Free Courses</span>
                   </div>
                   <p className="text-3xl font-bold text-white text-center">
-                    {courses.filter(course => course.is_free).length}
+                    {courses.filter(course => !course.is_premium).length}
                   </p>
                 </div>
                 <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
@@ -235,8 +235,8 @@ const CoursesOverview = () => {
                           <Badge className={getDifficultyColor(course.difficulty)}>
                             {course.difficulty}
                           </Badge>
-                          <Badge className={course.is_free ? "bg-green-900/20 text-green-400 border-green-800" : "bg-yellow-900/20 text-yellow-400 border-yellow-800"}>
-                            {course.is_free ? 'Free' : 'Premium'}
+                          <Badge className={!course.is_premium ? "bg-green-900/20 text-green-400 border-green-800" : "bg-yellow-900/20 text-yellow-400 border-yellow-800"}>
+                            {!course.is_premium ? 'Free' : 'Premium'}
                           </Badge>
                         </div>
                         <CardTitle className="text-white text-xl group-hover:text-green-400 transition-colors line-clamp-2 mb-2">
@@ -273,7 +273,7 @@ const CoursesOverview = () => {
                           <div className="flex items-center space-x-4">
                             <div className="flex items-center">
                               <Clock className="w-4 h-4 mr-1" />
-                              <span>{course.estimated_duration || 0}h</span>
+                              <span>{course.estimated_hours || 0}h</span>
                             </div>
                             {course.rating && (
                               <div className="flex items-center">
