@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -250,8 +249,12 @@ const AdminContentManagement = ({ category, searchQuery }: AdminContentManagemen
           </DialogHeader>
           <EnhancedCourseForm
             course={selectedCourse}
-            category={category}
-            onClose={() => setShowCourseForm(false)}
+            onSubmit={async (data) => {
+              // Handle form submission here
+              console.log('Course data:', data);
+              setShowCourseForm(false);
+            }}
+            onCancel={() => setShowCourseForm(false)}
           />
         </DialogContent>
       </Dialog>

@@ -20,12 +20,15 @@ interface Course {
   course_id: string;
   title: string;
   description: string;
+  tagline?: string;
   category: string;
   difficulty: string;
   total_lessons: number;
   estimated_hours: number;
   tags: string[];
   is_premium: boolean;
+  module_count?: number;
+  problem_count?: number;
 }
 
 interface Enrollment {
