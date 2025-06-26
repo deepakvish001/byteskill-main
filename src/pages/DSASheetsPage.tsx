@@ -5,11 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import UserMenu from '@/components/UserMenu';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Clock, Target, Users, Star, ArrowRight, Trophy, Code, GitBranch, TrendingUp, LogIn } from 'lucide-react';
+import { BookOpen, Clock, Target, Star, Play, Code, LogIn } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -38,7 +37,7 @@ interface UserProgress {
 const DSASheetsPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default closed
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [dsaSheets, setDsaSheets] = useState<DSASheet[]>([]);
   const [userProgress, setUserProgress] = useState<{ [key: string]: UserProgress }>({});
@@ -95,17 +94,18 @@ const DSASheetsPage = () => {
     }
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case 'beginner':
-        return 'bg-green-900/20 text-green-400 border-green-800';
-      case 'intermediate':
-        return 'bg-yellow-900/20 text-yellow-400 border-yellow-800';
-      case 'advanced':
-        return 'bg-red-900/20 text-red-400 border-red-800';
-      default:
-        return 'bg-gray-900/20 text-gray-400 border-gray-800';
-    }
+  const getCardGradient = (index: number) => {
+    const gradients = [
+      'bg-gradient-to-br from-orange-500 to-amber-600',
+      'bg-gradient-to-br from-red-500 to-orange-600',
+      'bg-gradient-to-br from-amber-500 to-orange-600',
+      'bg-gradient-to-br from-pink-500 to-red-600',
+      'bg-gradient-to-br from-purple-500 to-pink-600',
+      'bg-gradient-to-br from-blue-500 to-purple-600',
+      'bg-gradient-to-br from-green-500 to-teal-600',
+      'bg-gradient-to-br from-teal-500 to-cyan-600'
+    ];
+    return gradients[index % gradients.length];
   };
 
   const filteredSheets = dsaSheets.filter(sheet =>
@@ -171,44 +171,6 @@ const DSASheetsPage = () => {
                   </p>
                 </div>
               </div>
-
-              {/* Stats Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto">
-                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-3 mb-2">
-                    <BookOpen className="w-6 h-6 text-blue-400" />
-                    <span className="text-sm text-gray-400">Total Sheets</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white text-center">{dsaSheets.length}</p>
-                </div>
-                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-3 mb-2">
-                    <Target className="w-6 h-6 text-green-400" />
-                    <span className="text-sm text-gray-400">Total Problems</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white text-center">
-                    {dsaSheets.reduce((sum, sheet) => sum + (sheet.problem_count || 0), 0)}
-                  </p>
-                </div>
-                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-3 mb-2">
-                    <TrendingUp className="w-6 h-6 text-purple-400" />
-                    <span className="text-sm text-gray-400">In Progress</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white text-center">
-                    {user ? Object.values(userProgress).filter(p => p.progress_percentage > 0).length : 0}
-                  </p>
-                </div>
-                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-3 mb-2">
-                    <Trophy className="w-6 h-6 text-yellow-400" />
-                    <span className="text-sm text-gray-400">Completed</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white text-center">
-                    {user ? Object.values(userProgress).filter(p => p.progress_percentage === 100).length : 0}
-                  </p>
-                </div>
-              </div>
             </div>
 
             {loading ? (
@@ -224,95 +186,95 @@ const DSASheetsPage = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredSheets.map((sheet) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredSheets.map((sheet, index) => {
                   const progress = userProgress[sheet.course_id];
                   const progressPercentage = progress?.progress_percentage || 0;
                   
                   return (
-                    <Card key={sheet.course_id} className="bg-gray-900/50 border-gray-700 hover:border-gray-600 transition-all duration-300 group cursor-pointer backdrop-blur-sm">
-                      <CardHeader className="pb-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <Badge className={getDifficultyColor(sheet.difficulty)}>
-                            {sheet.difficulty}
-                          </Badge>
-                          <Badge className={sheet.is_premium ? "bg-yellow-900/20 text-yellow-400 border-yellow-800" : "bg-green-900/20 text-green-400 border-green-800"}>
-                            {sheet.is_premium ? 'Premium' : 'Free'}
-                          </Badge>
+                    <div key={sheet.course_id} className={`${getCardGradient(index)} rounded-2xl p-6 text-white relative overflow-hidden group hover:scale-105 transition-all duration-300 cursor-pointer`}>
+                      {/* Free Badge */}
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-green-600 text-white border-none text-xs font-semibold px-2 py-1">
+                          {!sheet.is_premium ? 'FREE' : 'PREMIUM'}
+                        </Badge>
+                      </div>
+
+                      {/* Icon */}
+                      <div className="mb-6 mt-4">
+                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                          <Code className="w-6 h-6 text-white" />
                         </div>
-                        <CardTitle className="text-white text-xl group-hover:text-blue-400 transition-colors line-clamp-2 mb-2">
-                          {sheet.title}
-                        </CardTitle>
-                        <CardDescription className="text-gray-400 line-clamp-3 leading-relaxed">
-                          {sheet.description}
-                        </CardDescription>
-                        {sheet.tagline && (
-                          <p className="text-sm text-blue-400 font-medium mt-2">{sheet.tagline}</p>
-                        )}
-                      </CardHeader>
-                      
-                      <CardContent className="space-y-4">
-                        {/* Progress Bar - Only show for logged in users */}
-                        {user && progress && progressPercentage > 0 && (
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Progress</span>
-                              <span className="text-white font-medium">{progressPercentage}%</span>
-                            </div>
-                            <Progress 
-                              value={progressPercentage} 
-                              className="h-2 bg-gray-800" 
-                            />
-                            <p className="text-xs text-gray-500">
-                              {Math.floor(progressPercentage / 10)} problems solved
-                            </p>
-                          </div>
-                        )}
+                      </div>
 
-                        {/* Stats */}
-                        <div className="flex items-center justify-between text-sm text-gray-400">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center">
-                              <Target className="w-4 h-4 mr-1" />
-                              <span>{sheet.problem_count || 0} problems</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Clock className="w-4 h-4 mr-1" />
-                              <span>{sheet.estimated_hours || 0}h</span>
-                            </div>
-                          </div>
+                      {/* Sheet Title */}
+                      <h3 className="text-xl font-bold mb-3 text-white">
+                        {sheet.title}
+                      </h3>
+
+                      {/* Sheet Description */}
+                      <p className="text-white/80 text-sm mb-4 line-clamp-2">
+                        {sheet.description}
+                      </p>
+
+                      {/* Difficulty Badge */}
+                      <div className="mb-4">
+                        <Badge className="bg-white/20 text-white border-none text-xs font-medium px-2 py-1 backdrop-blur-sm">
+                          {sheet.difficulty.toUpperCase()}
+                        </Badge>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex items-center justify-between text-sm text-white/80 mb-6">
+                        <div className="flex items-center space-x-1">
+                          <BookOpen className="w-4 h-4" />
+                          <span>{sheet.problem_count || 0} problems</span>
                         </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{sheet.estimated_hours}h</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-300" />
+                          <span>4.9</span>
+                        </div>
+                      </div>
 
-                        {/* Tags */}
-                        {sheet.tags && sheet.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {sheet.tags.slice(0, 3).map((tag, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs bg-gray-800/50 text-gray-300 border-gray-700">
-                                {tag}
-                              </Badge>
-                            ))}
-                            {sheet.tags.length > 3 && (
-                              <Badge variant="secondary" className="text-xs bg-gray-800/50 text-gray-300 border-gray-700">
-                                +{sheet.tags.length - 3} more
-                              </Badge>
-                            )}
+                      {/* Progress Bar - Only show for logged in users */}
+                      {user && progress && progressPercentage > 0 && (
+                        <div className="mb-4">
+                          <div className="flex justify-between text-sm mb-2">
+                            <span className="text-white/80">Progress</span>
+                            <span className="text-white font-medium">{progressPercentage}%</span>
                           </div>
-                        )}
+                          <Progress 
+                            value={progressPercentage} 
+                            className="h-2 bg-white/20" 
+                          />
+                        </div>
+                      )}
 
-                        {/* Action Button */}
+                      {/* Action Buttons */}
+                      <div className="space-y-2">
                         <Button 
                           onClick={() => user ? navigate(`/sheet/${sheet.course_id}`) : navigate('/login')}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white group-hover:shadow-lg transition-all duration-300"
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm transition-all duration-200"
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          View Sheet
+                        </Button>
+                        <Button 
+                          onClick={() => user ? navigate(`/sheet/${sheet.course_id}`) : navigate('/login')}
+                          className="w-full bg-white hover:bg-gray-100 text-gray-800 border-none font-semibold transition-all duration-200"
                         >
                           {user ? (
                             progress && progressPercentage > 0 ? (
                               progressPercentage === 100 ? 'Review Sheet' : 'Continue Practice'
-                            ) : 'Start Practicing'
-                          ) : 'Sign In to Practice'}
-                          <ArrowRight className="w-4 h-4 ml-2" />
+                            ) : 'Enroll Now'
+                          ) : 'Enroll Now'}
                         </Button>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
