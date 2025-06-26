@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,82 +17,60 @@ import {
   Star,
   BookOpen,
   Play,
-  TrendingUp,
-  Users,
-  Zap,
-  Lock
+  AlertCircle
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
 import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 
-interface Course {
-  id: string;
-  course_id: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  total_lessons: number;
-  estimated_hours: number;
-  tags: string[];
-  is_premium: boolean;
-}
-
-interface Enrollment {
-  course_id: string;
-  progress_percentage: number;
-}
-
 const CoreCSPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filterQuery, setFilterQuery] = useState("");
+  
   const breadcrumbItems = [
     { label: 'Home', href: '/dashboard' },
     { label: 'Core CS' }
   ];
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
-
-  const fetchData = async () => {
-    try {
-      // Fetch core CS courses
-      const { data: coursesData, error: coursesError } = await supabase
+  // Fetch core CS courses
+  const { data: courses, isLoading, error } = useQuery({
+    queryKey: ['core-cs-courses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('courses')
         .select('*')
         .eq('category', 'core-cs')
+        .eq('is_published', true)
         .order('created_at', { ascending: false });
 
-      if (coursesError) throw coursesError;
-      setCourses(coursesData || []);
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
-      // Fetch user enrollments if logged in
-      if (user) {
-        const { data: enrollmentsData, error: enrollmentsError } = await supabase
-          .from('course_enrollments')
-          .select('course_id, progress_percentage')
-          .eq('user_id', user.id);
+  // Fetch user enrollments
+  const { data: enrollments } = useQuery({
+    queryKey: ['user-core-cs-enrollments', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select('course_id, progress_percentage')
+        .eq('user_id', user.id);
 
-        if (enrollmentsError) {
-          console.error('Error fetching enrollments:', enrollmentsError);
-        } else {
-          setEnrollments(enrollmentsData || []);
-        }
+      if (error) {
+        console.error('Error fetching enrollments:', error);
+        return [];
       }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -102,7 +82,7 @@ const CoreCSPage = () => {
   };
 
   const getEnrollmentStatus = (courseId: string) => {
-    return enrollments.find(e => e.course_id === courseId);
+    return enrollments?.find(e => e.course_id === courseId);
   };
 
   const handleEnrollment = async (courseId: string) => {
@@ -120,27 +100,16 @@ const CoreCSPage = () => {
         });
 
       if (error) throw error;
-      
-      // Refresh enrollments
-      fetchData();
     } catch (error) {
       console.error('Error enrolling:', error);
     }
   };
 
-  const filteredCourses = courses.filter(course => 
+  const filteredCourses = courses?.filter(course => 
     course.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
     course.description?.toLowerCase().includes(filterQuery.toLowerCase()) ||
-    course.tags.some(tag => tag.toLowerCase().includes(filterQuery.toLowerCase()))
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
-      </div>
-    );
-  }
+    course.tags?.some((tag: string) => tag.toLowerCase().includes(filterQuery.toLowerCase()))
+  ) || [];
 
   return (
     <div className="min-h-screen bg-black flex relative overflow-hidden">
@@ -177,7 +146,7 @@ const CoreCSPage = () => {
         {/* Main Content */}
         <main className="flex-1 pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
-            {/* Breadcrumb - Now visible with proper spacing */}
+            {/* Breadcrumb */}
             <div className="bg-black mb-4">
               <CourseBreadcrumb items={breadcrumbItems} />
             </div>
@@ -205,7 +174,41 @@ const CoreCSPage = () => {
               </div>
             </div>
 
-            {/* Course Cards Grid - Same design as DSA Sheets */}
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-red-400 mb-2">Error Loading Courses</h3>
+                  <p className="text-gray-400">There was an error loading the Core CS courses. Please try again later.</p>
+                </div>
+              </div>
+            )}
+
+            {/* No Data State */}
+            {!isLoading && !error && filteredCourses.length === 0 && (
+              <div className="text-center py-12">
+                <Cpu className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                  {courses?.length === 0 ? 'No Core CS Courses Available' : 'No courses found'}
+                </h3>
+                <p className="text-gray-500">
+                  {courses?.length === 0 
+                    ? 'Core Computer Science courses will appear here once they are created by administrators.'
+                    : 'Try adjusting your search query.'
+                  }
+                </p>
+              </div>
+            )}
+
+            {/* Course Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);
@@ -255,7 +258,7 @@ const CoreCSPage = () => {
                       
                       <div className="flex items-center justify-center mt-3">
                         <Badge className={`${getDifficultyColor(course.difficulty)} text-xs font-medium border`}>
-                          {course.difficulty.toUpperCase()}
+                          {course.difficulty?.toUpperCase() || 'BEGINNER'}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -264,11 +267,11 @@ const CoreCSPage = () => {
                       <div className="flex items-center justify-center space-x-6 mb-6 text-white/80">
                         <div className="flex items-center space-x-1 text-sm">
                           <Database className="w-4 h-4" />
-                          <span>{course.total_lessons} topics</span>
+                          <span>{course.total_lessons || 0} topics</span>
                         </div>
                         <div className="flex items-center space-x-1 text-sm">
                           <Clock className="w-4 h-4" />
-                          <span>{course.estimated_hours}h</span>
+                          <span>{course.estimated_hours || 0}h</span>
                         </div>
                         <div className="flex items-center space-x-1 text-sm">
                           <Star className="w-4 h-4 text-yellow-400" />

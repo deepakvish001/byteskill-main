@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
-import { Code, Bookmark, Minimize2, Maximize2, Trophy, Medal, Target, Crown, Brain, Zap } from "lucide-react";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Code, Bookmark, Trophy, Medal, Target, Crown, Brain, Zap, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProgressSection from "@/components/ProgressSection";
 import StatsOverview from "@/components/StatsOverview";
-import AdvancedFilter from "@/components/AdvancedFilter";
 import ProblemTable from "@/components/ProblemTable";
 import NoteDialog from "@/components/NoteDialog";
 import CoursePageToolbar from "@/components/CoursePageToolbar";
+import { toast } from "sonner";
 
 interface Problem {
   id: number;
@@ -46,370 +49,16 @@ interface Step {
   completedProblems: number;
 }
 
-interface Sheet {
-  id: string;
-  name: string;
-  description: string;
-  totalTime: number;
-  completion: number;
-  steps: Step[];
-}
-
-const mockSheets: Record<string, Sheet> = {
-  "striver-a2z": {
-    id: "striver-a2z",
-    name: "Byteskill A2Z DSA Course",
-    description: "This course is made for people who want to learn DSA from A to Z for free in a well-organized and structured manner. Master algorithms and data structures with our comprehensive curriculum.",
-    totalTime: 2400,
-    completion: 0,
-    steps: [
-      {
-        id: "step1",
-        title: "Step 1: Learn the basics",
-        expanded: true,
-        totalProblems: 31,
-        completedProblems: 0,
-        lectures: [
-          {
-            id: "lec1",
-            title: "Lec 1: Things to Know in C++/Java/Python or any language",
-            expanded: true,
-            totalProblems: 9,
-            completedProblems: 0,
-            problems: [
-              {
-                id: 1,
-                title: "User Input / Output",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Basics"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 15,
-                article: "https://takeuforward.org/c/c-basic-input-output/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              },
-              {
-                id: 2,
-                title: "Data Types",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Basics"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 20,
-                article: "https://takeuforward.org/c/data-types-in-c/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              },
-              {
-                id: 3,
-                title: "If Else statements",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Basics"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 25,
-                article: "https://takeuforward.org/if-else/if-else-statements-in-c/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              },
-              {
-                id: 4,
-                title: "Switch Statement",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Basics"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: false,
-                article: "https://takeuforward.org/switch/switch-statement-in-c/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              },
-              {
-                id: 5,
-                title: "What are arrays, strings?",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Array", "String"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: false,
-                article: "https://takeuforward.org/arrays/introduction-to-arrays/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              },
-              {
-                id: 6,
-                title: "For loops",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Loops"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: false,
-                article: "https://takeuforward.org/loops/for-loop-in-c/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              },
-              {
-                id: 7,
-                title: "While loops",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Loops"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: false,
-                article: "https://takeuforward.org/loops/while-loop-in-c/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              },
-              {
-                id: 8,
-                title: "Functions (Pass by Reference and Value)",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Functions"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: false,
-                article: "https://takeuforward.org/functions/functions-in-c/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              },
-              {
-                id: 9,
-                title: "Time Complexity (Learn Basics, and then analyse in next Steps)",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Time Complexity"],
-                companies: [],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: false,
-                article: "https://takeuforward.org/time-complexity/time-complexity-analysis/",
-                video: "https://www.youtube.com/watch?v=EAR7De6Goz4"
-              }
-            ]
-          },
-          {
-            id: "lec2",
-            title: "Lec 2: Build-up Logical Thinking",
-            expanded: false,
-            totalProblems: 1,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec3",
-            title: "Lec 3: Learn STL/Java-Collections or similar thing in your language",
-            expanded: false,
-            totalProblems: 1,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec4",
-            title: "Lec 4: Know Basic Maths",
-            expanded: false,
-            totalProblems: 7,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec5",
-            title: "Lec 5: Learn Basic Recursion",
-            expanded: false,
-            totalProblems: 9,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec6",
-            title: "Lec 6: Learn Basic Hashing",
-            expanded: false,
-            totalProblems: 3,
-            completedProblems: 0,
-            problems: []
-          }
-        ]
-      },
-      {
-        id: "step2",
-        title: "Step 2: Learn Important Sorting Techniques",
-        expanded: false,
-        totalProblems: 7,
-        completedProblems: 0,
-        lectures: [
-          {
-            id: "lec7",
-            title: "Lec 1: Sorting-I",
-            expanded: false,
-            totalProblems: 7,
-            completedProblems: 0,
-            problems: []
-          }
-        ]
-      },
-      {
-        id: "step3",
-        title: "Step 3: Solve Problems on Arrays [Easy -> Medium -> Hard]",
-        expanded: false,
-        totalProblems: 40,
-        completedProblems: 0,
-        lectures: [
-          {
-            id: "lec8",
-            title: "Lec 1: Easy",
-            expanded: false,
-            totalProblems: 13,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec9",
-            title: "Lec 2: Medium",
-            expanded: false,
-            totalProblems: 15,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec10",
-            title: "Lec 3: Hard",
-            expanded: false,
-            totalProblems: 12,
-            completedProblems: 0,
-            problems: []
-          }
-        ]
-      },
-      {
-        id: "step4",
-        title: "Step 4: Binary Search [1D, 2D Arrays, Search Space]",
-        expanded: false,
-        totalProblems: 32,
-        completedProblems: 0,
-        lectures: [
-          {
-            id: "lec11",
-            title: "Lec 1: Learning Binary Search on 1D Arrays",
-            expanded: false,
-            totalProblems: 8,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec12",
-            title: "Lec 2: BS on Answers",
-            expanded: false,
-            totalProblems: 11,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec13",
-            title: "Lec 3: BS on 2D Arrays",
-            expanded: false,
-            totalProblems: 4,
-            completedProblems: 0,
-            problems: []
-          }
-        ]
-      },
-      {
-        id: "step5",
-        title: "Step 5: Strings [Basic and Medium]",
-        expanded: false,
-        totalProblems: 15,
-        completedProblems: 0,
-        lectures: [
-          {
-            id: "lec14",
-            title: "Lec 1: Basic and Easy String Problems",
-            expanded: false,
-            totalProblems: 8,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec15",
-            title: "Lec 2: Medium String Problems",
-            expanded: false,
-            totalProblems: 7,
-            completedProblems: 0,
-            problems: []
-          }
-        ]
-      },
-      {
-        id: "step6",
-        title: "Step 6: Learn LinkedList [Single/Double LL, Medium, Hard Problems]",
-        expanded: false,
-        totalProblems: 31,
-        completedProblems: 0,
-        lectures: [
-          {
-            id: "lec16",
-            title: "Lec 1: Learn 1D LinkedList",
-            expanded: false,
-            totalProblems: 9,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec17",
-            title: "Lec 2: Learn Doubly LinkedList",
-            expanded: false,
-            totalProblems: 4,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec18",
-            title: "Lec 3: Medium Problems of LL",
-            expanded: false,
-            totalProblems: 12,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec19",
-            title: "Lec 4: Medium Problems of DLL",
-            expanded: false,
-            totalProblems: 2,
-            completedProblems: 0,
-            problems: []
-          },
-          {
-            id: "lec20",
-            title: "Lec 5: Hard Problems of LL",
-            expanded: false,
-            totalProblems: 4,
-            completedProblems: 0,
-            problems: []
-          }
-        ]
-      }
-    ]
-  }
-};
-
 interface ProblemDashboardProps {
   selectedSheet: string;
   searchQuery: string;
+  userId?: string;
 }
 
-const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps) => {
-  const [expandedSteps, setExpandedSteps] = useState<string[]>(["step1"]);
-  const [expandedLectures, setExpandedLectures] = useState<string[]>(["lec1"]);
+const ProblemDashboard = ({ selectedSheet, searchQuery, userId }: ProblemDashboardProps) => {
+  const { user } = useAuth();
+  const [expandedSteps, setExpandedSteps] = useState<string[]>([]);
+  const [expandedLectures, setExpandedLectures] = useState<string[]>([]);
   const [bookmarkedProblems, setBookmarkedProblems] = useState<number[]>([]);
   const [problemNotes, setProblemNotes] = useState<Record<number, string>>({});
   const [selectedTab, setSelectedTab] = useState<"all" | "revision">("all");
@@ -429,7 +78,155 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     searchQuery: ""
   });
 
-  const sheet = mockSheets[selectedSheet] || mockSheets["striver-a2z"];
+  // Fetch course data with real-time updates
+  const { data: courseData, isLoading, error } = useQuery({
+    queryKey: ['course-content', selectedSheet],
+    queryFn: async () => {
+      // Fetch course details
+      const { data: course, error: courseError } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('course_id', selectedSheet)
+        .single();
+
+      if (courseError) throw courseError;
+
+      // Fetch modules
+      const { data: modules, error: modulesError } = await supabase
+        .from('course_modules')
+        .select('*')
+        .eq('course_id', selectedSheet)
+        .eq('is_published', true)
+        .order('module_order');
+
+      if (modulesError) throw modulesError;
+
+      // If no modules, return empty structure
+      if (!modules || modules.length === 0) {
+        return { course, steps: [] };
+      }
+
+      // Fetch chapters
+      const moduleIds = modules.map(m => m.id);
+      const { data: chapters, error: chaptersError } = await supabase
+        .from('course_chapters')
+        .select('*')
+        .in('module_id', moduleIds)
+        .eq('is_published', true)
+        .order('chapter_order');
+
+      if (chaptersError) throw chaptersError;
+
+      // Fetch content
+      const chapterIds = chapters?.map(c => c.id) || [];
+      const { data: content, error: contentError } = await supabase
+        .from('course_content')
+        .select('*')
+        .in('chapter_id', chapterIds)
+        .eq('status', 'published')
+        .order('content_order');
+
+      if (contentError) throw contentError;
+
+      // Transform to Step structure
+      const steps: Step[] = modules.map(module => {
+        const moduleChapters = chapters?.filter(c => c.module_id === module.id) || [];
+        
+        const lectures: Lecture[] = moduleChapters.map(chapter => {
+          const chapterContent = content?.filter(c => c.chapter_id === chapter.id) || [];
+          
+          const problems: Problem[] = chapterContent.map(item => ({
+            id: parseInt(item.id.replace(/-/g, '').substring(0, 8), 16),
+            title: item.title,
+            difficulty: (item.difficulty as "Easy" | "Medium" | "Hard") || "Easy",
+            status: "Not Started" as const,
+            tags: item.tags || [],
+            companies: [],
+            hasArticle: !!item.article_content,
+            hasVideo: !!item.video_url,
+            hasPractice: !!item.practice_link,
+            estimatedTime: item.estimated_time_minutes || 30,
+            article: item.article_content || undefined,
+            video: item.video_url || undefined,
+            notes: undefined
+          }));
+
+          return {
+            id: chapter.id,
+            title: chapter.title,
+            problems,
+            expanded: false,
+            totalProblems: problems.length,
+            completedProblems: 0
+          };
+        });
+
+        return {
+          id: module.id,
+          title: module.title,
+          lectures,
+          expanded: false,
+          totalProblems: lectures.reduce((sum, l) => sum + l.totalProblems, 0),
+          completedProblems: 0
+        };
+      });
+
+      return { course, steps };
+    },
+    enabled: !!selectedSheet,
+  });
+
+  // Fetch user progress
+  const { data: userProgress } = useQuery({
+    queryKey: ['user-progress', selectedSheet, userId || user?.id],
+    queryFn: async () => {
+      const targetUserId = userId || user?.id;
+      if (!targetUserId) return null;
+
+      const { data, error } = await supabase
+        .from('user_content_progress')
+        .select('*')
+        .eq('user_id', targetUserId)
+        .eq('course_id', selectedSheet);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!(userId || user?.id) && !!selectedSheet,
+  });
+
+  // Update problem statuses and bookmarks when user progress loads
+  useEffect(() => {
+    if (userProgress) {
+      const statuses: Record<number, "Solved" | "Attempted" | "Not Started"> = {};
+      const bookmarks: number[] = [];
+      const notes: Record<number, string> = {};
+
+      userProgress.forEach(p => {
+        const problemId = parseInt(p.content_id.replace(/-/g, '').substring(0, 8), 16);
+        
+        if (p.is_completed) {
+          statuses[problemId] = "Solved";
+        } else if (p.time_spent_minutes > 0) {
+          statuses[problemId] = "Attempted";
+        } else {
+          statuses[problemId] = "Not Started";
+        }
+
+        if (p.is_bookmarked) {
+          bookmarks.push(problemId);
+        }
+
+        if (p.notes) {
+          notes[problemId] = p.notes;
+        }
+      });
+
+      setProblemStatuses(statuses);
+      setBookmarkedProblems(bookmarks);
+      setProblemNotes(notes);
+    }
+  }, [userProgress]);
 
   const toggleStep = (stepId: string) => {
     setExpandedSteps(prev => 
@@ -447,43 +244,137 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     );
   };
 
-  const toggleBookmark = (problemId: number) => {
-    setBookmarkedProblems(prev => 
-      prev.includes(problemId)
-        ? prev.filter(id => id !== problemId)
-        : [...prev, problemId]
-    );
+  const toggleBookmark = async (problemId: number) => {
+    if (!user) {
+      toast.error("Please log in to bookmark problems");
+      return;
+    }
+
+    const isBookmarked = bookmarkedProblems.includes(problemId);
+    
+    try {
+      // Update in database
+      const contentId = findContentIdByProblemId(problemId);
+      if (!contentId) return;
+
+      const { error } = await supabase
+        .from('user_content_progress')
+        .upsert({
+          user_id: user.id,
+          content_id: contentId,
+          course_id: selectedSheet,
+          module_id: findModuleIdByProblemId(problemId),
+          chapter_id: findChapterIdByProblemId(problemId),
+          is_bookmarked: !isBookmarked,
+          bookmarked_at: !isBookmarked ? new Date().toISOString() : null
+        });
+
+      if (error) throw error;
+
+      setBookmarkedProblems(prev => 
+        isBookmarked 
+          ? prev.filter(id => id !== problemId)
+          : [...prev, problemId]
+      );
+    } catch (error) {
+      console.error('Error updating bookmark:', error);
+      toast.error('Failed to update bookmark');
+    }
   };
 
-  const toggleProblemStatus = (problemId: number) => {
-    setProblemStatuses(prev => {
-      const currentStatus = prev[problemId] || "Not Started";
-      let nextStatus: "Solved" | "Attempted" | "Not Started";
-      
-      switch (currentStatus) {
-        case "Not Started":
-          nextStatus = "Attempted";
-          break;
-        case "Attempted":
-          nextStatus = "Solved";
-          break;
-        case "Solved":
-          nextStatus = "Not Started";
-          break;
-        default:
-          nextStatus = "Not Started";
-      }
-      
-      return {
+  const toggleProblemStatus = async (problemId: number) => {
+    if (!user) {
+      toast.error("Please log in to track progress");
+      return;
+    }
+
+    const currentStatus = problemStatuses[problemId] || "Not Started";
+    let newStatus: "Solved" | "Attempted" | "Not Started";
+    
+    switch (currentStatus) {
+      case "Not Started":
+        newStatus = "Attempted";
+        break;
+      case "Attempted":
+        newStatus = "Solved";
+        break;
+      case "Solved":
+        newStatus = "Not Started";
+        break;
+      default:
+        newStatus = "Not Started";
+    }
+
+    try {
+      const contentId = findContentIdByProblemId(problemId);
+      if (!contentId) return;
+
+      const { error } = await supabase
+        .from('user_content_progress')
+        .upsert({
+          user_id: user.id,
+          content_id: contentId,
+          course_id: selectedSheet,
+          module_id: findModuleIdByProblemId(problemId),
+          chapter_id: findChapterIdByProblemId(problemId),
+          is_completed: newStatus === "Solved",
+          time_spent_minutes: newStatus !== "Not Started" ? 1 : 0,
+          completed_at: newStatus === "Solved" ? new Date().toISOString() : null
+        });
+
+      if (error) throw error;
+
+      setProblemStatuses(prev => ({
         ...prev,
-        [problemId]: nextStatus
-      };
-    });
+        [problemId]: newStatus
+      }));
+    } catch (error) {
+      console.error('Error updating problem status:', error);
+      toast.error('Failed to update progress');
+    }
+  };
+
+  // Helper functions
+  const findContentIdByProblemId = (problemId: number): string => {
+    if (!courseData?.steps) return '';
+    for (const step of courseData.steps) {
+      for (const lecture of step.lectures) {
+        const problem = lecture.problems.find(p => p.id === problemId);
+        if (problem) {
+          return lecture.id;
+        }
+      }
+    }
+    return '';
+  };
+
+  const findModuleIdByProblemId = (problemId: number): string => {
+    if (!courseData?.steps) return '';
+    for (const step of courseData.steps) {
+      for (const lecture of step.lectures) {
+        if (lecture.problems.find(p => p.id === problemId)) {
+          return step.id;
+        }
+      }
+    }
+    return '';
+  };
+
+  const findChapterIdByProblemId = (problemId: number): string => {
+    if (!courseData?.steps) return '';
+    for (const step of courseData.steps) {
+      for (const lecture of step.lectures) {
+        if (lecture.problems.find(p => p.id === problemId)) {
+          return lecture.id;
+        }
+      }
+    }
+    return '';
   };
 
   const collapseAllSteps = () => {
     if (allStepsCollapsed) {
-      setExpandedSteps(sheet.steps.map(step => step.id));
+      setExpandedSteps(courseData?.steps.map(step => step.id) || []);
     } else {
       setExpandedSteps([]);
     }
@@ -492,7 +383,7 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
   const collapseAllLectures = () => {
     if (allLecturesCollapsed) {
-      const allLectureIds = sheet.steps.flatMap(step => step.lectures.map(lecture => lecture.id));
+      const allLectureIds = courseData?.steps.flatMap(step => step.lectures.map(lecture => lecture.id)) || [];
       setExpandedLectures(allLectureIds);
     } else {
       setExpandedLectures([]);
@@ -501,12 +392,13 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
   };
 
   const filteredStepsAndLectures = () => {
+    if (!courseData?.steps) return [];
+    
     if (selectedTab !== "revision") {
-      return sheet.steps;
+      return courseData.steps;
     }
 
-    // Filter to show only steps and lectures that contain bookmarked problems
-    return sheet.steps.map(step => ({
+    return courseData.steps.map(step => ({
       ...step,
       lectures: step.lectures.map(lecture => ({
         ...lecture,
@@ -529,16 +421,23 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     });
   };
 
-  // Calculate progress statistics with dynamic updates
   const calculateProgress = () => {
-    const allProblems = sheet.steps.flatMap(step => 
+    if (!courseData?.steps) {
+      return {
+        total: { solved: 0, total: 0, percentage: 0 },
+        easy: { solved: 0, total: 0, percentage: 0 },
+        medium: { solved: 0, total: 0, percentage: 0 },
+        hard: { solved: 0, total: 0, percentage: 0 }
+      };
+    }
+
+    const allProblems = courseData.steps.flatMap(step => 
       step.lectures.flatMap(lecture => lecture.problems)
     );
     
-    const totalProblems = 455;
-    const easyTotal = 131;
-    const mediumTotal = 187;
-    const hardTotal = 136;
+    const easyProblems = allProblems.filter(p => p.difficulty === "Easy");
+    const mediumProblems = allProblems.filter(p => p.difficulty === "Medium");
+    const hardProblems = allProblems.filter(p => p.difficulty === "Hard");
     
     let totalSolved = 0;
     let easySolved = 0;
@@ -564,14 +463,13 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     });
     
     return {
-      total: { solved: totalSolved, total: totalProblems, percentage: Math.round((totalSolved / totalProblems) * 100) },
-      easy: { solved: easySolved, total: easyTotal, percentage: Math.round((easySolved / easyTotal) * 100) },
-      medium: { solved: mediumSolved, total: mediumTotal, percentage: Math.round((mediumSolved / mediumTotal) * 100) },
-      hard: { solved: hardSolved, total: hardTotal, percentage: Math.round((hardSolved / hardTotal) * 100) }
+      total: { solved: totalSolved, total: allProblems.length, percentage: Math.round((totalSolved / (allProblems.length || 1)) * 100) },
+      easy: { solved: easySolved, total: easyProblems.length, percentage: Math.round((easySolved / (easyProblems.length || 1)) * 100) },
+      medium: { solved: mediumSolved, total: mediumProblems.length, percentage: Math.round((mediumSolved / (mediumProblems.length || 1)) * 100) },
+      hard: { solved: hardSolved, total: hardProblems.length, percentage: Math.round((hardSolved / (hardProblems.length || 1)) * 100) }
     };
   };
 
-  // Calculate step and lecture progress
   const calculateStepProgress = (step: Step) => {
     const stepProblems = step.lectures.flatMap(lecture => lecture.problems);
     const solvedProblems = stepProblems.filter(problem => 
@@ -587,44 +485,13 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     return lecture.problems.length > 0 ? Math.round((solvedProblems.length / lecture.problems.length) * 100) : 0;
   };
 
-  // Calculate points and awards
-  const calculatePointsAndAwards = () => {
-    const allProblems = sheet.steps.flatMap(step => 
-      step.lectures.flatMap(lecture => lecture.problems)
-    );
-    
-    let totalPoints = 0;
-    let totalArticlesRead = 0;
-    let totalVideosWatched = 0;
-    
-    allProblems.forEach(problem => {
-      const status = problemStatuses[problem.id] || problem.status;
-      if (status === "Solved") {
-        // Points based on difficulty
-        switch (problem.difficulty) {
-          case "Easy": totalPoints += 10; break;
-          case "Medium": totalPoints += 25; break;
-          case "Hard": totalPoints += 50; break;
-        }
-      }
-      // Simulate articles read and videos watched (in real app, track these separately)
-      if (problem.hasArticle && Math.random() > 0.7) totalArticlesRead++;
-      if (problem.hasVideo && Math.random() > 0.8) totalVideosWatched++;
-    });
-
-    const awards = [];
-    if (progress.total.solved >= 50) awards.push({ name: "Problem Solver", icon: Trophy, color: "text-yellow-400" });
-    if (progress.easy.solved >= 20) awards.push({ name: "Easy Master", icon: Medal, color: "text-green-400" });
-    if (progress.medium.solved >= 15) awards.push({ name: "Medium Challenger", icon: Target, color: "text-yellow-400" });
-    if (progress.hard.solved >= 5) awards.push({ name: "Hard Warrior", icon: Crown, color: "text-red-400" });
-    if (totalArticlesRead >= 30) awards.push({ name: "Knowledge Seeker", icon: Brain, color: "text-blue-400" });
-    if (totalVideosWatched >= 20) awards.push({ name: "Video Learner", icon: Zap, color: "text-purple-400" });
-
-    return { totalPoints, totalArticlesRead, totalVideosWatched, awards };
-  };
-
   const progress = calculateProgress();
-  const { totalPoints, totalArticlesRead, totalVideosWatched, awards } = calculatePointsAndAwards();
+  const { totalPoints, totalArticlesRead, totalVideosWatched, awards } = {
+    totalPoints: progress.total.solved * 15,
+    totalArticlesRead: Math.floor(progress.total.solved * 0.7),
+    totalVideosWatched: Math.floor(progress.total.solved * 0.5),
+    awards: []
+  };
 
   const openNoteDialog = (problemId: number, problemTitle: string) => {
     setCurrentProblemId(problemId);
@@ -645,9 +512,87 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
     }
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-red-400 mb-2">Error Loading Course</h3>
+          <p className="text-gray-400">There was an error loading the course content. Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!courseData?.course) {
+    return (
+      <div className="text-center py-12">
+        <Code className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-gray-400 mb-2">Course Not Found</h3>
+        <p className="text-gray-500">The requested course could not be found or is not available.</p>
+      </div>
+    );
+  }
+
+  // No content state
+  if (!courseData.steps || courseData.steps.length === 0) {
+    return (
+      <div className="text-white space-y-4 sm:space-y-6 bg-black min-h-screen px-2 sm:px-4 lg:px-0">
+        {/* Course Header */}
+        <div className="bg-black space-y-4 sm:space-y-6">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl blur-xl"></div>
+            <div className="relative bg-black backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+                <div className="flex items-center justify-center sm:justify-start">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Code className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <div className="text-center sm:text-left">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+                    {courseData.course.title}
+                  </h1>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-semibold text-xs">
+                      {courseData.course.difficulty}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-300 text-sm sm:text-base lg:text-lg leading-relaxed text-center sm:text-left">
+                {courseData.course.description}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* No Content Message */}
+        <div className="text-center py-12">
+          <Code className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-400 mb-2">No Content Available</h3>
+          <p className="text-gray-500">
+            This course doesn't have any modules or problems yet. Content will appear here once the course is properly structured.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="text-white space-y-4 sm:space-y-6 bg-black min-h-screen px-2 sm:px-4 lg:px-0">
-      {/* Enhanced Header Section with Dark Black Background */}
+      {/* Enhanced Header Section */}
       <div className="bg-black space-y-4 sm:space-y-6">
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl blur-xl"></div>
@@ -660,23 +605,23 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
               </div>
               <div className="text-center sm:text-left">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
-                  {sheet.name}
+                  {courseData.course.title}
                 </h1>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
                   <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-semibold text-xs">
-                    Free Course
+                    {courseData.course.is_premium ? 'Premium' : 'Free'} Course
                   </Badge>
                   <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-semibold text-xs">
-                    450+ Problems
+                    {progress.total.total} Problems
                   </Badge>
                   <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-semibold text-xs">
-                    Complete DSA
+                    {courseData.course.difficulty}
                   </Badge>
                 </div>
               </div>
             </div>
             <p className="text-gray-300 text-sm sm:text-base lg:text-lg leading-relaxed text-center sm:text-left">
-              {sheet.description}
+              {courseData.course.description}
             </p>
           </div>
         </div>
@@ -690,7 +635,6 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
 
         <ProgressSection progress={progress} />
 
-        {/* Course Page Toolbar - Always show default options */}
         <CoursePageToolbar
           onRevisionModeToggle={() => setSelectedTab(selectedTab === "revision" ? "all" : "revision")}
           onCollapseAllSteps={collapseAllSteps}
@@ -703,7 +647,6 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
           onFiltersChange={setAdvancedFilters}
         />
 
-        {/* Enhanced Filter Tabs */}
         <div className="flex flex-wrap gap-2 mb-4">
           <Button 
             onClick={() => setSelectedTab("all")}
@@ -746,11 +689,12 @@ const ProblemDashboard = ({ selectedSheet, searchQuery }: ProblemDashboardProps)
         calculateLectureProgress={calculateLectureProgress}
       />
 
-      <NoteDialog 
+      <NoteDialog
         open={noteDialogOpen}
         onOpenChange={setNoteDialogOpen}
-        noteTitle={noteTitle}
-        noteContent={noteContent}
+        title={noteTitle}
+        content={noteContent}
+        onContentChange={setNoteContent}
         onSave={saveNote}
       />
     </div>

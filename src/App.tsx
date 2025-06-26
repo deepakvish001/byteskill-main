@@ -1,134 +1,47 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import DashboardPage from "./pages/DashboardPage";
-import UserDashboard from "./pages/UserDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import SheetPage from "./pages/SheetPage";
-import CoursePage from "./pages/CoursePage";
-import CoursesOverview from "./pages/CoursesOverview";
-import DSASheetsPage from "./pages/DSASheetsPage";
-import InterviewPrepPage from "./pages/InterviewPrepPage";
-import CoreCSPage from "./pages/CoreCSPage";
-import PublicProfile from "./pages/PublicProfile";
-import AuthPage from "./components/auth/AuthPage";
-import UserProfile from "./components/profile/UserProfile";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import NotFound from "./pages/NotFound";
+import LandingPage from "@/pages/LandingPage";
+import AuthPage from "@/pages/AuthPage";
+import DashboardPage from "@/pages/DashboardPage";
+import DSASheetsPage from "@/pages/DSASheetsPage";
+import CoursesOverview from "@/pages/CoursesOverview";
+import CoreCSPage from "@/pages/CoreCSPage";
+import InterviewPrepPage from "@/pages/InterviewPrepPage";
+import CoursePage from "@/pages/CoursePage";
+import UserDashboard from "@/pages/UserDashboard";
+import AdminDashboard from "@/pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/profile/:username" element={<PublicProfile />} />
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/courses" 
-              element={
-                <ProtectedRoute>
-                  <CoursesOverview />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dsa-sheets" 
-              element={
-                <ProtectedRoute>
-                  <DSASheetsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/interview-prep" 
-              element={
-                <ProtectedRoute>
-                  <InterviewPrepPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/core-cs" 
-              element={
-                <ProtectedRoute>
-                  <CoreCSPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/course/:courseId" 
-              element={
-                <ProtectedRoute>
-                  <CoursePage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/u/:username" 
-              element={
-                <ProtectedRoute>
-                  <UserDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/sheet/:sheetId" 
-              element={
-                <ProtectedRoute>
-                  <SheetPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <UserProfile />
-                </ProtectedRoute>
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dsa-sheets" element={<DSASheetsPage />} />
+              <Route path="/courses" element={<CoursesOverview />} />
+              <Route path="/core-cs" element={<CoreCSPage />} />
+              <Route path="/interview-prep" element={<InterviewPrepPage />} />
+              <Route path="/course/:courseId" element={<CoursePage />} />
+              <Route path="/sheet/:courseId" element={<CoursePage />} />
+              <Route path="/u/:username" element={<UserDashboard />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

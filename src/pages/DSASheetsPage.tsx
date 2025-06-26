@@ -1,38 +1,63 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Clock, Trophy, Users } from 'lucide-react';
+import { BookOpen, Clock, Users, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import UserMenu from '@/components/UserMenu';
 
 const DSASheetsPage = () => {
+  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
 
-  // Fetch courses from Supabase
+  // Fetch DSA sheet courses from Supabase
   const { data: courses, isLoading, error } = useQuery({
-    queryKey: ['courses'],
+    queryKey: ['dsa-courses'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('courses')
         .select('*')
-        .eq('category', 'dsa-sheet');
+        .eq('category', 'dsa-sheet')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw new Error(error.message);
       }
-      return data;
+      return data || [];
     },
   });
 
-  // Function to filter courses based on difficulty
+  // Fetch user enrollments and progress
+  const { data: userProgress } = useQuery({
+    queryKey: ['user-dsa-progress', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select('course_id, progress_percentage')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error fetching user progress:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Filter courses based on difficulty and search
   const filteredCourses = React.useMemo(() => {
     if (!courses) return [];
 
@@ -47,20 +72,20 @@ const DSASheetsPage = () => {
     if (searchQuery) {
       const lowerCaseQuery = searchQuery.toLowerCase();
       filtered = filtered.filter((course) =>
-        course.title.toLowerCase().includes(lowerCaseQuery)
+        course.title.toLowerCase().includes(lowerCaseQuery) ||
+        course.description?.toLowerCase().includes(lowerCaseQuery)
       );
     }
 
     return filtered;
   }, [courses, selectedFilter, searchQuery]);
 
-  // Mock function to get enrollment status (replace with actual logic)
-  const getEnrollmentStatus = (courseId: string) => {
-    // Replace this with actual logic to fetch enrollment status
-    return {
-      course_id: courseId,
-      progress_percentage: Math.floor(Math.random() * 100), // Mock progress
-    };
+  const getProgressForCourse = (courseId: string) => {
+    return userProgress?.find(p => p.course_id === courseId)?.progress_percentage || 0;
+  };
+
+  const isEnrolled = (courseId: string) => {
+    return userProgress?.some(p => p.course_id === courseId) || false;
   };
 
   return (
@@ -110,23 +135,57 @@ const DSASheetsPage = () => {
 
             {/* Filter Pills */}
             <div className="flex flex-wrap gap-2 justify-center mb-8">
-              {['All', 'Beginner', 'Intermediate', 'Advanced'].map((filter) => (
+              {['all', 'beginner', 'intermediate', 'advanced'].map((filter) => (
                 <Button
                   key={filter}
-                  variant={selectedFilter === filter.toLowerCase() ? 'default' : 'outline'}
-                  onClick={() => setSelectedFilter(filter.toLowerCase())}
-                  className="text-sm"
+                  variant={selectedFilter === filter ? 'default' : 'outline'}
+                  onClick={() => setSelectedFilter(filter)}
+                  className="text-sm capitalize"
                 >
                   {filter}
                 </Button>
               ))}
             </div>
 
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-red-400 mb-2">Error Loading Courses</h3>
+                  <p className="text-gray-400">There was an error loading the DSA sheets. Please try again later.</p>
+                </div>
+              </div>
+            )}
+
+            {/* No Data State */}
+            {!isLoading && !error && filteredCourses.length === 0 && (
+              <div className="text-center py-12">
+                <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                  {courses?.length === 0 ? 'No DSA Sheets Available' : 'No sheets found'}
+                </h3>
+                <p className="text-gray-500">
+                  {courses?.length === 0 
+                    ? 'DSA practice sheets will appear here once they are created by administrators.'
+                    : 'Try adjusting your filter or search query.'
+                  }
+                </p>
+              </div>
+            )}
+
             {/* Course Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course) => {
-                const enrollment = getEnrollmentStatus(course.course_id);
-                const progressPercentage = enrollment?.progress_percentage || 0;
+                const progressPercentage = getProgressForCourse(course.course_id);
+                const enrolled = isEnrolled(course.course_id);
 
                 return (
                   <Card key={course.course_id} className="bg-gray-900 border-gray-700 hover:border-blue-500 transition-all duration-300 group">
@@ -152,7 +211,7 @@ const DSASheetsPage = () => {
                     
                     <CardContent className="space-y-4">
                       {/* Progress Bar (if enrolled) */}
-                      {enrollment && (
+                      {enrolled && (
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Progress</span>
@@ -166,30 +225,32 @@ const DSASheetsPage = () => {
                       <div className="grid grid-cols-2 gap-4 text-sm text-gray-400">
                         <div className="flex items-center gap-2">
                           <BookOpen className="w-4 h-4" />
-                          <span>{course.total_lessons} problems</span>
+                          <span>{course.problem_count || 0} problems</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
-                          <span>{course.estimated_hours}h</span>
+                          <span>{course.estimated_hours || 0}h</span>
                         </div>
                       </div>
                       
                       {/* Tags */}
-                      <div className="flex flex-wrap gap-1">
-                        {course.tags?.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
+                      {course.tags && course.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {course.tags.slice(0, 3).map((tag: string) => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                       
                       {/* Action Button */}
-                      <Link to={`/sheet/${course.course_id}`} className="block">
+                      <Link to={`/course/${course.course_id}`} className="block">
                         <Button 
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                           size="sm"
                         >
-                          {enrollment ? 'Continue' : 'Start Practice'}
+                          {enrolled ? 'Continue' : 'Start Practice'}
                         </Button>
                       </Link>
                     </CardContent>
@@ -197,22 +258,6 @@ const DSASheetsPage = () => {
                 );
               })}
             </div>
-
-            {/* Loading State */}
-            {isLoading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-              </div>
-            )}
-
-            {/* Empty State */}
-            {!isLoading && filteredCourses.length === 0 && (
-              <div className="text-center py-12">
-                <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-400 mb-2">No sheets found</h3>
-                <p className="text-gray-500">Try adjusting your filter or search query.</p>
-              </div>
-            )}
           </div>
         </main>
       </div>

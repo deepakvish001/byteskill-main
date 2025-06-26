@@ -2,93 +2,75 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
-  Users, 
+  Target, 
   Clock, 
   Search,
-  Target,
   CheckCircle,
-  MessageCircle,
+  Briefcase,
   Star,
   BookOpen,
-  Play
+  Play,
+  AlertCircle
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
 import CourseBreadcrumb from "@/components/CourseBreadcrumb";
 
-interface Course {
-  id: string;
-  course_id: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  total_lessons: number;
-  estimated_hours: number;
-  tags: string[];
-  is_premium: boolean;
-}
-
-interface Enrollment {
-  course_id: string;
-  progress_percentage: number;
-}
-
 const InterviewPrepPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filterQuery, setFilterQuery] = useState("");
+  
   const breadcrumbItems = [
     { label: 'Home', href: '/dashboard' },
     { label: 'Interview Prep' }
   ];
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
-
-  const fetchData = async () => {
-    try {
-      // Fetch interview prep courses
-      const { data: coursesData, error: coursesError } = await supabase
+  // Fetch interview prep courses
+  const { data: courses, isLoading, error } = useQuery({
+    queryKey: ['interview-prep-courses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('courses')
         .select('*')
         .eq('category', 'interview-prep')
+        .eq('is_published', true)
         .order('created_at', { ascending: false });
 
-      if (coursesError) throw coursesError;
-      setCourses(coursesData || []);
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
-      // Fetch user enrollments if logged in
-      if (user) {
-        const { data: enrollmentsData, error: enrollmentsError } = await supabase
-          .from('course_enrollments')
-          .select('course_id, progress_percentage')
-          .eq('user_id', user.id);
+  // Fetch user enrollments
+  const { data: enrollments } = useQuery({
+    queryKey: ['user-interview-enrollments', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .select('course_id, progress_percentage')
+        .eq('user_id', user.id);
 
-        if (enrollmentsError) {
-          console.error('Error fetching enrollments:', enrollmentsError);
-        } else {
-          setEnrollments(enrollmentsData || []);
-        }
+      if (error) {
+        console.error('Error fetching enrollments:', error);
+        return [];
       }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -100,7 +82,7 @@ const InterviewPrepPage = () => {
   };
 
   const getEnrollmentStatus = (courseId: string) => {
-    return enrollments.find(e => e.course_id === courseId);
+    return enrollments?.find(e => e.course_id === courseId);
   };
 
   const handleEnrollment = async (courseId: string) => {
@@ -118,30 +100,19 @@ const InterviewPrepPage = () => {
         });
 
       if (error) throw error;
-      
-      // Refresh enrollments
-      fetchData();
     } catch (error) {
       console.error('Error enrolling:', error);
     }
   };
 
-  const filteredCourses = courses.filter(course => 
+  const filteredCourses = courses?.filter(course => 
     course.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
     course.description?.toLowerCase().includes(filterQuery.toLowerCase()) ||
-    course.tags.some(tag => tag.toLowerCase().includes(filterQuery.toLowerCase()))
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
+    course.tags?.some((tag: string) => tag.toLowerCase().includes(filterQuery.toLowerCase()))
+  ) || [];
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex relative overflow-hidden">
       {/* Fixed Sidebar */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
         sidebarCollapsed ? 'w-20' : 'w-72'
@@ -154,11 +125,11 @@ const InterviewPrepPage = () => {
       </div>
       
       {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 ${
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
         sidebarCollapsed ? 'ml-20' : 'ml-72'
       }`}>
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 z-30 h-16 bg-black border-b border-gray-800" style={{
+        <div className="fixed top-0 right-0 z-30 h-16 bg-black border-b border-gray-800 transition-all duration-300" style={{
           left: sidebarCollapsed ? '5rem' : '18rem',
         }}>
           <div className="flex items-center justify-between h-full px-4">
@@ -173,20 +144,20 @@ const InterviewPrepPage = () => {
         </div>
         
         {/* Main Content */}
-        <main className="pt-16 p-6 bg-black min-h-screen">
+        <main className="flex-1 pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Breadcrumb */}
-            <div className="mb-4">
+            <div className="bg-black mb-4">
               <CourseBreadcrumb items={breadcrumbItems} />
             </div>
 
             {/* Page Header */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-8 bg-black">
               <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                 Interview Preparation
               </h1>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Ace your technical interviews with expert guidance, mock interviews, and comprehensive practice
+                Ace your technical interviews with comprehensive preparation courses and practice problems
               </p>
             </div>
 
@@ -195,7 +166,7 @@ const InterviewPrepPage = () => {
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <Input
-                  placeholder="Search interview prep courses by company, topic, or difficulty..."
+                  placeholder="Search interview prep topics, companies, or question types..."
                   value={filterQuery}
                   onChange={(e) => setFilterQuery(e.target.value)}
                   className="pl-12 bg-black border-gray-800 text-white placeholder-gray-500 h-12 text-lg focus:border-blue-500"
@@ -203,15 +174,49 @@ const InterviewPrepPage = () => {
               </div>
             </div>
 
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-red-400 mb-2">Error Loading Courses</h3>
+                  <p className="text-gray-400">There was an error loading the Interview Prep courses. Please try again later.</p>
+                </div>
+              </div>
+            )}
+
+            {/* No Data State */}
+            {!isLoading && !error && filteredCourses.length === 0 && (
+              <div className="text-center py-12">
+                <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                  {courses?.length === 0 ? 'No Interview Prep Courses Available' : 'No courses found'}
+                </h3>
+                <p className="text-gray-500">
+                  {courses?.length === 0 
+                    ? 'Interview preparation courses will appear here once they are created by administrators.'
+                    : 'Try adjusting your search query.'
+                  }
+                </p>
+              </div>
+            )}
+
             {/* Course Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);
                 const cardColors = [
-                  'from-purple-600 to-purple-800',
-                  'from-pink-600 to-rose-700', 
+                  'from-purple-600 to-indigo-800',
+                  'from-indigo-600 to-purple-700', 
                   'from-violet-600 to-purple-800',
-                  'from-indigo-500 to-purple-600'
+                  'from-fuchsia-500 to-purple-600'
                 ];
                 const cardColor = cardColors[filteredCourses.indexOf(course) % cardColors.length];
                 
@@ -239,7 +244,7 @@ const InterviewPrepPage = () => {
                     <CardHeader className="pb-4 bg-transparent relative z-10">
                       <div className="flex items-center justify-center mb-4">
                         <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                          <Users className="w-8 h-8 text-white" />
+                          <Target className="w-8 h-8 text-white" />
                         </div>
                       </div>
                       
@@ -253,7 +258,7 @@ const InterviewPrepPage = () => {
                       
                       <div className="flex items-center justify-center mt-3">
                         <Badge className={`${getDifficultyColor(course.difficulty)} text-xs font-medium border`}>
-                          {course.difficulty.toUpperCase()}
+                          {course.difficulty?.toUpperCase() || 'BEGINNER'}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -261,12 +266,12 @@ const InterviewPrepPage = () => {
                     <CardContent className="pt-0 bg-transparent relative z-10">
                       <div className="flex items-center justify-center space-x-6 mb-6 text-white/80">
                         <div className="flex items-center space-x-1 text-sm">
-                          <MessageCircle className="w-4 h-4" />
-                          <span>{course.total_lessons} sessions</span>
+                          <Briefcase className="w-4 h-4" />
+                          <span>{course.total_lessons || 0} questions</span>
                         </div>
                         <div className="flex items-center space-x-1 text-sm">
                           <Clock className="w-4 h-4" />
-                          <span>{course.estimated_hours}h</span>
+                          <span>{course.estimated_hours || 0}h</span>
                         </div>
                         <div className="flex items-center space-x-1 text-sm">
                           <Star className="w-4 h-4 text-yellow-400" />
