@@ -107,6 +107,20 @@ const CoursesOverview = () => {
     }
   };
 
+  const getCardGradient = (index: number) => {
+    const gradients = [
+      'bg-gradient-to-br from-orange-500 to-amber-600',
+      'bg-gradient-to-br from-red-500 to-orange-600',
+      'bg-gradient-to-br from-amber-500 to-orange-600',
+      'bg-gradient-to-br from-pink-500 to-red-600',
+      'bg-gradient-to-br from-purple-500 to-pink-600',
+      'bg-gradient-to-br from-blue-500 to-purple-600',
+      'bg-gradient-to-br from-green-500 to-teal-600',
+      'bg-gradient-to-br from-teal-500 to-cyan-600'
+    ];
+    return gradients[index % gradients.length];
+  };
+
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -170,44 +184,6 @@ const CoursesOverview = () => {
                   </p>
                 </div>
               </div>
-
-              {/* Stats Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto">
-                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-3 mb-2">
-                    <BookOpen className="w-6 h-6 text-green-400" />
-                    <span className="text-sm text-gray-400">Total Courses</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white text-center">{courses.length}</p>
-                </div>
-                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-3 mb-2">
-                    <Play className="w-6 h-6 text-blue-400" />
-                    <span className="text-sm text-gray-400">Free Courses</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white text-center">
-                    {courses.filter(course => !course.is_premium).length}
-                  </p>
-                </div>
-                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-3 mb-2">
-                    <Target className="w-6 h-6 text-purple-400" />
-                    <span className="text-sm text-gray-400">In Progress</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white text-center">
-                    {user ? Object.values(userProgress).filter(p => p.progress_percentage > 0).length : 0}
-                  </p>
-                </div>
-                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-3 mb-2">
-                    <CheckCircle className="w-6 h-6 text-yellow-400" />
-                    <span className="text-sm text-gray-400">Completed</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white text-center">
-                    {user ? Object.values(userProgress).filter(p => p.progress_percentage === 100).length : 0}
-                  </p>
-                </div>
-              </div>
             </div>
 
             {loading ? (
@@ -223,97 +199,95 @@ const CoursesOverview = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredCourses.map((course) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredCourses.map((course, index) => {
                   const progress = userProgress[course.course_id];
                   const progressPercentage = progress?.progress_percentage || 0;
                   
                   return (
-                    <Card key={course.course_id} className="bg-gray-900/50 border-gray-700 hover:border-gray-600 transition-all duration-300 group cursor-pointer backdrop-blur-sm">
-                      <CardHeader className="pb-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <Badge className={getDifficultyColor(course.difficulty)}>
-                            {course.difficulty}
-                          </Badge>
-                          <Badge className={!course.is_premium ? "bg-green-900/20 text-green-400 border-green-800" : "bg-yellow-900/20 text-yellow-400 border-yellow-800"}>
-                            {!course.is_premium ? 'Free' : 'Premium'}
-                          </Badge>
+                    <div key={course.course_id} className={`${getCardGradient(index)} rounded-2xl p-6 text-white relative overflow-hidden group hover:scale-105 transition-all duration-300 cursor-pointer`}>
+                      {/* Free Badge */}
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-green-600 text-white border-none text-xs font-semibold px-2 py-1">
+                          {!course.is_premium ? 'FREE' : 'PREMIUM'}
+                        </Badge>
+                      </div>
+
+                      {/* Icon */}
+                      <div className="mb-6 mt-4">
+                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                          <GraduationCap className="w-6 h-6 text-white" />
                         </div>
-                        <CardTitle className="text-white text-xl group-hover:text-green-400 transition-colors line-clamp-2 mb-2">
-                          {course.title}
-                        </CardTitle>
-                        <CardDescription className="text-gray-400 line-clamp-3 leading-relaxed">
-                          {course.description}
-                        </CardDescription>
-                        {course.tagline && (
-                          <p className="text-sm text-green-400 font-medium mt-2">{course.tagline}</p>
-                        )}
-                      </CardHeader>
-                      
-                      <CardContent className="space-y-4">
-                        {/* Progress Bar - Only show for logged in users */}
-                        {user && progress && progressPercentage > 0 && (
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Progress</span>
-                              <span className="text-white font-medium">{progressPercentage}%</span>
-                            </div>
-                            <Progress 
-                              value={progressPercentage} 
-                              className="h-2 bg-gray-800" 
-                            />
-                            <p className="text-xs text-gray-500">
-                              {Math.floor(progressPercentage / 5)} lessons completed
-                            </p>
-                          </div>
-                        )}
+                      </div>
 
-                        {/* Stats */}
-                        <div className="flex items-center justify-between text-sm text-gray-400">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center">
-                              <Clock className="w-4 h-4 mr-1" />
-                              <span>{course.estimated_hours || 0}h</span>
-                            </div>
-                            {course.rating && (
-                              <div className="flex items-center">
-                                <Star className="w-4 h-4 mr-1 text-yellow-400" />
-                                <span>{course.rating}</span>
-                              </div>
-                            )}
-                          </div>
+                      {/* Course Title */}
+                      <h3 className="text-xl font-bold mb-3 text-white">
+                        {course.title}
+                      </h3>
+
+                      {/* Course Description */}
+                      <p className="text-white/80 text-sm mb-4 line-clamp-2">
+                        {course.description}
+                      </p>
+
+                      {/* Difficulty Badge */}
+                      <div className="mb-4">
+                        <Badge className="bg-white/20 text-white border-none text-xs font-medium px-2 py-1 backdrop-blur-sm">
+                          {course.difficulty.toUpperCase()}
+                        </Badge>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex items-center justify-between text-sm text-white/80 mb-6">
+                        <div className="flex items-center space-x-1">
+                          <BookOpen className="w-4 h-4" />
+                          <span>15 topics</span>
                         </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{course.estimated_hours}h</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-300" />
+                          <span>4.9</span>
+                        </div>
+                      </div>
 
-                        {/* Tags */}
-                        {course.tags && course.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {course.tags.slice(0, 3).map((tag, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs bg-gray-800/50 text-gray-300 border-gray-700">
-                                {tag}
-                              </Badge>
-                            ))}
-                            {course.tags.length > 3 && (
-                              <Badge variant="secondary" className="text-xs bg-gray-800/50 text-gray-300 border-gray-700">
-                                +{course.tags.length - 3} more
-                              </Badge>
-                            )}
+                      {/* Progress Bar - Only show for logged in users */}
+                      {user && progress && progressPercentage > 0 && (
+                        <div className="mb-4">
+                          <div className="flex justify-between text-sm mb-2">
+                            <span className="text-white/80">Progress</span>
+                            <span className="text-white font-medium">{progressPercentage}%</span>
                           </div>
-                        )}
+                          <Progress 
+                            value={progressPercentage} 
+                            className="h-2 bg-white/20" 
+                          />
+                        </div>
+                      )}
 
-                        {/* Action Button */}
+                      {/* Action Buttons */}
+                      <div className="space-y-2">
                         <Button 
                           onClick={() => user ? navigate(`/course/${course.course_id}`) : navigate('/login')}
-                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white group-hover:shadow-lg transition-all duration-300"
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm transition-all duration-200"
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          View Course
+                        </Button>
+                        <Button 
+                          onClick={() => user ? navigate(`/course/${course.course_id}`) : navigate('/login')}
+                          className="w-full bg-white hover:bg-gray-100 text-gray-800 border-none font-semibold transition-all duration-200"
                         >
                           {user ? (
                             progress && progressPercentage > 0 ? (
                               progressPercentage === 100 ? 'Review Course' : 'Continue Learning'
-                            ) : 'Start Course'
-                          ) : 'Sign In to Learn'}
-                          <ArrowRight className="w-4 h-4 ml-2" />
+                            ) : 'Enroll Now'
+                          ) : 'Enroll Now'}
                         </Button>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
