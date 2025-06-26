@@ -213,7 +213,7 @@ const Index = () => {
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="border-gray-600 text-white hover:bg-gray-800 px-8 py-4 text-lg rounded-xl backdrop-blur-sm">
+            <Button size="lg" variant="outline" className="border-gray-600 text-white px-8 py-4 text-lg rounded-xl backdrop-blur-sm bg-orange-700 hover:bg-orange-600">
               Explore Features
             </Button>
           </div>
