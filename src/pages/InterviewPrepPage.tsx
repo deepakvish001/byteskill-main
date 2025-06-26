@@ -18,7 +18,8 @@ import {
   BookOpen,
   Play,
   AlertCircle,
-  LogIn
+  LogIn,
+  Database
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";

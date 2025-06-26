@@ -1,14 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import UserMenu from '@/components/UserMenu';
+import CourseBreadcrumb from '@/components/CourseBreadcrumb';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Clock, Target, Users, Star, ArrowRight, Trophy, GraduationCap, Play, CheckCircle, LogIn } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { BookOpen, Clock, Target, Users, Star, ArrowRight, Trophy, GraduationCap, Play, CheckCircle, LogIn, Search } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
