@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,6 +58,7 @@ const CoursePage = () => {
   const [loading, setLoading] = useState(true);
   const [allStepsCollapsed, setAllStepsCollapsed] = useState(false);
   const [allLecturesCollapsed, setAllLecturesCollapsed] = useState(false);
+  const [revisionMode, setRevisionMode] = useState(false);
   const [filters, setFilters] = useState<AdvancedFilters>({
     difficulty: "all",
     status: "all",
@@ -183,23 +183,29 @@ const CoursePage = () => {
   };
 
   const handleRevisionModeToggle = () => {
-    console.log("Revision mode toggled");
+    setRevisionMode(!revisionMode);
+    toast.success(revisionMode ? "Revision mode disabled" : "Revision mode enabled");
+    console.log("Revision mode:", !revisionMode);
   };
 
   const handleCollapseAllSteps = () => {
     setAllStepsCollapsed(true);
+    console.log("Collapsing all steps");
   };
 
   const handleExpandAllSteps = () => {
     setAllStepsCollapsed(false);
+    console.log("Expanding all steps");
   };
 
   const handleCollapseAllLectures = () => {
     setAllLecturesCollapsed(true);
+    console.log("Collapsing all lectures");
   };
 
   const handleExpandAllLectures = () => {
     setAllLecturesCollapsed(false);
+    console.log("Expanding all lectures");
   };
 
   if (loading) {
@@ -305,10 +311,27 @@ const CoursePage = () => {
             {user && enrollment && <CourseProgressStats totalProblems={course.problem_count || 0} solvedProblems={Math.floor(enrollment.progress_percentage / 100 * (course.problem_count || 0))} attemptedProblems={Math.floor((enrollment.progress_percentage + 10) / 100 * (course.problem_count || 0))} averageTime={22} streak={4} completionRate={enrollment.progress_percentage} />}
 
             {/* Course Toolbar - Show for all users */}
-            <CoursePageToolbar onRevisionModeToggle={handleRevisionModeToggle} onCollapseAllSteps={handleCollapseAllSteps} onExpandAllSteps={handleExpandAllSteps} onCollapseAllLectures={handleCollapseAllLectures} onExpandAllLectures={handleExpandAllLectures} allStepsCollapsed={allStepsCollapsed} allLecturesCollapsed={allLecturesCollapsed} filters={filters} onFiltersChange={setFilters} />
+            <CoursePageToolbar 
+              onRevisionModeToggle={handleRevisionModeToggle} 
+              onCollapseAllSteps={handleCollapseAllSteps} 
+              onExpandAllSteps={handleExpandAllSteps} 
+              onCollapseAllLectures={handleCollapseAllLectures} 
+              onExpandAllLectures={handleExpandAllLectures} 
+              allStepsCollapsed={allStepsCollapsed} 
+              allLecturesCollapsed={allLecturesCollapsed} 
+              filters={filters} 
+              onFiltersChange={setFilters} 
+            />
 
             {/* Course Content - Accessible to all users */}
-            <CourseContent selectedSheet={courseId || ""} searchQuery={searchQuery} isEnrolled={true} />
+            <CourseContent 
+              selectedSheet={courseId || ""} 
+              searchQuery={searchQuery} 
+              isEnrolled={true}
+              allStepsCollapsed={allStepsCollapsed}
+              allLecturesCollapsed={allLecturesCollapsed}
+              revisionMode={revisionMode}
+            />
           </div>
         </main>
       </div>

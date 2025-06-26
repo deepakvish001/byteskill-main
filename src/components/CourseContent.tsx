@@ -1,14 +1,17 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ProblemTable from "./ProblemTable";
+import NoteDialog from "./NoteDialog";
 import { toast } from "sonner";
 
 interface CourseContentProps {
   selectedSheet: string;
   searchQuery: string;
   isEnrolled: boolean;
+  allStepsCollapsed?: boolean;
+  allLecturesCollapsed?: boolean;
+  revisionMode?: boolean;
 }
 
 interface Problem {
@@ -50,7 +53,14 @@ interface Step {
   completedProblems: number;
 }
 
-const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContentProps) => {
+const CourseContent = ({ 
+  selectedSheet, 
+  searchQuery, 
+  isEnrolled, 
+  allStepsCollapsed = false,
+  allLecturesCollapsed = false,
+  revisionMode = false
+}: CourseContentProps) => {
   const { user } = useAuth();
   const [steps, setSteps] = useState<Step[]>([]);
   const [expandedSteps, setExpandedSteps] = useState<string[]>([]);
@@ -59,6 +69,26 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
   const [bookmarkedProblems, setBookmarkedProblems] = useState<number[]>([]);
   const [problemNotes, setProblemNotes] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [currentProblem, setCurrentProblem] = useState<{ id: number; title: string } | null>(null);
+
+  // Handle collapse/expand controls from parent
+  useEffect(() => {
+    if (allStepsCollapsed) {
+      setExpandedSteps([]);
+    } else {
+      setExpandedSteps(steps.map(step => step.id));
+    }
+  }, [allStepsCollapsed, steps]);
+
+  useEffect(() => {
+    if (allLecturesCollapsed) {
+      setExpandedLectures([]);
+    } else {
+      const allLectureIds = steps.flatMap(step => step.lectures.map(lecture => lecture.id));
+      setExpandedLectures(allLectureIds);
+    }
+  }, [allLecturesCollapsed, steps]);
 
   useEffect(() => {
     if (selectedSheet && isEnrolled) {
@@ -231,8 +261,8 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
   };
 
   const handleToggleProblemStatus = async (problemId: number) => {
-    if (!user || !isEnrolled) {
-      toast.error("Please enroll in the course to track your progress");
+    if (!user) {
+      toast.error("Please sign in to track your progress");
       return;
     }
 
@@ -262,7 +292,6 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
     const contentId = findContentIdByProblemId(problemId);
     if (!contentId) return;
 
-    // Update in database
     try {
       const { error } = await supabase
         .from('user_content_progress')
@@ -279,12 +308,11 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
 
       if (error) throw error;
       
-      // Refresh user progress to update UI
+      toast.success(`Problem marked as ${newStatus.toLowerCase()}`);
       fetchUserProgress();
     } catch (error) {
       console.error('Error updating problem status:', error);
       toast.error('Failed to update progress');
-      // Revert the status change
       setProblemStatuses(prev => ({
         ...prev,
         [problemId]: currentStatus
@@ -293,8 +321,8 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
   };
 
   const handleToggleBookmark = async (problemId: number) => {
-    if (!user || !isEnrolled) {
-      toast.error("Please enroll in the course to bookmark problems");
+    if (!user) {
+      toast.error("Please sign in to bookmark problems");
       return;
     }
 
@@ -322,6 +350,8 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
           ? prev.filter(id => id !== problemId)
           : [...prev, problemId]
       );
+
+      toast.success(isBookmarked ? 'Bookmark removed' : 'Problem bookmarked');
     } catch (error) {
       console.error('Error updating bookmark:', error);
       toast.error('Failed to update bookmark');
@@ -329,12 +359,44 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
   };
 
   const handleOpenNoteDialog = (problemId: number, problemTitle: string) => {
-    if (!user || !isEnrolled) {
-      toast.error("Please enroll in the course to add notes");
+    if (!user) {
+      toast.error("Please sign in to add notes");
       return;
     }
-    // This would open a note dialog - for now just show a toast
-    toast.info(`Note dialog for ${problemTitle} (ID: ${problemId})`);
+    setCurrentProblem({ id: problemId, title: problemTitle });
+    setNoteDialogOpen(true);
+  };
+
+  const handleSaveNote = async (noteContent: string) => {
+    if (!user || !currentProblem) return;
+
+    const contentId = findContentIdByProblemId(currentProblem.id);
+    if (!contentId) return;
+
+    try {
+      const { error } = await supabase
+        .from('user_content_progress')
+        .upsert({
+          user_id: user.id,
+          content_id: contentId,
+          course_id: selectedSheet,
+          module_id: findModuleIdByProblemId(currentProblem.id),
+          chapter_id: findChapterIdByProblemId(currentProblem.id),
+          notes: noteContent
+        });
+
+      if (error) throw error;
+
+      setProblemNotes(prev => ({
+        ...prev,
+        [currentProblem.id]: noteContent
+      }));
+
+      toast.success('Note saved successfully');
+    } catch (error) {
+      console.error('Error saving note:', error);
+      toast.error('Failed to save note');
+    }
   };
 
   // Helper functions to find IDs
@@ -420,29 +482,55 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
       <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 text-center">
         <h3 className="text-xl font-semibold text-white mb-2">No Content Available</h3>
         <p className="text-gray-400 mb-4">
-          This course doesn't have any modules or chapters yet. Content will appear here once the instructor adds them.
+          This course doesn't have any modules or chapters yet. Content will appear here once available.
         </p>
       </div>
     );
   }
 
+  // Filter problems for revision mode
+  const filteredSteps = revisionMode 
+    ? steps.map(step => ({
+        ...step,
+        lectures: step.lectures.map(lecture => ({
+          ...lecture,
+          problems: lecture.problems.filter(problem => 
+            (problemStatuses[problem.id] || problem.status) === "Solved" ||
+            bookmarkedProblems.includes(problem.id)
+          )
+        })).filter(lecture => lecture.problems.length > 0)
+      })).filter(step => step.lectures.length > 0)
+    : steps;
+
   return (
-    <ProblemTable
-      steps={steps}
-      expandedSteps={expandedSteps}
-      expandedLectures={expandedLectures}
-      problemStatuses={problemStatuses}
-      bookmarkedProblems={bookmarkedProblems}
-      problemNotes={problemNotes}
-      onToggleStep={handleToggleStep}
-      onToggleLecture={handleToggleLecture}
-      onToggleProblemStatus={handleToggleProblemStatus}
-      onToggleBookmark={handleToggleBookmark}
-      onOpenNoteDialog={handleOpenNoteDialog}
-      applyAdvancedFilters={applyAdvancedFilters}
-      calculateStepProgress={calculateStepProgress}
-      calculateLectureProgress={calculateLectureProgress}
-    />
+    <>
+      <ProblemTable
+        steps={filteredSteps}
+        expandedSteps={expandedSteps}
+        expandedLectures={expandedLectures}
+        problemStatuses={problemStatuses}
+        bookmarkedProblems={bookmarkedProblems}
+        problemNotes={problemNotes}
+        onToggleStep={handleToggleStep}
+        onToggleLecture={handleToggleLecture}
+        onToggleProblemStatus={handleToggleProblemStatus}
+        onToggleBookmark={handleToggleBookmark}
+        onOpenNoteDialog={handleOpenNoteDialog}
+        applyAdvancedFilters={applyAdvancedFilters}
+        calculateStepProgress={calculateStepProgress}
+        calculateLectureProgress={calculateLectureProgress}
+      />
+      
+      {currentProblem && (
+        <NoteDialog
+          open={noteDialogOpen}
+          onOpenChange={setNoteDialogOpen}
+          noteTitle={`Notes for: ${currentProblem.title}`}
+          noteContent={problemNotes[currentProblem.id] || ""}
+          onSave={handleSaveNote}
+        />
+      )}
+    </>
   );
 };
 
