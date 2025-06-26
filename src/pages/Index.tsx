@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,127 +5,107 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Code, BookOpen, Trophy, Users, ArrowRight, Star, Target, Zap, Award, ChevronRight, Cpu, FileText, GraduationCap, Brain, MessageCircle, TrendingUp, Calendar, Flame } from 'lucide-react';
-
 const Index = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
-
   React.useEffect(() => {
     if (user) {
       const username = user.user_metadata?.username || user.email?.split('@')[0];
-      navigate(`/u/${username}`, { replace: true });
+      navigate(`/u/${username}`, {
+        replace: true
+      });
     }
   }, [user, navigate]);
-
   if (user) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+    return <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-      </div>
-    );
+      </div>;
   }
-
-  const features = [
-    {
-      icon: BookOpen,
-      title: "Structured Learning",
-      description: "Follow curated learning paths designed by industry experts and FAANG engineers.",
-      color: "text-blue-400",
-      bgColor: "bg-blue-900/20",
-      borderColor: "border-blue-800"
-    },
-    {
-      icon: Target,
-      title: "Track Progress",
-      description: "Monitor your learning journey with detailed progress tracking and analytics.",
-      color: "text-green-400",
-      bgColor: "bg-green-900/20",
-      borderColor: "border-green-800"
-    },
-    {
-      icon: Users,
-      title: "Community",
-      description: "Join thousands of learners and get help from experienced developers.",
-      color: "text-purple-400",
-      bgColor: "bg-purple-900/20", 
-      borderColor: "border-purple-800"
-    },
-    {
-      icon: Zap,
-      title: "Real Projects",
-      description: "Build real-world projects and create an impressive portfolio.",
-      color: "text-yellow-400",
-      bgColor: "bg-yellow-900/20",
-      borderColor: "border-yellow-800"
-    }
-  ];
-
-  const learningPaths = [
-    {
-      title: "DSA Sheets",
-      description: "Master data structures and algorithms with comprehensive problem sets",
-      icon: Code,
-      link: "/dsa-sheets",
-      stats: "500+ Problems",
-      color: "from-blue-500 to-cyan-500",
-      bgColor: "bg-blue-900/20",
-      borderColor: "border-blue-700"
-    },
-    {
-      title: "Courses",
-      description: "Learn programming languages and frameworks with hands-on projects",
-      icon: GraduationCap,
-      link: "/courses",
-      stats: "50+ Courses",
-      color: "from-green-500 to-emerald-500",
-      bgColor: "bg-green-900/20",
-      borderColor: "border-green-700"
-    },
-    {
-      title: "Interview Prep",
-      description: "Get ready for technical interviews with real company questions",
-      icon: Award,
-      link: "/interview-prep",
-      stats: "300+ Questions",
-      color: "from-orange-500 to-red-500",
-      bgColor: "bg-orange-900/20",
-      borderColor: "border-orange-700"
-    },
-    {
-      title: "Core CS",
-      description: "Master computer science fundamentals and system design",
-      icon: Cpu,
-      link: "/core-cs",
-      stats: "25+ Topics",
-      color: "from-purple-500 to-pink-500",
-      bgColor: "bg-purple-900/20",
-      borderColor: "border-purple-700"
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Software Engineer at Google",
-      content: "Byteskill helped me land my dream job at Google. The DSA practice was incredibly comprehensive.",
-      avatar: "SC"
-    },
-    {
-      name: "Michael Rodriguez",
-      role: "Frontend Developer at Meta",
-      content: "The interview prep section was a game-changer. I felt confident in every technical interview.",
-      avatar: "MR"
-    },
-    {
-      name: "Priya Patel",
-      role: "Full Stack Developer at Amazon",
-      content: "The structured learning path made complex topics easy to understand. Highly recommended!",
-      avatar: "PP"
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-black text-white">
+  const features = [{
+    icon: BookOpen,
+    title: "Structured Learning",
+    description: "Follow curated learning paths designed by industry experts and FAANG engineers.",
+    color: "text-blue-400",
+    bgColor: "bg-blue-900/20",
+    borderColor: "border-blue-800"
+  }, {
+    icon: Target,
+    title: "Track Progress",
+    description: "Monitor your learning journey with detailed progress tracking and analytics.",
+    color: "text-green-400",
+    bgColor: "bg-green-900/20",
+    borderColor: "border-green-800"
+  }, {
+    icon: Users,
+    title: "Community",
+    description: "Join thousands of learners and get help from experienced developers.",
+    color: "text-purple-400",
+    bgColor: "bg-purple-900/20",
+    borderColor: "border-purple-800"
+  }, {
+    icon: Zap,
+    title: "Real Projects",
+    description: "Build real-world projects and create an impressive portfolio.",
+    color: "text-yellow-400",
+    bgColor: "bg-yellow-900/20",
+    borderColor: "border-yellow-800"
+  }];
+  const learningPaths = [{
+    title: "DSA Sheets",
+    description: "Master data structures and algorithms with comprehensive problem sets",
+    icon: Code,
+    link: "/dsa-sheets",
+    stats: "500+ Problems",
+    color: "from-blue-500 to-cyan-500",
+    bgColor: "bg-blue-900/20",
+    borderColor: "border-blue-700"
+  }, {
+    title: "Courses",
+    description: "Learn programming languages and frameworks with hands-on projects",
+    icon: GraduationCap,
+    link: "/courses",
+    stats: "50+ Courses",
+    color: "from-green-500 to-emerald-500",
+    bgColor: "bg-green-900/20",
+    borderColor: "border-green-700"
+  }, {
+    title: "Interview Prep",
+    description: "Get ready for technical interviews with real company questions",
+    icon: Award,
+    link: "/interview-prep",
+    stats: "300+ Questions",
+    color: "from-orange-500 to-red-500",
+    bgColor: "bg-orange-900/20",
+    borderColor: "border-orange-700"
+  }, {
+    title: "Core CS",
+    description: "Master computer science fundamentals and system design",
+    icon: Cpu,
+    link: "/core-cs",
+    stats: "25+ Topics",
+    color: "from-purple-500 to-pink-500",
+    bgColor: "bg-purple-900/20",
+    borderColor: "border-purple-700"
+  }];
+  const testimonials = [{
+    name: "Sarah Chen",
+    role: "Software Engineer at Google",
+    content: "Byteskill helped me land my dream job at Google. The DSA practice was incredibly comprehensive.",
+    avatar: "SC"
+  }, {
+    name: "Michael Rodriguez",
+    role: "Frontend Developer at Meta",
+    content: "The interview prep section was a game-changer. I felt confident in every technical interview.",
+    avatar: "MR"
+  }, {
+    name: "Priya Patel",
+    role: "Full Stack Developer at Amazon",
+    content: "The structured learning path made complex topics easy to understand. Highly recommended!",
+    avatar: "PP"
+  }];
+  return <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-gray-800 bg-black/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -143,7 +122,9 @@ const Index = () => {
                   Byteskill
                 </span>
                 <div className="flex items-center space-x-2">
-                  <Trophy className="w-4 h-4 text-yellow-400 animate-spin" style={{ animationDuration: '3s' }} />
+                  <Trophy className="w-4 h-4 text-yellow-400 animate-spin" style={{
+                  animationDuration: '3s'
+                }} />
                   <span className="text-sm bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-bold">
                     Learning Platform
                   </span>
@@ -153,26 +134,35 @@ const Index = () => {
             
             {/* Enhanced Navigation */}
             <nav className="hidden md:flex items-center space-x-1">
-              {[
-                { name: 'DSA Sheets', href: '/dsa-sheets', icon: FileText, color: 'text-blue-400' },
-                { name: 'Courses', href: '/courses', icon: GraduationCap, color: 'text-green-400' },
-                { name: 'Core CS', href: '/core-cs', icon: Cpu, color: 'text-purple-400' },
-                { name: 'Interview Prep', href: '/interview-prep', icon: Target, color: 'text-orange-400' }
-              ].map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-gray-800/50 transition-all duration-200 group"
-                >
+              {[{
+              name: 'DSA Sheets',
+              href: '/dsa-sheets',
+              icon: FileText,
+              color: 'text-blue-400'
+            }, {
+              name: 'Courses',
+              href: '/courses',
+              icon: GraduationCap,
+              color: 'text-green-400'
+            }, {
+              name: 'Core CS',
+              href: '/core-cs',
+              icon: Cpu,
+              color: 'text-purple-400'
+            }, {
+              name: 'Interview Prep',
+              href: '/interview-prep',
+              icon: Target,
+              color: 'text-orange-400'
+            }].map(item => <Link key={item.name} to={item.href} className="flex items-center space-x-2 px-4 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-gray-800/50 transition-all duration-200 group">
                   <item.icon className={`w-4 h-4 ${item.color} group-hover:scale-110 transition-transform`} />
                   <span className="font-medium">{item.name}</span>
-                </Link>
-              ))}
+                </Link>)}
             </nav>
             
             <div className="flex items-center space-x-4">
               <Link to="/login">
-                <Button variant="outline" className="border-gray-600 text-white hover:bg-gray-800 hover:border-gray-500">
+                <Button variant="outline" className="border-gray-600 hover:border-gray-500 text-orange-50 bg-orange-700 hover:bg-orange-600">
                   Sign In
                 </Button>
               </Link>
@@ -191,13 +181,17 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 via-purple-900/10 to-orange-900/10"></div>
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" style={{
+          animationDelay: '1s'
+        }}></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="mb-8">
             <div className="inline-flex items-center px-6 py-3 bg-gray-900/80 backdrop-blur-sm rounded-full mb-8 border border-gray-700">
-              <Star className="w-5 h-5 text-yellow-400 mr-2 animate-spin" style={{ animationDuration: '3s' }} />
+              <Star className="w-5 h-5 text-yellow-400 mr-2 animate-spin" style={{
+              animationDuration: '3s'
+            }} />
               <span className="text-sm text-gray-300 font-medium">Join 50,000+ developers mastering coding skills</span>
             </div>
             
@@ -226,20 +220,29 @@ const Index = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-            {[
-              { number: "50,000+", label: "Active Learners", icon: Users },
-              { number: "1,000+", label: "Coding Problems", icon: Code },
-              { number: "100+", label: "Expert Courses", icon: BookOpen },
-              { number: "95%", label: "Success Rate", icon: Trophy }
-            ].map((stat, index) => (
-              <Card key={index} className="bg-gray-900/50 border-gray-700 backdrop-blur-sm hover:bg-gray-800/50 transition-colors">
+            {[{
+            number: "50,000+",
+            label: "Active Learners",
+            icon: Users
+          }, {
+            number: "1,000+",
+            label: "Coding Problems",
+            icon: Code
+          }, {
+            number: "100+",
+            label: "Expert Courses",
+            icon: BookOpen
+          }, {
+            number: "95%",
+            label: "Success Rate",
+            icon: Trophy
+          }].map((stat, index) => <Card key={index} className="bg-gray-900/50 border-gray-700 backdrop-blur-sm hover:bg-gray-800/50 transition-colors">
                 <CardContent className="p-6 text-center">
                   <stat.icon className="w-8 h-8 text-orange-400 mx-auto mb-3" />
                   <div className="text-3xl font-bold text-white mb-1">{stat.number}</div>
                   <div className="text-gray-400 text-sm">{stat.label}</div>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -255,8 +258,7 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className={`${feature.bgColor} border ${feature.borderColor} hover:border-opacity-80 transition-all duration-300 hover:transform hover:scale-105 backdrop-blur-sm`}>
+            {features.map((feature, index) => <Card key={index} className={`${feature.bgColor} border ${feature.borderColor} hover:border-opacity-80 transition-all duration-300 hover:transform hover:scale-105 backdrop-blur-sm`}>
                 <CardHeader className="text-center pb-4">
                   <feature.icon className={`h-16 w-16 ${feature.color} mx-auto mb-4`} />
                   <CardTitle className="text-xl font-semibold text-white mb-2">{feature.title}</CardTitle>
@@ -264,8 +266,7 @@ const Index = () => {
                 <CardContent>
                   <p className="text-gray-300 text-center leading-relaxed">{feature.description}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -279,8 +280,7 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {learningPaths.map((path, index) => (
-              <Link key={index} to={path.link} className="group block">
+            {learningPaths.map((path, index) => <Link key={index} to={path.link} className="group block">
                 <Card className={`${path.bgColor} border ${path.borderColor} hover:border-opacity-80 transition-all duration-300 hover:transform hover:scale-105 backdrop-blur-sm h-full`}>
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between mb-4">
@@ -301,8 +301,7 @@ const Index = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
-            ))}
+              </Link>)}
           </div>
         </div>
       </section>
@@ -316,8 +315,7 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-gray-900/50 border-gray-700 backdrop-blur-sm hover:bg-gray-800/50 transition-colors">
+            {testimonials.map((testimonial, index) => <Card key={index} className="bg-gray-900/50 border-gray-700 backdrop-blur-sm hover:bg-gray-800/50 transition-colors">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold mr-4">
@@ -330,8 +328,7 @@ const Index = () => {
                   </div>
                   <p className="text-gray-300 italic">"{testimonial.content}"</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -435,8 +432,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
