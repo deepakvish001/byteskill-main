@@ -692,9 +692,8 @@ const ProblemDashboard = ({ selectedSheet, searchQuery, userId }: ProblemDashboa
       <NoteDialog
         open={noteDialogOpen}
         onOpenChange={setNoteDialogOpen}
-        title={noteTitle}
-        content={noteContent}
-        onContentChange={setNoteContent}
+        noteTitle={noteTitle}
+        noteContent={noteContent}
         onSave={saveNote}
       />
     </div>
