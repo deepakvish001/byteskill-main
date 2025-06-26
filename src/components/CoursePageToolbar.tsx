@@ -69,7 +69,7 @@ const CoursePageToolbar = ({
           </Button>
 
           {/* Collapse/Expand Lectures */}
-          <Button onClick={allLecturesCollapsed ? onExpandAllLectures : onCollapseAllLectures} variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white text-xs">
+          <Button onClick={allLecturesCollapsed ? onExpandAllLectures : onCollapseAllLectures} variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:text-white text-xs bg-zinc-950 hover:bg-zinc-800">
             {allLecturesCollapsed ? <>
                 <ChevronDown className="w-3 h-3 mr-1" />
                 Expand Lectures
