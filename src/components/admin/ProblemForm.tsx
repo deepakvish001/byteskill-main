@@ -8,9 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useAdminValidation } from '@/hooks/useAdminValidation';
-import { sanitizeInput } from '@/utils/inputValidation';
 import { FileText, Video, Link, Bookmark } from 'lucide-react';
 
 interface ProblemFormProps {
@@ -24,111 +23,68 @@ interface ProblemFormProps {
 const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: ProblemFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { validateAdminOperation, logAdminAction } = useAdminValidation();
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    content_type: 'problem',
     difficulty: 'easy',
     estimated_time_minutes: 0,
     article_content: '',
     video_url: '',
     practice_link: '',
     is_bookmarkable: true,
-    is_practice_available: false,
-    status: 'draft',
-    content_type: 'problem'
+    status: 'draft'
   });
-
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   useEffect(() => {
     if (content) {
       setFormData({
         title: content.title || '',
         description: content.description || '',
+        content_type: content.content_type || 'problem',
         difficulty: content.difficulty || 'easy',
         estimated_time_minutes: content.estimated_time_minutes || 0,
         article_content: content.article_content || '',
         video_url: content.video_url || '',
         practice_link: content.practice_link || '',
         is_bookmarkable: content.is_bookmarkable ?? true,
-        is_practice_available: content.is_practice_available ?? false,
-        status: content.status || 'draft',
-        content_type: content.content_type || 'problem'
+        status: content.status || 'draft'
       });
     }
   }, [content]);
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      const isAuthorized = await validateAdminOperation(
-        content ? 'update' : 'create',
-        'content'
-      );
-      
-      if (!isAuthorized) {
-        throw new Error('Insufficient permissions');
-      }
-
-      const sanitizedData = {
+      const problemData = {
         ...data,
-        title: sanitizeInput(data.title),
-        description: data.description ? sanitizeInput(data.description) : '',
-        article_content: data.article_content ? sanitizeInput(data.article_content) : '',
-        video_url: data.video_url ? sanitizeInput(data.video_url) : '',
-        practice_link: data.practice_link ? sanitizeInput(data.practice_link) : '',
+        chapter_id: chapterId,
+        module_id: moduleId,
+        course_id: courseId,
+        content_order: content?.content_order || 1,
+        topics: [],
+        tags: []
       };
 
       if (content) {
         const { error } = await supabase
           .from('course_content')
-          .update(sanitizedData)
+          .update(problemData)
           .eq('id', content.id);
         if (error) throw error;
-
-        await logAdminAction('update', 'content', content.id, {
-          title: sanitizedData.title,
-          chapterId,
-          moduleId,
-          courseId
-        });
       } else {
-        // Get the next content order
-        const { data: existingContent, error: countError } = await supabase
-          .from('course_content')
-          .select('content_order')
-          .eq('chapter_id', chapterId)
-          .order('content_order', { ascending: false })
-          .limit(1);
-
-        if (countError) throw countError;
-
-        const nextOrder = existingContent.length > 0 ? existingContent[0].content_order + 1 : 1;
-
         const { error } = await supabase
           .from('course_content')
-          .insert({
-            ...sanitizedData,
-            chapter_id: chapterId,
-            module_id: moduleId,
-            course_id: courseId,
-            content_order: nextOrder,
-          });
+          .insert([problemData]);
         if (error) throw error;
-
-        await logAdminAction('create', 'content', courseId, {
-          title: sanitizedData.title,
-          chapterId,
-          moduleId,
-          courseId
-        });
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-hierarchy', courseId] });
-      toast({ title: `Problem ${content ? 'updated' : 'created'} successfully` });
-      setValidationErrors([]);
+      toast({ 
+        title: `Problem ${content ? 'updated' : 'created'} successfully`,
+        className: "bg-green-900 border-green-700 text-green-100"
+      });
       onClose();
     },
     onError: (error: any) => {
@@ -137,87 +93,80 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
         title: `Error ${content ? 'updating' : 'creating'} problem`,
         description: error.message,
         variant: 'destructive',
+        className: "bg-red-900 border-red-700 text-red-100"
       });
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationErrors([]);
     mutation.mutate(formData);
   };
 
   return (
-    <div className="bg-black text-white">
-      <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto">
-        {validationErrors.length > 0 && (
-          <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
-            <h4 className="text-red-400 font-medium mb-2">Validation Errors:</h4>
-            <ul className="text-red-300 text-sm space-y-1">
-              {validationErrors.map((error, index) => (
-                <li key={index}>• {error}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title" className="text-white">Problem Name</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter problem name"
-              required
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description" className="text-white">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Enter problem description"
-              rows={3}
-              className="bg-gray-800 border-gray-700 text-white"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="difficulty" className="text-white">Difficulty</Label>
-              <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="easy">Easy</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="hard">Hard</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="estimated_time_minutes" className="text-white">Estimated Time (minutes)</Label>
-              <Input
-                id="estimated_time_minutes"
-                type="number"
-                value={formData.estimated_time_minutes}
-                onChange={(e) => setFormData({ ...formData, estimated_time_minutes: parseInt(e.target.value) || 0 })}
-                min="0"
-                className="bg-gray-800 border-gray-700 text-white"
-              />
-            </div>
-          </div>
-
+    <div className="bg-gray-900 text-white">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="article_content" className="text-white flex items-center gap-2">
-                <FileText className="w-4 h-4" />
+              <Label htmlFor="title" className="text-gray-200 font-medium">Problem Name *</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Enter problem name"
+                required
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description" className="text-gray-200 font-medium">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Enter problem description"
+                rows={3}
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="difficulty" className="text-gray-200 font-medium">Difficulty</Label>
+                <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
+                  <SelectTrigger className="bg-gray-800 border-gray-600 text-white focus:border-blue-500">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="easy" className="text-white hover:bg-gray-700">Easy</SelectItem>
+                    <SelectItem value="medium" className="text-white hover:bg-gray-700">Medium</SelectItem>
+                    <SelectItem value="hard" className="text-white hover:bg-gray-700">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="estimated_time" className="text-gray-200 font-medium">Est. Time (min)</Label>
+                <Input
+                  id="estimated_time"
+                  type="number"
+                  value={formData.estimated_time_minutes}
+                  onChange={(e) => setFormData({ ...formData, estimated_time_minutes: parseInt(e.target.value) || 0 })}
+                  min="0"
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="article_content" className="text-gray-200 font-medium flex items-center gap-2">
+                <FileText className="w-4 h-4 text-blue-400" />
                 Article Link
               </Label>
               <Input
@@ -225,13 +174,13 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                 value={formData.article_content}
                 onChange={(e) => setFormData({ ...formData, article_content: e.target.value })}
                 placeholder="Enter article URL"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <Label htmlFor="video_url" className="text-white flex items-center gap-2">
-                <Video className="w-4 h-4" />
+              <Label htmlFor="video_url" className="text-gray-200 font-medium flex items-center gap-2">
+                <Video className="w-4 h-4 text-red-400" />
                 Video Link
               </Label>
               <Input
@@ -239,13 +188,13 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                 value={formData.video_url}
                 onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
                 placeholder="Enter video URL"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <Label htmlFor="practice_link" className="text-white flex items-center gap-2">
-                <Link className="w-4 h-4" />
+              <Label htmlFor="practice_link" className="text-gray-200 font-medium flex items-center gap-2">
+                <Link className="w-4 h-4 text-green-400" />
                 Practice Link
               </Label>
               <Input
@@ -253,53 +202,61 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                 value={formData.practice_link}
                 onChange={(e) => setFormData({ ...formData, practice_link: e.target.value })}
                 placeholder="Enter practice URL"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_bookmarkable"
-                checked={formData.is_bookmarkable}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_bookmarkable: checked })}
-              />
-              <Label htmlFor="is_bookmarkable" className="text-white flex items-center gap-2">
-                <Bookmark className="w-4 h-4" />
-                Bookmarkable
-              </Label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_practice_available"
-                checked={formData.is_practice_available}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_practice_available: checked })}
-              />
-              <Label htmlFor="is_practice_available" className="text-white">Practice Available</Label>
-            </div>
-
-            <div>
-              <Label htmlFor="status" className="text-white">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
+              <div className="flex items-center space-x-3">
+                <Bookmark className="w-4 h-4 text-yellow-400" />
+                <Switch
+                  id="is_bookmarkable"
+                  checked={formData.is_bookmarkable}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_bookmarkable: checked })}
+                />
+                <Label htmlFor="is_bookmarkable" className="text-gray-200 font-medium">Bookmarkable</Label>
+              </div>
+              <Badge variant={formData.is_bookmarkable ? "default" : "secondary"} className={formData.is_bookmarkable ? "bg-yellow-600 text-yellow-100" : "bg-gray-600 text-gray-200"}>
+                {formData.is_bookmarkable ? "Yes" : "No"}
+              </Badge>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={onClose} className="border-gray-600 text-gray-300 hover:bg-gray-800">
+        {/* Status Selection */}
+        <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
+          <div>
+            <Label htmlFor="status" className="text-gray-200 font-medium">Status</Label>
+            <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+              <SelectTrigger className="bg-gray-700 border-gray-600 text-white focus:border-blue-500 mt-2 w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectItem value="draft" className="text-white hover:bg-gray-700">Draft</SelectItem>
+                <SelectItem value="published" className="text-white hover:bg-gray-700">Published</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Badge variant={formData.status === 'published' ? "default" : "destructive"} className={formData.status === 'published' ? "bg-green-600 text-green-100" : "bg-red-600 text-red-100"}>
+            {formData.status === 'published' ? "Published" : "Draft"}
+          </Badge>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onClose} 
+            className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+          >
             Cancel
           </Button>
-          <Button type="submit" disabled={mutation.isPending} className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            type="submit" 
+            disabled={mutation.isPending} 
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 transition-colors disabled:opacity-50"
+          >
             {mutation.isPending ? 'Saving...' : (content ? 'Update Problem' : 'Create Problem')}
           </Button>
         </div>

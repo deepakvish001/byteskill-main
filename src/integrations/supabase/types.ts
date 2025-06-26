@@ -340,6 +340,7 @@ export type Database = {
       courses: {
         Row: {
           category: string
+          chapter_count: number | null
           course_id: string
           created_at: string
           description: string | null
@@ -348,7 +349,10 @@ export type Database = {
           id: string
           is_premium: boolean | null
           is_published: boolean | null
+          module_count: number | null
           prerequisites: string[] | null
+          problem_count: number | null
+          tagline: string | null
           tags: string[] | null
           title: string
           total_lessons: number | null
@@ -356,6 +360,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          chapter_count?: number | null
           course_id: string
           created_at?: string
           description?: string | null
@@ -364,7 +369,10 @@ export type Database = {
           id?: string
           is_premium?: boolean | null
           is_published?: boolean | null
+          module_count?: number | null
           prerequisites?: string[] | null
+          problem_count?: number | null
+          tagline?: string | null
           tags?: string[] | null
           title: string
           total_lessons?: number | null
@@ -372,6 +380,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          chapter_count?: number | null
           course_id?: string
           created_at?: string
           description?: string | null
@@ -380,7 +389,10 @@ export type Database = {
           id?: string
           is_premium?: boolean | null
           is_published?: boolean | null
+          module_count?: number | null
           prerequisites?: string[] | null
+          problem_count?: number | null
+          tagline?: string | null
           tags?: string[] | null
           title?: string
           total_lessons?: number | null

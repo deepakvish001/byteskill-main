@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
@@ -17,8 +15,6 @@ import {
   FileText,
   ChevronDown,
   ChevronRight,
-  ArrowUp,
-  ArrowDown,
   Video,
   Link,
   Bookmark
@@ -26,6 +22,7 @@ import {
 import ModuleForm from './ModuleForm';
 import ChapterForm from './ChapterForm';
 import ProblemForm from './ProblemForm';
+import ModernDialog from './ModernDialog';
 
 interface CourseHierarchyManagementProps {
   courseId: string;
@@ -86,7 +83,10 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-hierarchy', courseId] });
-      toast({ title: "Module deleted successfully" });
+      toast({ 
+        title: "Module deleted successfully",
+        className: "bg-green-900 border-green-700 text-green-100"
+      });
     },
   });
 
@@ -100,7 +100,10 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-hierarchy', courseId] });
-      toast({ title: "Chapter deleted successfully" });
+      toast({ 
+        title: "Chapter deleted successfully",
+        className: "bg-green-900 border-green-700 text-green-100"
+      });
     },
   });
 
@@ -114,7 +117,10 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-hierarchy', courseId] });
-      toast({ title: "Problem deleted successfully" });
+      toast({ 
+        title: "Problem deleted successfully",
+        className: "bg-green-900 border-green-700 text-green-100"
+      });
     },
   });
 
@@ -200,14 +206,14 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8 bg-black">
+      <div className="flex items-center justify-center p-8 bg-gray-900 rounded-lg">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-gray-900 text-white min-h-screen rounded-lg border border-gray-700">
       <div className="space-y-6 max-h-[80vh] overflow-y-auto p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -236,10 +242,9 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
           </div>
         </div>
 
-        {/* Modules List */}
         <div className="space-y-4">
           {courseData?.modules?.map((module: any, moduleIndex: number) => (
-            <Card key={module.id} className="bg-gray-900 border-gray-800">
+            <Card key={module.id} className="bg-gray-800 border-gray-700">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -267,10 +272,10 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
                     <Badge variant={module.is_published ? 'secondary' : 'destructive'}>
                       {module.is_published ? 'Published' : 'Draft'}
                     </Badge>
-                    <Button size="sm" variant="outline" onClick={() => handleEditModule(module)} className="border-gray-600 hover:bg-gray-800">
+                    <Button size="sm" variant="outline" onClick={() => handleEditModule(module)} className="border-gray-600 hover:bg-gray-700">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleAddChapter(module)} className="border-gray-600 hover:bg-gray-800">
+                    <Button size="sm" variant="outline" onClick={() => handleAddChapter(module)} className="border-gray-600 hover:bg-gray-700">
                       <Plus className="w-4 h-4" />
                     </Button>
                     <Button
@@ -293,7 +298,7 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
                   <CardContent className="pt-0">
                     <div className="space-y-3">
                       {module.course_chapters?.map((chapter: any, chapterIndex: number) => (
-                        <Card key={chapter.id} className="bg-gray-800 border-gray-700 ml-6">
+                        <Card key={chapter.id} className="bg-gray-700 border-gray-600 ml-6">
                           <CardHeader className="pb-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3">
@@ -321,10 +326,10 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
                                 <Badge variant="outline" className="text-xs">
                                   {chapter.estimated_time_minutes}min
                                 </Badge>
-                                <Button size="sm" variant="outline" onClick={() => handleEditChapter(chapter)} className="border-gray-600 hover:bg-gray-800">
+                                <Button size="sm" variant="outline" onClick={() => handleEditChapter(chapter)} className="border-gray-600 hover:bg-gray-600">
                                   <Edit className="w-3 h-3" />
                                 </Button>
-                                <Button size="sm" variant="outline" onClick={() => handleAddProblem(chapter)} className="border-gray-600 hover:bg-gray-800">
+                                <Button size="sm" variant="outline" onClick={() => handleAddProblem(chapter)} className="border-gray-600 hover:bg-gray-600">
                                   <Plus className="w-3 h-3" />
                                 </Button>
                                 <Button
@@ -347,7 +352,7 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
                               <CardContent className="pt-0">
                                 <div className="space-y-2">
                                   {chapter.course_content?.map((content: any, contentIndex: number) => (
-                                    <div key={content.id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg ml-6">
+                                    <div key={content.id} className="flex items-center justify-between p-3 bg-gray-600 rounded-lg ml-6">
                                       <div className="flex items-center space-x-3">
                                         <FileText className="w-4 h-4 text-yellow-400" />
                                         <div>
@@ -368,7 +373,7 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
                                         <Badge variant={content.status === 'published' ? 'secondary' : 'destructive'} className="text-xs">
                                           {content.status}
                                         </Badge>
-                                        <Button size="sm" variant="outline" onClick={() => handleEditProblem(content)} className="border-gray-600 hover:bg-gray-800">
+                                        <Button size="sm" variant="outline" onClick={() => handleEditProblem(content)} className="border-gray-500 hover:bg-gray-500">
                                           <Edit className="w-3 h-3" />
                                         </Button>
                                         <Button
@@ -408,7 +413,7 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
             </Card>
           ))}
           {(!courseData?.modules || courseData.modules.length === 0) && (
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-gray-800 border-gray-700">
               <CardContent className="text-center py-8">
                 <p className="text-gray-400 mb-4">No modules yet. Start by adding your first module.</p>
                 <Button onClick={handleAddModule} className="bg-blue-600 hover:bg-blue-700">
@@ -420,56 +425,46 @@ const CourseHierarchyManagement = ({ courseId, onClose }: CourseHierarchyManagem
           )}
         </div>
 
-        {/* Module Form Dialog */}
-        <Dialog open={showModuleForm} onOpenChange={setShowModuleForm}>
-          <DialogContent className="max-w-2xl bg-gray-900 border-gray-800">
-            <DialogHeader>
-              <DialogTitle className="text-white">
-                {selectedModule ? 'Edit Module' : 'Add New Module'}
-              </DialogTitle>
-            </DialogHeader>
-            <ModuleForm
-              module={selectedModule}
-              courseId={courseId}
-              onClose={() => setShowModuleForm(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        {/* Modern Dialog Forms */}
+        <ModernDialog
+          isOpen={showModuleForm}
+          onClose={() => setShowModuleForm(false)}
+          title={selectedModule ? 'Edit Module' : 'Add New Module'}
+        >
+          <ModuleForm
+            module={selectedModule}
+            courseId={courseId}
+            onClose={() => setShowModuleForm(false)}
+          />
+        </ModernDialog>
 
-        {/* Chapter Form Dialog */}
-        <Dialog open={showChapterForm} onOpenChange={setShowChapterForm}>
-          <DialogContent className="max-w-2xl bg-gray-900 border-gray-800">
-            <DialogHeader>
-              <DialogTitle className="text-white">
-                {selectedChapter ? 'Edit Chapter' : 'Add New Chapter'}
-              </DialogTitle>
-            </DialogHeader>
-            <ChapterForm
-              chapter={selectedChapter}
-              moduleId={formContext.parent?.id}
-              courseId={courseId}
-              onClose={() => setShowChapterForm(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <ModernDialog
+          isOpen={showChapterForm}
+          onClose={() => setShowChapterForm(false)}
+          title={selectedChapter ? 'Edit Chapter' : 'Add New Chapter'}
+        >
+          <ChapterForm
+            chapter={selectedChapter}
+            moduleId={formContext.parent?.id}
+            courseId={courseId}
+            onClose={() => setShowChapterForm(false)}
+          />
+        </ModernDialog>
 
-        {/* Problem Form Dialog */}
-        <Dialog open={showProblemForm} onOpenChange={setShowProblemForm}>
-          <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
-            <DialogHeader>
-              <DialogTitle className="text-white">
-                {selectedContent ? 'Edit Problem' : 'Add New Problem'}
-              </DialogTitle>
-            </DialogHeader>
-            <ProblemForm
-              content={selectedContent}
-              chapterId={formContext.parent?.id}
-              moduleId={formContext.parent?.module_id}
-              courseId={courseId}
-              onClose={() => setShowProblemForm(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <ModernDialog
+          isOpen={showProblemForm}
+          onClose={() => setShowProblemForm(false)}
+          title={selectedContent ? 'Edit Problem' : 'Add New Problem'}
+          maxWidth="max-w-4xl"
+        >
+          <ProblemForm
+            content={selectedContent}
+            chapterId={formContext.parent?.id}
+            moduleId={formContext.parent?.module_id}
+            courseId={courseId}
+            onClose={() => setShowProblemForm(false)}
+          />
+        </ModernDialog>
       </div>
     </div>
   );
