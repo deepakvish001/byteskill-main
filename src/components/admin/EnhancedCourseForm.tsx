@@ -1,326 +1,291 @@
-
-import React, { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { X } from 'lucide-react';
-import { useAdminValidation } from '@/hooks/useAdminValidation';
-import { validateCourseInput, sanitizeInput } from '@/utils/inputValidation';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Editor } from "@/components/editor"
+import { InputTag } from "@/components/input-tag"
 
-interface EnhancedCourseFormProps {
-  course?: any;
+interface Course {
+  id?: string;
+  course_id?: string;
+  title: string;
+  description: string;
+  tagline?: string;
   category: string;
-  onClose: () => void;
+  difficulty: string;
+  total_lessons: number;
+  estimated_hours: number;
+  tags: string[];
+  prerequisites: string[];
+  is_premium: boolean;
 }
 
-const EnhancedCourseForm = ({ course, category, onClose }: EnhancedCourseFormProps) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { validateAdminOperation, logAdminAction } = useAdminValidation();
-  const [formData, setFormData] = useState({
-    title: '',
-    tagline: '',
-    description: '',
-    difficulty: 'beginner',
-    estimated_hours: 0,
-    is_published: false,
-    is_premium: false,
-    tags: [] as string[],
+const formSchema = z.object({
+  title: z.string().min(2, {
+    message: "Title must be at least 2 characters.",
+  }),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+  tagline: z.string().optional(),
+  category: z.string().min(2, {
+    message: "Category must be selected.",
+  }),
+  difficulty: z.string().min(2, {
+    message: "Difficulty must be selected.",
+  }),
+  total_lessons: z.number().min(0, {
+    message: "Total lessons must be a non-negative number.",
+  }).default(0),
+  estimated_hours: z.number().min(0, {
+    message: "Estimated hours must be a non-negative number.",
+  }).default(0),
+  tags: z.array(z.string()).default([]),
+  prerequisites: z.array(z.string()).default([]),
+  is_premium: z.boolean().default(false),
+});
+
+interface EnhancedCourseFormProps {
+  course?: Course;
+  onSubmit: (data: FormData) => Promise<void>;
+  onCancel: () => void;
+}
+
+type FormData = z.infer<typeof formSchema>;
+
+const EnhancedCourseForm = ({ course, onSubmit, onCancel }: EnhancedCourseFormProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: course?.title || "",
+      description: course?.description || "",
+      tagline: course?.tagline || "",
+      category: course?.category || "course",
+      difficulty: course?.difficulty || "Easy",
+      total_lessons: course?.total_lessons || 0,
+      estimated_hours: course?.estimated_hours || 0,
+      tags: course?.tags || [],
+      prerequisites: course?.prerequisites || [],
+      is_premium: course?.is_premium || false,
+    },
+    mode: "onChange",
   });
 
-  const [newTag, setNewTag] = useState('');
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  // Function to generate SEO-friendly slug
+  const generateSlug = (title: string): string => {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  };
 
-  useEffect(() => {
-    if (course) {
-      setFormData({
-        title: course.title || '',
-        tagline: course.tagline || '',
-        description: course.description || '',
-        difficulty: course.difficulty || 'beginner',
-        estimated_hours: course.estimated_hours || 0,
-        is_published: course.is_published ?? false,
-        is_premium: course.is_premium ?? false,
-        tags: course.tags || [],
-      });
-    }
-  }, [course]);
+  const { control, handleSubmit, formState: { isValid } , watch } = form;
 
-  const mutation = useMutation({
-    mutationFn: async (data: any) => {
-      const isAuthorized = await validateAdminOperation(
-        course ? 'update' : 'create',
-        'course'
-      );
+  const watchTags = watch("tags");
+	const watchPrerequisites = watch("prerequisites");
+
+  const handleFormSubmit = async (data: FormData) => {
+    try {
+      setIsSubmitting(true);
       
-      if (!isAuthorized) {
-        throw new Error('Insufficient permissions');
+      // Generate course_id as SEO-friendly slug if creating new course
+      let courseId = course?.course_id;
+      if (!courseId) {
+        const baseSlug = generateSlug(data.title);
+        const timestamp = Date.now();
+        courseId = `${baseSlug}-${timestamp}`;
       }
 
-      const validation = validateCourseInput(data);
-      if (!validation.isValid) {
-        setValidationErrors(validation.errors);
-        throw new Error('Validation failed: ' + validation.errors.join(', '));
-      }
-
-      const sanitizedData = {
-        title: sanitizeInput(data.title),
-        tagline: data.tagline ? sanitizeInput(data.tagline) : '',
-        description: data.description ? sanitizeInput(data.description) : '',
-        difficulty: data.difficulty,
-        estimated_hours: data.estimated_hours,
-        is_published: data.is_published,
-        is_premium: data.is_premium,
-        tags: data.tags?.map((tag: string) => sanitizeInput(tag)) || [],
-        category: category,
-        total_lessons: 0,
-        module_count: 0,
-        chapter_count: 0,
-        problem_count: 0
+      const courseData = {
+        ...data,
+        course_id: courseId,
+        tags: data.tags.filter(tag => tag.trim() !== ''),
+        prerequisites: data.prerequisites.filter(prereq => prereq.trim() !== ''),
+        estimated_hours: Number(data.estimated_hours) || 0,
+        total_lessons: Number(data.total_lessons) || 0,
       };
 
-      if (course) {
-        const { error } = await supabase
-          .from('courses')
-          .update(sanitizedData)
-          .eq('id', course.id);
-        if (error) throw error;
-
-        await logAdminAction('update', 'course', course.id, {
-          title: sanitizedData.title,
-          category
-        });
-      } else {
-        const courseId = `${category}-${Date.now()}`;
-        
-        const { error } = await supabase
-          .from('courses')
-          .insert({
-            ...sanitizedData,
-            course_id: courseId,
-          });
-        if (error) throw error;
-
-        await logAdminAction('create', 'course', courseId, {
-          title: sanitizedData.title,
-          category
-        });
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`admin-${category}`] });
-      queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
-      toast({ 
-        title: `Course ${course ? 'updated' : 'created'} successfully`,
-        className: "bg-green-900 border-green-700 text-green-100"
-      });
-      setValidationErrors([]);
-      onClose();
-    },
-    onError: (error: any) => {
-      console.error('Course mutation error:', error);
-      toast({
-        title: `Error ${course ? 'updating' : 'creating'} course`,
-        description: error.message,
-        variant: 'destructive',
-        className: "bg-red-900 border-red-700 text-red-100"
-      });
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationErrors([]);
-    mutation.mutate(formData);
-  };
-
-  const addTag = () => {
-    const sanitizedTag = sanitizeInput(newTag);
-    if (sanitizedTag && !formData.tags.includes(sanitizedTag)) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, sanitizedTag]
-      });
-      setNewTag('');
+      await onSubmit(courseData);
+      toast.success(course ? 'Course updated successfully!' : 'Course created successfully!');
+    } catch (error) {
+      console.error('Error submitting course:', error);
+      toast.error('Failed to save course. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const removeTag = (tag: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter(t => t !== tag)
-    });
   };
 
   return (
-    <div className="bg-gray-900 text-white rounded-lg border border-gray-700 p-6">
-      <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto">
-        {validationErrors.length > 0 && (
-          <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-4">
-            <h4 className="text-red-300 font-medium mb-2">Validation Errors:</h4>
-            <ul className="text-red-200 text-sm space-y-1">
-              {validationErrors.map((error, index) => (
-                <li key={index}>• {error}</li>
-              ))}
-            </ul>
-          </div>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8">
+      <div>
+        <Label htmlFor="title">Title</Label>
+        <Input id="title" type="text" placeholder="Course Title"
+          {...form.register("title", {
+            required: "Title is required",
+          })}
+        />
+        {form.formState.errors.title && (
+          <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
         )}
+      </div>
 
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title" className="text-gray-200 font-medium">Course Name *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter course name"
-              required
-              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea id="description" placeholder="Course Description"
+          {...form.register("description", {
+            required: "Description is required",
+          })}
+        />
+        {form.formState.errors.description && (
+          <p className="text-red-500 text-sm mt-1">{form.formState.errors.description.message}</p>
+        )}
+      </div>
 
-          <div>
-            <Label htmlFor="tagline" className="text-gray-200 font-medium">Tagline</Label>
-            <Input
-              id="tagline"
-              value={formData.tagline}
-              onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-              placeholder="Enter course tagline"
-              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
+      <div>
+        <Label htmlFor="tagline">Tagline</Label>
+        <Input id="tagline" type="text" placeholder="Course Tagline"
+          {...form.register("tagline")}
+        />
+        {form.formState.errors.tagline && (
+          <p className="text-red-500 text-sm mt-1">{form.formState.errors.tagline.message}</p>
+        )}
+      </div>
 
-          <div>
-            <Label htmlFor="description" className="text-gray-200 font-medium">Long Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Enter detailed course description"
-              rows={4}
-              className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="difficulty" className="text-gray-200 font-medium">Difficulty</Label>
-              <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
-                <SelectTrigger className="bg-gray-800 border-gray-600 text-white focus:border-blue-500">
-                  <SelectValue />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <Controller
+            control={control}
+            name="category"
+            defaultValue={course?.category || "course"}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-600">
-                  <SelectItem value="beginner" className="text-white hover:bg-gray-700">Beginner</SelectItem>
-                  <SelectItem value="intermediate" className="text-white hover:bg-gray-700">Intermediate</SelectItem>
-                  <SelectItem value="advanced" className="text-white hover:bg-gray-700">Advanced</SelectItem>
+                <SelectContent>
+                  <SelectItem value="course">Course</SelectItem>
+                  <SelectItem value="dsa-sheet">DSA Sheet</SelectItem>
+                  <SelectItem value="interview-prep">Interview Prep</SelectItem>
+                  <SelectItem value="core-cs">Core CS</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="estimated_hours" className="text-gray-200 font-medium">Estimated Hours</Label>
-              <Input
-                id="estimated_hours"
-                type="number"
-                value={formData.estimated_hours}
-                onChange={(e) => setFormData({ ...formData, estimated_hours: parseInt(e.target.value) || 0 })}
-                min="0"
-                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-gray-200 font-medium">Tags</Label>
-            <div className="flex gap-2 mb-2">
-              <Input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add a tag"
-                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-              />
-              <Button 
-                type="button" 
-                onClick={addTag} 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 transition-colors"
-              >
-                Add
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {formData.tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-gray-700 text-gray-200 border-gray-600">
-                  {tag}
-                  <X className="w-3 h-3 cursor-pointer hover:text-red-400 transition-colors" onClick={() => removeTag(tag)} />
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
-              <div className="flex items-center space-x-3">
-                <Switch
-                  id="is_premium"
-                  checked={formData.is_premium}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_premium: checked })}
-                />
-                <Label htmlFor="is_premium" className="text-gray-200 font-medium">Premium Course</Label>
-              </div>
-              <Badge 
-                variant={formData.is_premium ? "default" : "secondary"} 
-                className={formData.is_premium ? "bg-yellow-600 text-yellow-100" : "bg-gray-600 text-gray-200"}
-              >
-                {formData.is_premium ? "Premium" : "Free"}
-              </Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
-              <div className="flex items-center space-x-3">
-                <Switch
-                  id="is_published"  
-                  checked={formData.is_published}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_published: checked })}
-                />
-                <Label htmlFor="is_published" className="text-gray-200 font-medium">Published</Label>
-              </div>
-              <Badge 
-                variant={formData.is_published ? "default" : "destructive"} 
-                className={formData.is_published ? "bg-green-600 text-green-100" : "bg-red-600 text-red-100"}
-              >
-                {formData.is_published ? "Published" : "Draft"}
-              </Badge>
-            </div>
-          </div>
+            )}
+          />
+          {form.formState.errors.category && (
+            <p className="text-red-500 text-sm mt-1">{form.formState.errors.category.message}</p>
+          )}
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onClose} 
-            className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
-          >
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={mutation.isPending} 
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 transition-colors disabled:opacity-50"
-          >
-            {mutation.isPending ? 'Saving...' : (course ? 'Update Course' : 'Create Course')}
-          </Button>
+        <div>
+          <Label htmlFor="difficulty">Difficulty</Label>
+          <Controller
+            control={control}
+            name="difficulty"
+            defaultValue={course?.difficulty || "Easy"}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Easy">Easy</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                  <SelectItem value="Hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {form.formState.errors.difficulty && (
+            <p className="text-red-500 text-sm mt-1">{form.formState.errors.difficulty.message}</p>
+          )}
         </div>
-      </form>
-    </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="total_lessons">Total Lessons</Label>
+          <Input id="total_lessons" type="number" placeholder="Total Lessons"
+            {...form.register("total_lessons", { valueAsNumber: true })}
+          />
+          {form.formState.errors.total_lessons && (
+            <p className="text-red-500 text-sm mt-1">{form.formState.errors.total_lessons.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="estimated_hours">Estimated Hours</Label>
+          <Input id="estimated_hours" type="number" placeholder="Estimated Hours"
+            {...form.register("estimated_hours", { valueAsNumber: true })}
+          />
+          {form.formState.errors.estimated_hours && (
+            <p className="text-red-500 text-sm mt-1">{form.formState.errors.estimated_hours.message}</p>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="tags">Tags</Label>
+				<InputTag
+					id="tags"
+					placeholder="Add tags"
+					onChange={(values) => {
+						form.setValue("tags", values);
+					}}
+					values={watchTags}
+				/>
+        {form.formState.errors.tags && (
+          <p className="text-red-500 text-sm mt-1">{form.formState.errors.tags.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="prerequisites">Prerequisites</Label>
+				<InputTag
+					id="prerequisites"
+					placeholder="Add prerequisites"
+					onChange={(values) => {
+						form.setValue("prerequisites", values);
+					}}
+					values={watchPrerequisites}
+				/>
+        {form.formState.errors.prerequisites && (
+          <p className="text-red-500 text-sm mt-1">{form.formState.errors.prerequisites.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="is_premium">Is Premium</Label>
+        <input
+          id="is_premium"
+          type="checkbox"
+          className="ml-2"
+          {...form.register("is_premium")}
+        />
+        {form.formState.errors.is_premium && (
+          <p className="text-red-500 text-sm mt-1">{form.formState.errors.is_premium.message}</p>
+        )}
+      </div>
+
+      <div className="flex justify-end gap-4">
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={!isValid || isSubmitting}>
+          {isSubmitting ? "Submitting..." : "Submit"}
+        </Button>
+      </div>
+    </form>
   );
 };
 

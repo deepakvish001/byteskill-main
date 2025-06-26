@@ -28,6 +28,8 @@ interface Problem {
   hasVideo?: boolean;
   hasPractice?: boolean;
   estimatedTime?: number;
+  practice_link?: string;
+  description?: string;
 }
 
 interface Lecture {
@@ -59,160 +61,157 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    generateCourseData();
-  }, [selectedSheet]);
-
-  const generateCourseData = () => {
-    // Generate mock data structure for the course
-    const mockSteps: Step[] = [
-      {
-        id: "step-1",
-        title: "Introduction to Data Structures",
-        expanded: false,
-        totalProblems: 5,
-        completedProblems: 0,
-        lectures: [
-          {
-            id: "lecture-1-1",
-            title: "Arrays and Strings",
-            expanded: false,
-            totalProblems: 5,
-            completedProblems: 0,
-            problems: [
-              {
-                id: 1,
-                title: "Two Sum",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Array", "Hash Table"],
-                companies: ["Google", "Amazon"],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 15
-              },
-              {
-                id: 2,
-                title: "Valid Anagram",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Hash Table", "String"],
-                companies: ["Facebook", "Microsoft"],
-                hasArticle: true,
-                hasVideo: false,
-                hasPractice: true,
-                estimatedTime: 20
-              },
-              {
-                id: 3,
-                title: "Group Anagrams",
-                difficulty: "Medium",
-                status: "Not Started",
-                tags: ["Array", "Hash Table", "String"],
-                companies: ["Amazon", "Uber"],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 30
-              },
-              {
-                id: 4,
-                title: "Top K Frequent Elements",
-                difficulty: "Medium",
-                status: "Not Started",
-                tags: ["Array", "Hash Table", "Divide and Conquer"],
-                companies: ["Amazon", "Facebook"],
-                hasArticle: false,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 25
-              },
-              {
-                id: 5,
-                title: "Product of Array Except Self",
-                difficulty: "Medium",
-                status: "Not Started",
-                tags: ["Array"],
-                companies: ["Amazon", "Facebook", "Microsoft"],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 30
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: "step-2",
-        title: "Advanced Data Structures",
-        expanded: false,
-        totalProblems: 4,
-        completedProblems: 0,
-        lectures: [
-          {
-            id: "lecture-2-1",
-            title: "Trees and Graphs",
-            expanded: false,
-            totalProblems: 4,
-            completedProblems: 0,
-            problems: [
-              {
-                id: 6,
-                title: "Binary Tree Inorder Traversal",
-                difficulty: "Easy",
-                status: "Not Started",
-                tags: ["Hash Table", "Stack", "Tree"],
-                companies: ["Microsoft", "Facebook"],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 20
-              },
-              {
-                id: 7,
-                title: "Validate Binary Search Tree",
-                difficulty: "Medium",
-                status: "Not Started",
-                tags: ["Tree", "Depth-First Search"],
-                companies: ["Amazon", "Facebook"],
-                hasArticle: true,
-                hasVideo: false,
-                hasPractice: true,
-                estimatedTime: 25
-              },
-              {
-                id: 8,
-                title: "Number of Islands",
-                difficulty: "Medium",
-                status: "Not Started",
-                tags: ["Array", "Depth-First Search", "Breadth-First Search"],
-                companies: ["Amazon", "Google", "Facebook"],
-                hasArticle: true,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 35
-              },
-              {
-                id: 9,
-                title: "Course Schedule",
-                difficulty: "Medium",
-                status: "Not Started",
-                tags: ["Depth-First Search", "Breadth-First Search", "Graph"],
-                companies: ["Facebook", "Zenefits"],
-                hasArticle: false,
-                hasVideo: true,
-                hasPractice: true,
-                estimatedTime: 40
-              }
-            ]
-          }
-        ]
+    if (selectedSheet && isEnrolled) {
+      fetchCourseData();
+      if (user) {
+        fetchUserProgress();
       }
-    ];
+    } else {
+      setSteps([]);
+      setLoading(false);
+    }
+  }, [selectedSheet, isEnrolled, user]);
 
-    setSteps(mockSteps);
-    setLoading(false);
+  const fetchCourseData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch modules for this course
+      const { data: modules, error: modulesError } = await supabase
+        .from('course_modules')
+        .select('*')
+        .eq('course_id', selectedSheet)
+        .eq('is_published', true)
+        .order('module_order');
+
+      if (modulesError) throw modulesError;
+
+      if (!modules || modules.length === 0) {
+        setSteps([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch chapters for all modules
+      const moduleIds = modules.map(m => m.id);
+      const { data: chapters, error: chaptersError } = await supabase
+        .from('course_chapters')
+        .select('*')
+        .in('module_id', moduleIds)
+        .eq('is_published', true)
+        .order('chapter_order');
+
+      if (chaptersError) throw chaptersError;
+
+      // Fetch content for all chapters
+      const chapterIds = chapters?.map(c => c.id) || [];
+      const { data: content, error: contentError } = await supabase
+        .from('course_content')
+        .select('*')
+        .in('chapter_id', chapterIds)
+        .eq('status', 'published')
+        .order('content_order');
+
+      if (contentError) throw contentError;
+
+      // Transform data to match the expected structure
+      const transformedSteps: Step[] = modules.map(module => {
+        const moduleChapters = chapters?.filter(c => c.module_id === module.id) || [];
+        
+        const lectures: Lecture[] = moduleChapters.map(chapter => {
+          const chapterContent = content?.filter(c => c.chapter_id === chapter.id) || [];
+          
+          const problems: Problem[] = chapterContent.map(item => ({
+            id: parseInt(item.id.replace(/-/g, '').substring(0, 8), 16), // Convert UUID to number
+            title: item.title,
+            difficulty: (item.difficulty as "Easy" | "Medium" | "Hard") || "Easy",
+            status: "Not Started" as const,
+            tags: item.tags || [],
+            companies: [],
+            hasArticle: !!item.article_content,
+            hasVideo: !!item.video_url,
+            hasPractice: !!item.practice_link,
+            estimatedTime: item.estimated_time_minutes || 30,
+            article: item.article_content || undefined,
+            video: item.video_url || undefined,
+            practice_link: item.practice_link || undefined,
+            description: item.description || undefined
+          }));
+
+          return {
+            id: chapter.id,
+            title: chapter.title,
+            problems,
+            expanded: false,
+            totalProblems: problems.length,
+            completedProblems: 0
+          };
+        });
+
+        return {
+          id: module.id,
+          title: module.title,
+          lectures,
+          expanded: false,
+          totalProblems: lectures.reduce((sum, l) => sum + l.totalProblems, 0),
+          completedProblems: 0
+        };
+      });
+
+      setSteps(transformedSteps);
+    } catch (error) {
+      console.error('Error fetching course data:', error);
+      toast.error('Failed to load course content');
+      setSteps([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserProgress = async () => {
+    if (!user) return;
+
+    try {
+      // Fetch user progress for this course
+      const { data: progress, error: progressError } = await supabase
+        .from('user_content_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('course_id', selectedSheet);
+
+      if (progressError) throw progressError;
+
+      // Update problem statuses and bookmarks based on progress
+      const statuses: Record<number, "Solved" | "Attempted" | "Not Started"> = {};
+      const bookmarks: number[] = [];
+      const notes: Record<number, string> = {};
+
+      progress?.forEach(p => {
+        const problemId = parseInt(p.content_id.replace(/-/g, '').substring(0, 8), 16);
+        
+        if (p.is_completed) {
+          statuses[problemId] = "Solved";
+        } else if (p.time_spent_minutes > 0) {
+          statuses[problemId] = "Attempted";
+        } else {
+          statuses[problemId] = "Not Started";
+        }
+
+        if (p.is_bookmarked) {
+          bookmarks.push(problemId);
+        }
+
+        if (p.notes) {
+          notes[problemId] = p.notes;
+        }
+      });
+
+      setProblemStatuses(statuses);
+      setBookmarkedProblems(bookmarks);
+      setProblemNotes(notes);
+    } catch (error) {
+      console.error('Error fetching user progress:', error);
+    }
   };
 
   const handleToggleStep = (stepId: string) => {
@@ -259,35 +258,74 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
       [problemId]: newStatus
     }));
 
+    // Find the content_id for this problem
+    const contentId = findContentIdByProblemId(problemId);
+    if (!contentId) return;
+
     // Update in database
     try {
       const { error } = await supabase
-        .from('user_progress')
+        .from('user_content_progress')
         .upsert({
           user_id: user.id,
-          problem_id: problemId.toString(),
-          status: newStatus.toLowerCase().replace(' ', '_'),
-          solved_at: newStatus === "Solved" ? new Date().toISOString() : null
+          content_id: contentId,
+          course_id: selectedSheet,
+          module_id: findModuleIdByProblemId(problemId),
+          chapter_id: findChapterIdByProblemId(problemId),
+          is_completed: newStatus === "Solved",
+          time_spent_minutes: newStatus !== "Not Started" ? 1 : 0,
+          completed_at: newStatus === "Solved" ? new Date().toISOString() : null
         });
 
       if (error) throw error;
+      
+      // Refresh user progress to update UI
+      fetchUserProgress();
     } catch (error) {
       console.error('Error updating problem status:', error);
       toast.error('Failed to update progress');
+      // Revert the status change
+      setProblemStatuses(prev => ({
+        ...prev,
+        [problemId]: currentStatus
+      }));
     }
   };
 
-  const handleToggleBookmark = (problemId: number) => {
+  const handleToggleBookmark = async (problemId: number) => {
     if (!user || !isEnrolled) {
       toast.error("Please enroll in the course to bookmark problems");
       return;
     }
 
-    setBookmarkedProblems(prev => 
-      prev.includes(problemId) 
-        ? prev.filter(id => id !== problemId)
-        : [...prev, problemId]
-    );
+    const isBookmarked = bookmarkedProblems.includes(problemId);
+    const contentId = findContentIdByProblemId(problemId);
+    if (!contentId) return;
+
+    try {
+      const { error } = await supabase
+        .from('user_content_progress')
+        .upsert({
+          user_id: user.id,
+          content_id: contentId,
+          course_id: selectedSheet,
+          module_id: findModuleIdByProblemId(problemId),
+          chapter_id: findChapterIdByProblemId(problemId),
+          is_bookmarked: !isBookmarked,
+          bookmarked_at: !isBookmarked ? new Date().toISOString() : null
+        });
+
+      if (error) throw error;
+
+      setBookmarkedProblems(prev => 
+        isBookmarked 
+          ? prev.filter(id => id !== problemId)
+          : [...prev, problemId]
+      );
+    } catch (error) {
+      console.error('Error updating bookmark:', error);
+      toast.error('Failed to update bookmark');
+    }
   };
 
   const handleOpenNoteDialog = (problemId: number, problemTitle: string) => {
@@ -297,6 +335,41 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
     }
     // This would open a note dialog - for now just show a toast
     toast.info(`Note dialog for ${problemTitle} (ID: ${problemId})`);
+  };
+
+  // Helper functions to find IDs
+  const findContentIdByProblemId = (problemId: number): string => {
+    for (const step of steps) {
+      for (const lecture of step.lectures) {
+        const problem = lecture.problems.find(p => p.id === problemId);
+        if (problem) {
+          return lecture.id; // Using chapter ID as content ID for now
+        }
+      }
+    }
+    return '';
+  };
+
+  const findModuleIdByProblemId = (problemId: number): string => {
+    for (const step of steps) {
+      for (const lecture of step.lectures) {
+        if (lecture.problems.find(p => p.id === problemId)) {
+          return step.id;
+        }
+      }
+    }
+    return '';
+  };
+
+  const findChapterIdByProblemId = (problemId: number): string => {
+    for (const step of steps) {
+      for (const lecture of step.lectures) {
+        if (lecture.problems.find(p => p.id === problemId)) {
+          return lecture.id;
+        }
+      }
+    }
+    return '';
   };
 
   const applyAdvancedFilters = (problems: Problem[]) => {
@@ -333,10 +406,21 @@ const CourseContent = ({ selectedSheet, searchQuery, isEnrolled }: CourseContent
 
   if (!isEnrolled) {
     return (
-      <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-6 text-center">
+      <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 text-center">
         <h3 className="text-xl font-semibold text-white mb-2">Course Content Locked</h3>
         <p className="text-gray-400 mb-4">
           Enroll in this course to access all problems and track your progress.
+        </p>
+      </div>
+    );
+  }
+
+  if (steps.length === 0) {
+    return (
+      <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 text-center">
+        <h3 className="text-xl font-semibold text-white mb-2">No Content Available</h3>
+        <p className="text-gray-400 mb-4">
+          This course doesn't have any modules or chapters yet. Content will appear here once the instructor adds them.
         </p>
       </div>
     );

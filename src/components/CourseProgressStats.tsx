@@ -26,16 +26,22 @@ const CourseProgressStats = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {/* Overall Progress */}
-      <Card className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 border-blue-700/50">
+      <Card className="bg-gray-900 border-gray-700 hover:border-blue-500/50 transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-blue-200">Overall Progress</CardTitle>
+          <CardTitle className="text-sm font-medium text-blue-300">Overall Progress</CardTitle>
           <Target className="h-4 w-4 text-blue-400" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white mb-2">
             {Math.round(progressPercentage)}%
           </div>
-          <Progress value={progressPercentage} className="mb-2" />
+          <Progress 
+            value={progressPercentage} 
+            className="mb-2 h-2 bg-gray-800"
+            style={{
+              '--progress-foreground': 'rgb(59 130 246)', // blue-500
+            } as React.CSSProperties}
+          />
           <p className="text-xs text-blue-300">
             {solvedProblems} of {totalProblems} problems completed
           </p>
@@ -43,28 +49,28 @@ const CourseProgressStats = ({
       </Card>
 
       {/* Problems Solved */}
-      <Card className="bg-gradient-to-br from-green-900/50 to-green-800/30 border-green-700/50">
+      <Card className="bg-gray-900 border-gray-700 hover:border-green-500/50 transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-green-200">Problems Solved</CardTitle>
+          <CardTitle className="text-sm font-medium text-green-300">Problems Solved</CardTitle>
           <CheckCircle className="h-4 w-4 text-green-400" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white">{solvedProblems}</div>
           <div className="flex items-center space-x-2 mt-2">
-            <Badge className="bg-green-600/20 text-green-400 border-green-600/50 text-xs">
-              Solved
+            <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs hover:bg-green-500/30">
+              ✓ Solved
             </Badge>
-            <Badge className="bg-yellow-600/20 text-yellow-400 border-yellow-600/50 text-xs">
-              {attemptedProblems} Attempted
+            <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs hover:bg-yellow-500/30">
+              ⚡ {attemptedProblems} Attempted
             </Badge>
           </div>
         </CardContent>
       </Card>
 
       {/* Average Time */}
-      <Card className="bg-gradient-to-br from-orange-900/50 to-orange-800/30 border-orange-700/50">
+      <Card className="bg-gray-900 border-gray-700 hover:border-orange-500/50 transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-orange-200">Average Time</CardTitle>
+          <CardTitle className="text-sm font-medium text-orange-300">Average Time</CardTitle>
           <Clock className="h-4 w-4 text-orange-400" />
         </CardHeader>
         <CardContent>
@@ -76,9 +82,9 @@ const CourseProgressStats = ({
       </Card>
 
       {/* Current Streak */}
-      <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 border-purple-700/50">
+      <Card className="bg-gray-900 border-gray-700 hover:border-purple-500/50 transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-purple-200">Current Streak</CardTitle>
+          <CardTitle className="text-sm font-medium text-purple-300">Current Streak</CardTitle>
           <Zap className="h-4 w-4 text-purple-400" />
         </CardHeader>
         <CardContent>

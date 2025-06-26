@@ -79,6 +79,34 @@ const CoursePage = () => {
       if (courseError) throw courseError;
       setCourse(courseData);
 
+      // Set SEO meta tags
+      if (courseData) {
+        document.title = `${courseData.title} - ByteSkill`;
+        
+        // Update meta description
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+          metaDescription.setAttribute('content', courseData.description || `Learn ${courseData.title} with ByteSkill's comprehensive course.`);
+        } else {
+          const meta = document.createElement('meta');
+          meta.name = 'description';
+          meta.content = courseData.description || `Learn ${courseData.title} with ByteSkill's comprehensive course.`;
+          document.getElementsByTagName('head')[0].appendChild(meta);
+        }
+
+        // Update canonical URL
+        const canonical = document.querySelector('link[rel="canonical"]');
+        const canonicalUrl = `${window.location.origin}/course/${courseData.course_id}`;
+        if (canonical) {
+          canonical.setAttribute('href', canonicalUrl);
+        } else {
+          const link = document.createElement('link');
+          link.rel = 'canonical';
+          link.href = canonicalUrl;
+          document.getElementsByTagName('head')[0].appendChild(link);
+        }
+      }
+
       // Fetch enrollment if user is logged in
       if (user) {
         const {
@@ -260,6 +288,9 @@ const CoursePage = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{course?.title}</h1>
+                  {course?.tagline && (
+                    <p className="text-blue-400 text-lg font-medium mb-2">{course.tagline}</p>
+                  )}
                   <p className="text-gray-400 text-lg">{course?.description}</p>
                 </div>
                 {!enrollment && course && <Button onClick={handleEnroll} className="bg-green-600 hover:bg-green-700 text-white" disabled={!user}>
@@ -273,7 +304,7 @@ const CoursePage = () => {
                   </Badge>
                   <div className="flex items-center space-x-1 text-gray-400">
                     <BookOpen className="w-4 h-4" />
-                    <span>{course.total_lessons} lessons</span>
+                    <span>{course.module_count || 0} modules</span>
                   </div>
                   <div className="flex items-center space-x-1 text-gray-400">
                     <Clock className="w-4 h-4" />
@@ -287,7 +318,7 @@ const CoursePage = () => {
             </div>
 
             {/* Progress Stats - Only show if enrolled */}
-            {enrollment && <CourseProgressStats totalProblems={course.total_lessons} solvedProblems={Math.floor(enrollment.progress_percentage / 100 * course.total_lessons)} attemptedProblems={Math.floor((enrollment.progress_percentage + 10) / 100 * course.total_lessons)} averageTime={22} streak={4} completionRate={enrollment.progress_percentage} />}
+            {enrollment && <CourseProgressStats totalProblems={course.problem_count || 0} solvedProblems={Math.floor(enrollment.progress_percentage / 100 * (course.problem_count || 0))} attemptedProblems={Math.floor((enrollment.progress_percentage + 10) / 100 * (course.problem_count || 0))} averageTime={22} streak={4} completionRate={enrollment.progress_percentage} />}
 
             {/* Course Toolbar - Only show if enrolled */}
             {enrollment && <CoursePageToolbar onRevisionModeToggle={handleRevisionModeToggle} onCollapseAllSteps={handleCollapseAllSteps} onExpandAllSteps={handleExpandAllSteps} onCollapseAllLectures={handleCollapseAllLectures} onExpandAllLectures={handleExpandAllLectures} allStepsCollapsed={allStepsCollapsed} allLecturesCollapsed={allLecturesCollapsed} filters={filters} onFiltersChange={setFilters} />}
