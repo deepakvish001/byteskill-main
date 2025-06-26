@@ -56,8 +56,8 @@ const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onToggleSidebar
             </Link>
           )}
 
-          {/* Home Button - Show only when sidebar is collapsed and user is logged in */}
-          {sidebarCollapsed && user && (
+          {/* Home Button - Show when sidebar is collapsed */}
+          {sidebarCollapsed && (
             <Link to="/" className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all duration-200 group">
               <Home className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium">Home</span>

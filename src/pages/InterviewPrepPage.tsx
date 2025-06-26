@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
-  Target, 
+  Users, 
   Clock, 
   Search,
   CheckCircle,
-  Briefcase,
+  Database,
   Star,
   BookOpen,
   Play,
@@ -28,7 +27,7 @@ const InterviewPrepPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default to collapsed
   const [filterQuery, setFilterQuery] = useState("");
   
   const breadcrumbItems = [
@@ -54,7 +53,7 @@ const InterviewPrepPage = () => {
 
   // Fetch user enrollments
   const { data: enrollments } = useQuery({
-    queryKey: ['user-interview-enrollments', user?.id],
+    queryKey: ['user-interview-prep-enrollments', user?.id],
     queryFn: async () => {
       if (!user) return [];
       
@@ -157,7 +156,7 @@ const InterviewPrepPage = () => {
                 Interview Preparation
               </h1>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Ace your technical interviews with comprehensive preparation courses and practice problems
+                Ace your technical interviews with our comprehensive preparation courses and practice problems
               </p>
             </div>
 
@@ -166,7 +165,7 @@ const InterviewPrepPage = () => {
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <Input
-                  placeholder="Search interview prep topics, companies, or question types..."
+                  placeholder="Search interview topics, companies, or problem types..."
                   value={filterQuery}
                   onChange={(e) => setFilterQuery(e.target.value)}
                   className="pl-12 bg-black border-gray-800 text-white placeholder-gray-500 h-12 text-lg focus:border-blue-500"
@@ -177,7 +176,7 @@ const InterviewPrepPage = () => {
             {/* Loading State */}
             {isLoading && (
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
               </div>
             )}
 
@@ -195,7 +194,7 @@ const InterviewPrepPage = () => {
             {/* No Data State */}
             {!isLoading && !error && filteredCourses.length === 0 && (
               <div className="text-center py-12">
-                <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <Users className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-400 mb-2">
                   {courses?.length === 0 ? 'No Interview Prep Courses Available' : 'No courses found'}
                 </h3>
@@ -213,10 +212,10 @@ const InterviewPrepPage = () => {
               {filteredCourses.map((course) => {
                 const enrollment = getEnrollmentStatus(course.course_id);
                 const cardColors = [
-                  'from-purple-600 to-indigo-800',
-                  'from-indigo-600 to-purple-700', 
-                  'from-violet-600 to-purple-800',
-                  'from-fuchsia-500 to-purple-600'
+                  'from-blue-600 to-purple-800',
+                  'from-green-600 to-teal-700', 
+                  'from-purple-600 to-pink-800',
+                  'from-orange-500 to-red-600'
                 ];
                 const cardColor = cardColors[filteredCourses.indexOf(course) % cardColors.length];
                 
@@ -244,7 +243,7 @@ const InterviewPrepPage = () => {
                     <CardHeader className="pb-4 bg-transparent relative z-10">
                       <div className="flex items-center justify-center mb-4">
                         <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                          <Target className="w-8 h-8 text-white" />
+                          <Users className="w-8 h-8 text-white" />
                         </div>
                       </div>
                       
@@ -266,8 +265,8 @@ const InterviewPrepPage = () => {
                     <CardContent className="pt-0 bg-transparent relative z-10">
                       <div className="flex items-center justify-center space-x-6 mb-6 text-white/80">
                         <div className="flex items-center space-x-1 text-sm">
-                          <Briefcase className="w-4 h-4" />
-                          <span>{course.total_lessons || 0} questions</span>
+                          <Database className="w-4 h-4" />
+                          <span>{course.total_lessons || 0} topics</span>
                         </div>
                         <div className="flex items-center space-x-1 text-sm">
                           <Clock className="w-4 h-4" />
@@ -275,7 +274,7 @@ const InterviewPrepPage = () => {
                         </div>
                         <div className="flex items-center space-x-1 text-sm">
                           <Star className="w-4 h-4 text-yellow-400" />
-                          <span>4.8</span>
+                          <span>4.9</span>
                         </div>
                       </div>
                       
