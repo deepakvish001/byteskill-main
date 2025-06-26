@@ -1,8 +1,9 @@
 
-import { Search, Menu, BookOpen, Trophy, ChevronLeft, FileText, GraduationCap, Cpu, Target } from "lucide-react";
+import { Search, Menu, BookOpen, Trophy, ChevronLeft, Home, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   searchQuery: string;
@@ -12,6 +13,8 @@ interface HeaderProps {
 }
 
 const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onToggleSidebar }: HeaderProps) => {
+  const { user } = useAuth();
+
   return (
     <header className="w-full bg-black border-b border-gray-800 px-4 py-3 h-16 flex items-center backdrop-blur-md">
       <div className="flex items-center justify-between w-full">
@@ -53,25 +56,12 @@ const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onToggleSidebar
             </Link>
           )}
 
-          {/* Enhanced Navigation - Show when sidebar is collapsed */}
-          {sidebarCollapsed && (
-            <nav className="hidden lg:flex items-center space-x-1 ml-8">
-              {[
-                { name: 'DSA Sheets', href: '/dsa-sheets', icon: FileText, color: 'text-blue-400' },
-                { name: 'Courses', href: '/courses', icon: GraduationCap, color: 'text-green-400' },
-                { name: 'Core CS', href: '/core-cs', icon: Cpu, color: 'text-purple-400' },
-                { name: 'Interview Prep', href: '/interview-prep', icon: Target, color: 'text-orange-400' }
-              ].map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all duration-200 group"
-                >
-                  <item.icon className={`w-4 h-4 ${item.color} group-hover:scale-110 transition-transform`} />
-                  <span className="text-sm font-medium">{item.name}</span>
-                </Link>
-              ))}
-            </nav>
+          {/* Home Button - Show only when sidebar is collapsed and user is logged in */}
+          {sidebarCollapsed && user && (
+            <Link to="/" className="hidden md:flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all duration-200 group">
+              <Home className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium">Home</span>
+            </Link>
           )}
         </div>
         

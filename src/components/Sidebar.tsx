@@ -1,5 +1,4 @@
-
-import { ChevronDown, ChevronRight, FileText, Users, BookOpen, Cpu, Settings, Trophy, Target, TrendingUp, Star, Code, GitBranch, Menu, Award, Calendar, Brain, Timer, Bookmark, PenTool, MessageCircle, Lightbulb, GraduationCap } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Users, BookOpen, Cpu, Settings, Trophy, Target, TrendingUp, Star, Code, GitBranch, Menu, Award, Calendar, Brain, Timer, Bookmark, PenTool, MessageCircle, Lightbulb, GraduationCap, Home } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -28,7 +27,7 @@ const Sidebar = ({
   };
 
   const handleHomeClick = () => {
-    navigate("/");
+    navigate("/"); // Always redirect to website home page
   };
 
   const handleDashboardClick = () => {
@@ -60,18 +59,10 @@ const Sidebar = ({
     {
       id: "home",
       label: "Home",
-      icon: BookOpen,
+      icon: Home,
       items: [],
-      badge: "Home",
+      badge: "Website",
       action: handleHomeClick
-    },
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: TrendingUp,
-      items: [],
-      badge: "Track",
-      action: handleDashboardClick
     },
     {
       id: "dsa-sheets",
@@ -143,10 +134,10 @@ const Sidebar = ({
                   item.badge === "Live" && "bg-red-900 text-red-400 border-red-800 animate-pulse",
                   item.badge === "Beta" && "bg-purple-900 text-purple-400 border-purple-800",
                   item.badge === "Pro" && "bg-yellow-900 text-yellow-400 border-yellow-800",
-                  item.badge === "Home" && "bg-blue-900 text-blue-400 border-blue-800",
+                  item.badge === "Website" && "bg-orange-900 text-orange-400 border-orange-800",
                   item.badge === "Track" && "bg-cyan-900 text-cyan-400 border-cyan-800",
                   item.badge === "Popular" && "bg-orange-900 text-orange-400 border-orange-800",
-                  typeof item.badge === "string" && !["New", "Hot", "Live", "Beta", "Pro", "Home", "Track", "Popular"].includes(item.badge) && "bg-gray-800 text-gray-400 border-gray-700"
+                  typeof item.badge === "string" && !["New", "Hot", "Live", "Beta", "Pro", "Website", "Track", "Popular"].includes(item.badge) && "bg-gray-800 text-gray-400 border-gray-700"
                 )}>
                   {item.badge}
                 </Badge>

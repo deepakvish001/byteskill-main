@@ -9,8 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Clock, Target, Users, Star, ArrowRight, Trophy, Code, GitBranch, TrendingUp } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { BookOpen, Clock, Target, Users, Star, ArrowRight, Trophy, Code, GitBranch, TrendingUp, LogIn } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface DSASheet {
@@ -18,11 +18,11 @@ interface DSASheet {
   title: string;
   description: string;
   difficulty: string;
-  estimated_hours: number;  // Changed from estimated_duration
+  estimated_hours: number;
   problem_count: number;
   tags: string[];
   created_at: string;
-  is_premium: boolean;  // Changed from is_free
+  is_premium: boolean;
   rating?: number;
   enrolled_count?: number;
   category: string;
@@ -38,7 +38,7 @@ interface UserProgress {
 const DSASheetsPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default closed
   const [searchQuery, setSearchQuery] = useState('');
   const [dsaSheets, setDsaSheets] = useState<DSASheet[]>([]);
   const [userProgress, setUserProgress] = useState<{ [key: string]: UserProgress }>({});
@@ -85,7 +85,7 @@ const DSASheetsPage = () => {
         progressMap[progress.course_id] = {
           course_id: progress.course_id,
           progress_percentage: progress.progress_percentage || 0,
-          problems_solved: Math.floor((progress.progress_percentage || 0) / 10) // Estimate
+          problems_solved: Math.floor((progress.progress_percentage || 0) / 10)
         };
       });
 
@@ -98,13 +98,13 @@ const DSASheetsPage = () => {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        return 'bg-green-900 text-green-400 border-green-800';
+        return 'bg-green-900/20 text-green-400 border-green-800';
       case 'intermediate':
-        return 'bg-yellow-900 text-yellow-400 border-yellow-800';
+        return 'bg-yellow-900/20 text-yellow-400 border-yellow-800';
       case 'advanced':
-        return 'bg-red-900 text-red-400 border-red-800';
+        return 'bg-red-900/20 text-red-400 border-red-800';
       default:
-        return 'bg-gray-900 text-gray-400 border-gray-800';
+        return 'bg-gray-900/20 text-gray-400 border-gray-800';
     }
   };
 
@@ -113,20 +113,6 @@ const DSASheetsPage = () => {
     sheet.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     sheet.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Access Denied</h1>
-          <p className="text-gray-400 mb-8">Please sign in to access DSA sheets.</p>
-          <Button onClick={() => navigate('/auth')} className="bg-blue-600 hover:bg-blue-700">
-            Sign In
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-black flex">
@@ -156,7 +142,16 @@ const DSASheetsPage = () => {
               sidebarCollapsed={sidebarCollapsed}
               onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
-            <UserMenu />
+            {user ? (
+              <UserMenu />
+            ) : (
+              <Link to="/login">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
         
@@ -164,62 +159,54 @@ const DSASheetsPage = () => {
         <main className="pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Header Section */}
-            <div className="mb-8">
-              <div className="flex items-center space-x-3 mb-4">
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center space-x-3 mb-6">
                 <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
                   <Code className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold text-white">DSA Practice Sheets</h1>
-                  <p className="text-gray-400 text-lg">
+                  <h1 className="text-5xl font-bold text-white">DSA Practice Sheets</h1>
+                  <p className="text-gray-400 text-lg mt-2">
                     Master Data Structures and Algorithms with curated problem collections
                   </p>
                 </div>
               </div>
 
               {/* Stats Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                  <div className="flex items-center space-x-3">
-                    <BookOpen className="w-8 h-8 text-blue-400" />
-                    <div>
-                      <p className="text-2xl font-bold text-white">{dsaSheets.length}</p>
-                      <p className="text-sm text-gray-400">Total Sheets</p>
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 max-w-4xl mx-auto">
+                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
+                  <div className="flex items-center justify-center space-x-3 mb-2">
+                    <BookOpen className="w-6 h-6 text-blue-400" />
+                    <span className="text-sm text-gray-400">Total Sheets</span>
                   </div>
+                  <p className="text-3xl font-bold text-white text-center">{dsaSheets.length}</p>
                 </div>
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                  <div className="flex items-center space-x-3">
-                    <Target className="w-8 h-8 text-green-400" />
-                    <div>
-                      <p className="text-2xl font-bold text-white">
-                        {dsaSheets.reduce((sum, sheet) => sum + (sheet.problem_count || 0), 0)}
-                      </p>
-                      <p className="text-sm text-gray-400">Total Problems</p>
-                    </div>
+                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
+                  <div className="flex items-center justify-center space-x-3 mb-2">
+                    <Target className="w-6 h-6 text-green-400" />
+                    <span className="text-sm text-gray-400">Total Problems</span>
                   </div>
+                  <p className="text-3xl font-bold text-white text-center">
+                    {dsaSheets.reduce((sum, sheet) => sum + (sheet.problem_count || 0), 0)}
+                  </p>
                 </div>
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                  <div className="flex items-center space-x-3">
-                    <TrendingUp className="w-8 h-8 text-purple-400" />
-                    <div>
-                      <p className="text-2xl font-bold text-white">
-                        {Object.values(userProgress).filter(p => p.progress_percentage > 0).length}
-                      </p>
-                      <p className="text-sm text-gray-400">In Progress</p>
-                    </div>
+                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
+                  <div className="flex items-center justify-center space-x-3 mb-2">
+                    <TrendingUp className="w-6 h-6 text-purple-400" />
+                    <span className="text-sm text-gray-400">In Progress</span>
                   </div>
+                  <p className="text-3xl font-bold text-white text-center">
+                    {user ? Object.values(userProgress).filter(p => p.progress_percentage > 0).length : 0}
+                  </p>
                 </div>
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                  <div className="flex items-center space-x-3">
-                    <Trophy className="w-8 h-8 text-yellow-400" />
-                    <div>
-                      <p className="text-2xl font-bold text-white">
-                        {Object.values(userProgress).filter(p => p.progress_percentage === 100).length}
-                      </p>
-                      <p className="text-sm text-gray-400">Completed</p>
-                    </div>
+                <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
+                  <div className="flex items-center justify-center space-x-3 mb-2">
+                    <Trophy className="w-6 h-6 text-yellow-400" />
+                    <span className="text-sm text-gray-400">Completed</span>
                   </div>
+                  <p className="text-3xl font-bold text-white text-center">
+                    {user ? Object.values(userProgress).filter(p => p.progress_percentage === 100).length : 0}
+                  </p>
                 </div>
               </div>
             </div>
@@ -237,36 +224,36 @@ const DSASheetsPage = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredSheets.map((sheet) => {
                   const progress = userProgress[sheet.course_id];
                   const progressPercentage = progress?.progress_percentage || 0;
                   
                   return (
-                    <Card key={sheet.course_id} className="bg-gray-900 border-gray-700 hover:border-gray-600 transition-all duration-300 group cursor-pointer">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between mb-2">
+                    <Card key={sheet.course_id} className="bg-gray-900/50 border-gray-700 hover:border-gray-600 transition-all duration-300 group cursor-pointer backdrop-blur-sm">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-start justify-between mb-3">
                           <Badge className={getDifficultyColor(sheet.difficulty)}>
                             {sheet.difficulty}
                           </Badge>
-                          <Badge className={sheet.is_premium ? "bg-yellow-900 text-yellow-400 border-yellow-800" : "bg-green-900 text-green-400 border-green-800"}>
+                          <Badge className={sheet.is_premium ? "bg-yellow-900/20 text-yellow-400 border-yellow-800" : "bg-green-900/20 text-green-400 border-green-800"}>
                             {sheet.is_premium ? 'Premium' : 'Free'}
                           </Badge>
                         </div>
-                        <CardTitle className="text-white text-xl group-hover:text-blue-400 transition-colors line-clamp-2">
+                        <CardTitle className="text-white text-xl group-hover:text-blue-400 transition-colors line-clamp-2 mb-2">
                           {sheet.title}
                         </CardTitle>
-                        <CardDescription className="text-gray-400 line-clamp-2">
+                        <CardDescription className="text-gray-400 line-clamp-3 leading-relaxed">
                           {sheet.description}
                         </CardDescription>
                         {sheet.tagline && (
-                          <p className="text-sm text-blue-400 font-medium">{sheet.tagline}</p>
+                          <p className="text-sm text-blue-400 font-medium mt-2">{sheet.tagline}</p>
                         )}
                       </CardHeader>
                       
                       <CardContent className="space-y-4">
-                        {/* Progress Bar */}
-                        {progress && progressPercentage > 0 && (
+                        {/* Progress Bar - Only show for logged in users */}
+                        {user && progress && progressPercentage > 0 && (
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="text-gray-400">Progress</span>
@@ -298,14 +285,14 @@ const DSASheetsPage = () => {
 
                         {/* Tags */}
                         {sheet.tags && sheet.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-2">
                             {sheet.tags.slice(0, 3).map((tag, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
+                              <Badge key={index} variant="secondary" className="text-xs bg-gray-800/50 text-gray-300 border-gray-700">
                                 {tag}
                               </Badge>
                             ))}
                             {sheet.tags.length > 3 && (
-                              <Badge variant="secondary" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
+                              <Badge variant="secondary" className="text-xs bg-gray-800/50 text-gray-300 border-gray-700">
                                 +{sheet.tags.length - 3} more
                               </Badge>
                             )}
@@ -314,12 +301,14 @@ const DSASheetsPage = () => {
 
                         {/* Action Button */}
                         <Button 
-                          onClick={() => navigate(`/sheet/${sheet.course_id}`)}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white group-hover:bg-blue-500 transition-colors"
+                          onClick={() => user ? navigate(`/sheet/${sheet.course_id}`) : navigate('/login')}
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white group-hover:shadow-lg transition-all duration-300"
                         >
-                          {progress && progressPercentage > 0 ? (
-                            progressPercentage === 100 ? 'Review Sheet' : 'Continue Practice'
-                          ) : 'Start Practicing'}
+                          {user ? (
+                            progress && progressPercentage > 0 ? (
+                              progressPercentage === 100 ? 'Review Sheet' : 'Continue Practice'
+                            ) : 'Start Practicing'
+                          ) : 'Sign In to Practice'}
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                       </CardContent>

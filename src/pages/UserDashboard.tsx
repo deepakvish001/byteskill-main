@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,8 +14,9 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Target, Flame, Calendar, Edit, Save, X, BookOpen, Code, Star, TrendingUp, Award, Clock, Brain, Zap, CheckCircle, XCircle, AlertCircle, Activity, BarChart3 } from 'lucide-react';
+import { Trophy, Target, Flame, Calendar, Edit, Save, X, BookOpen, Code, Star, TrendingUp, Award, Clock, Brain, Zap, CheckCircle, XCircle, AlertCircle, Activity, BarChart3, LogIn } from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 interface UserProfile {
   id: string;
@@ -35,7 +35,7 @@ const UserDashboard = () => {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default closed
   const [searchQuery, setSearchQuery] = useState('');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -171,7 +171,14 @@ const UserDashboard = () => {
                 </span>
               </button>
             </div>
-            <UserMenu />
+            {user ? <UserMenu /> : (
+              <Link to="/login">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
         <div className="pt-16 flex items-center justify-center min-h-screen">
@@ -221,7 +228,14 @@ const UserDashboard = () => {
               sidebarCollapsed={sidebarCollapsed}
               onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
-            <UserMenu />
+            {user ? <UserMenu /> : (
+              <Link to="/login">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
         
@@ -229,7 +243,7 @@ const UserDashboard = () => {
         <div className="pt-20 p-6 bg-black min-h-screen">
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Profile Header */}
-            <Card className="bg-gray-900 border-gray-700 shadow-xl">
+            <Card className="bg-gray-900/50 border-gray-800 shadow-xl backdrop-blur-sm">
               <CardHeader>
                 <div className="flex items-center space-x-6">
                   <Avatar className="h-24 w-24 ring-4 ring-orange-500/20">
@@ -273,7 +287,7 @@ const UserDashboard = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="bg-gray-900 border-gray-700 hover:border-yellow-500/50 transition-colors shadow-lg">
+              <Card className="bg-gray-900/50 border-gray-800 hover:border-yellow-500/50 transition-colors shadow-lg backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -288,7 +302,7 @@ const UserDashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900 border-gray-700 hover:border-green-500/50 transition-colors shadow-lg">
+              <Card className="bg-gray-900/50 border-gray-800 hover:border-green-500/50 transition-colors shadow-lg backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -303,7 +317,7 @@ const UserDashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900 border-gray-700 hover:border-orange-500/50 transition-colors shadow-lg">
+              <Card className="bg-gray-900/50 border-gray-800 hover:border-orange-500/50 transition-colors shadow-lg backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -318,7 +332,7 @@ const UserDashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gray-900 border-gray-700 hover:border-blue-500/50 transition-colors shadow-lg">
+              <Card className="bg-gray-900/50 border-gray-800 hover:border-blue-500/50 transition-colors shadow-lg backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -335,7 +349,7 @@ const UserDashboard = () => {
             </div>
 
             <Tabs defaultValue="progress" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 bg-gray-900 border-gray-700">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-900/50 border-gray-800 backdrop-blur-sm">
                 <TabsTrigger value="progress" className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-gray-800">
                   <TrendingUp className="w-4 h-4 mr-2" />
                   Progress
@@ -357,8 +371,7 @@ const UserDashboard = () => {
               </TabsList>
 
               <TabsContent value="progress" className="space-y-6">
-                {/* Progress Section */}
-                <Card className="bg-gray-900 border-gray-700 shadow-lg">
+                <Card className="bg-gray-900/50 border-gray-800 shadow-lg backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
                       <BarChart3 className="h-5 w-5 text-blue-400" />
@@ -377,9 +390,9 @@ const UserDashboard = () => {
                             <div className="flex items-center space-x-3">
                               <span className="text-white font-medium">{topic.topic}</span>
                               <Badge className={`text-xs px-2 py-1 ${
-                                topic.difficulty === 'Easy' ? 'bg-green-900 text-green-400 border-green-800' :
-                                topic.difficulty === 'Medium' ? 'bg-yellow-900 text-yellow-400 border-yellow-800' :
-                                'bg-red-900 text-red-400 border-red-800'
+                                topic.difficulty === 'Easy' ? 'bg-green-900/20 text-green-400 border-green-800' :
+                                topic.difficulty === 'Medium' ? 'bg-yellow-900/20 text-yellow-400 border-yellow-800' :
+                                'bg-red-900/20 text-red-400 border-red-800'
                               }`}>
                                 {topic.difficulty}
                               </Badge>
@@ -399,7 +412,7 @@ const UserDashboard = () => {
               </TabsContent>
 
               <TabsContent value="achievements" className="space-y-6">
-                <Card className="bg-gray-900 border-gray-700 shadow-lg">
+                <Card className="bg-gray-900/50 border-gray-800 shadow-lg backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
                       <Award className="h-5 w-5 text-yellow-400" />
@@ -416,8 +429,8 @@ const UserDashboard = () => {
                           key={index} 
                           className={`p-4 rounded-lg border transition-all duration-300 ${
                             achievement.earned 
-                              ? 'bg-gray-800 border-green-800 shadow-lg ring-1 ring-green-500/20' 
-                              : 'bg-gray-800/50 border-gray-700'
+                              ? 'bg-gray-800/50 border-green-800 shadow-lg ring-1 ring-green-500/20' 
+                              : 'bg-gray-800/30 border-gray-700'
                           }`}
                         >
                           <div className="flex items-center space-x-3 mb-3">
@@ -429,7 +442,7 @@ const UserDashboard = () => {
                                 {achievement.name}
                               </span>
                               {achievement.earned && (
-                                <Badge className="ml-2 bg-green-900 text-green-400 border-green-800 text-xs">
+                                <Badge className="ml-2 bg-green-900/20 text-green-400 border-green-800 text-xs">
                                   Earned
                                 </Badge>
                               )}
@@ -450,7 +463,7 @@ const UserDashboard = () => {
               </TabsContent>
 
               <TabsContent value="activity" className="space-y-6">
-                <Card className="bg-gray-900 border-gray-700 shadow-lg">
+                <Card className="bg-gray-900/50 border-gray-800 shadow-lg backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="text-white flex items-center gap-2">
                       <Clock className="h-5 w-5 text-blue-400" />
@@ -463,7 +476,7 @@ const UserDashboard = () => {
                   <CardContent>
                     <div className="space-y-4">
                       {recentActivity.map((activity, index) => (
-                        <div key={index} className="flex items-center space-x-4 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+                        <div key={index} className="flex items-center space-x-4 p-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                             activity.status === 'solved' ? 'bg-green-500/20' : 'bg-gray-600/20'
                           }`}>
@@ -477,14 +490,14 @@ const UserDashboard = () => {
                             <div className="flex items-center space-x-2">
                               <span className="text-white font-medium">{activity.problem}</span>
                               <Badge className={`text-xs px-2 py-1 ${
-                                activity.difficulty === 'Easy' ? 'bg-green-900 text-green-400 border-green-800' :
-                                activity.difficulty === 'Medium' ? 'bg-yellow-900 text-yellow-400 border-yellow-800' :
-                                'bg-red-900 text-red-400 border-red-800'
+                                activity.difficulty === 'Easy' ? 'bg-green-900/20 text-green-400 border-green-800' :
+                                activity.difficulty === 'Medium' ? 'bg-yellow-900/20 text-yellow-400 border-yellow-800' :
+                                'bg-red-900/20 text-red-400 border-red-800'
                               }`}>
                                 {activity.difficulty}
                               </Badge>
                               {activity.status === 'solved' && (
-                                <Badge className="bg-blue-900 text-blue-400 border-blue-800 text-xs">
+                                <Badge className="bg-blue-900/20 text-blue-400 border-blue-800 text-xs">
                                   +{activity.xp} XP
                                 </Badge>
                               )}
@@ -493,8 +506,8 @@ const UserDashboard = () => {
                           </div>
                           <div className={`px-3 py-1 rounded-full text-xs font-medium ${
                             activity.status === 'solved' 
-                              ? 'bg-green-900 text-green-400' 
-                              : 'bg-gray-700 text-gray-400'
+                              ? 'bg-green-900/20 text-green-400' 
+                              : 'bg-gray-700/50 text-gray-400'
                           }`}>
                             {activity.status === 'solved' ? 'Solved' : 'Attempted'}
                           </div>
@@ -507,7 +520,7 @@ const UserDashboard = () => {
 
               {isOwnProfile && (
                 <TabsContent value="settings" className="space-y-6">
-                  <Card className="bg-gray-900 border-gray-700 shadow-lg">
+                  <Card className="bg-gray-900/50 border-gray-800 shadow-lg backdrop-blur-sm">
                     <CardHeader>
                       <CardTitle className="text-white">Profile Settings</CardTitle>
                       <CardDescription className="text-gray-400">
@@ -523,7 +536,7 @@ const UserDashboard = () => {
                             value={editing ? formData.full_name : userProfile.full_name}
                             onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                             disabled={!editing}
-                            className="bg-gray-800 border-gray-600 text-white focus:border-orange-400"
+                            className="bg-gray-800/50 border-gray-600 text-white focus:border-orange-400"
                             placeholder="Enter your full name"
                           />
                         </div>
@@ -534,7 +547,7 @@ const UserDashboard = () => {
                             id="username"
                             value={userProfile.username}
                             disabled
-                            className="bg-gray-800 border-gray-600 text-white opacity-50"
+                            className="bg-gray-800/50 border-gray-600 text-white opacity-50"
                           />
                           <p className="text-xs text-gray-500">Username cannot be changed</p>
                         </div>
@@ -545,7 +558,7 @@ const UserDashboard = () => {
                             id="email"
                             value={user?.email || ''}
                             disabled
-                            className="bg-gray-800 border-gray-600 text-white opacity-50"
+                            className="bg-gray-800/50 border-gray-600 text-white opacity-50"
                           />
                           <p className="text-xs text-gray-500">Email is managed by your account settings</p>
                         </div>
@@ -557,7 +570,7 @@ const UserDashboard = () => {
                             value={editing ? formData.mobile_number : (userProfile.mobile_number || '')}
                             onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value })}
                             disabled={!editing}
-                            className="bg-gray-800 border-gray-600 text-white focus:border-orange-400"
+                            className="bg-gray-800/50 border-gray-600 text-white focus:border-orange-400"
                             placeholder="Enter your mobile number"
                           />
                         </div>
