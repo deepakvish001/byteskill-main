@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, Target, Users, Star, ArrowRight, Trophy, GraduationCap, Play, CheckCircle, LogIn } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 interface Course {
   course_id: string;
@@ -37,18 +37,17 @@ interface UserProgress {
 const CoursesOverview = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default closed
-  const [searchQuery, setSearchQuery] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default to collapsed
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterQuery, setFilterQuery] = useState("");
   const [courses, setCourses] = useState<Course[]>([]);
   const [userProgress, setUserProgress] = useState<{ [key: string]: UserProgress }>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCourses();
-    if (user) {
-      fetchUserProgress();
-    }
-  }, [user]);
+  const breadcrumbItems = [
+    { label: 'Home', href: '/dashboard' },
+    { label: 'Courses' }
+  ];
 
   const fetchCourses = async () => {
     try {
@@ -121,14 +120,21 @@ const CoursesOverview = () => {
     return gradients[index % gradients.length];
   };
 
-  const filteredCourses = courses.filter(course =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    course.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredCourses = courses?.filter(course => 
+    course.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
+    course.description?.toLowerCase().includes(filterQuery.toLowerCase()) ||
+    course.tags?.some((tag: string) => tag.toLowerCase().includes(filterQuery.toLowerCase()))
+  ) || [];
+
+  useEffect(() => {
+    fetchCourses();
+    if (user) {
+      fetchUserProgress();
+    }
+  }, [user]);
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-black flex relative overflow-hidden">
       {/* Fixed Sidebar */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
         sidebarCollapsed ? 'w-20' : 'w-72'
@@ -141,11 +147,11 @@ const CoursesOverview = () => {
       </div>
       
       {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 ${
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
         sidebarCollapsed ? 'ml-20' : 'ml-72'
       }`}>
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 z-30 h-16 bg-black border-b border-gray-800" style={{
+        <div className="fixed top-0 right-0 z-30 h-16 bg-black border-b border-gray-800 transition-all duration-300" style={{
           left: sidebarCollapsed ? '5rem' : '18rem',
         }}>
           <div className="flex items-center justify-between h-full px-4">
@@ -158,7 +164,7 @@ const CoursesOverview = () => {
             {user ? (
               <UserMenu />
             ) : (
-              <Link to="/login">
+              <Link to="/auth">
                 <Button className="bg-orange-600 hover:bg-orange-700 text-white">
                   <LogIn className="w-4 h-4 mr-2" />
                   Sign In
@@ -169,20 +175,33 @@ const CoursesOverview = () => {
         </div>
         
         {/* Main Content */}
-        <main className="pt-16 p-6 bg-black min-h-screen">
-          <div className="max-w-7xl mx-auto">
-            {/* Header Section */}
-            <div className="text-center mb-12">
-              <div className="flex items-center justify-center space-x-3 mb-6">
-                <div className="p-3 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl">
-                  <GraduationCap className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-5xl font-bold text-white">Programming Courses</h1>
-                  <p className="text-gray-400 text-lg mt-2">
-                    Learn programming languages and frameworks with hands-on projects
-                  </p>
-                </div>
+        <main className="flex-1 pt-16 p-6 bg-black min-h-screen">
+          <div className="max-w-7xl mx-auto space-y-8">
+            {/* Breadcrumb */}
+            <div className="bg-black mb-4">
+              <CourseBreadcrumb items={breadcrumbItems} />
+            </div>
+
+            {/* Page Header */}
+            <div className="text-center mb-8 bg-black">
+              <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+                All Courses
+              </h1>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Explore our comprehensive collection of programming and computer science courses
+              </p>
+            </div>
+
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <Input
+                  placeholder="Search courses, topics, or technologies..."
+                  value={filterQuery}
+                  onChange={(e) => setFilterQuery(e.target.value)}
+                  className="pl-12 bg-black border-gray-800 text-white placeholder-gray-500 h-12 text-lg focus:border-blue-500"
+                />
               </div>
             </div>
 

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +17,8 @@ import {
   Star,
   BookOpen,
   Play,
-  AlertCircle
+  AlertCircle,
+  LogIn
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
@@ -119,7 +120,16 @@ const CoreCSPage = () => {
               sidebarCollapsed={sidebarCollapsed}
               onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
-            <UserMenu />
+            {user ? (
+              <UserMenu />
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
         

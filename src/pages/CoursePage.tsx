@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { BookOpen, Clock, Users, Star, Trophy, Target, CheckCircle, PlayCircle, Lock, Zap } from "lucide-react";
+import { BookOpen, Clock, Users, Star, Trophy, Target, CheckCircle, PlayCircle, Lock, Zap, LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import UserMenu from "@/components/UserMenu";
@@ -52,7 +53,7 @@ const CoursePage = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default to collapsed
   const [course, setCourse] = useState<Course | null>(null);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,7 +249,16 @@ const CoursePage = () => {
               sidebarCollapsed={sidebarCollapsed}
               onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
-            <UserMenu />
+            {user ? (
+              <UserMenu />
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
         

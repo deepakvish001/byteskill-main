@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
@@ -13,11 +13,12 @@ import {
   Clock, 
   Search,
   CheckCircle,
-  Database,
+  Briefcase,
   Star,
   BookOpen,
   Play,
-  AlertCircle
+  AlertCircle,
+  LogIn
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
@@ -119,7 +120,16 @@ const InterviewPrepPage = () => {
               sidebarCollapsed={sidebarCollapsed}
               onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
-            <UserMenu />
+            {user ? (
+              <UserMenu />
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
         
@@ -137,7 +147,7 @@ const InterviewPrepPage = () => {
                 Interview Preparation
               </h1>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Ace your technical interviews with our comprehensive preparation courses and practice problems
+                Ace your technical interviews with comprehensive preparation courses and practice sessions
               </p>
             </div>
 
@@ -146,7 +156,7 @@ const InterviewPrepPage = () => {
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 <Input
-                  placeholder="Search interview topics, companies, or problem types..."
+                  placeholder="Search interview topics, companies, or preparation guides..."
                   value={filterQuery}
                   onChange={(e) => setFilterQuery(e.target.value)}
                   className="pl-12 bg-black border-gray-800 text-white placeholder-gray-500 h-12 text-lg focus:border-blue-500"

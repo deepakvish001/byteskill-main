@@ -37,7 +37,7 @@ interface UserProgress {
 const DSASheetsPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default to collapsed
   const [searchQuery, setSearchQuery] = useState('');
   const [dsaSheets, setDsaSheets] = useState<DSASheet[]>([]);
   const [userProgress, setUserProgress] = useState<{ [key: string]: UserProgress }>({});
@@ -145,7 +145,7 @@ const DSASheetsPage = () => {
             {user ? (
               <UserMenu />
             ) : (
-              <Link to="/login">
+              <Link to="/auth">
                 <Button className="bg-orange-600 hover:bg-orange-700 text-white">
                   <LogIn className="w-4 h-4 mr-2" />
                   Sign In
