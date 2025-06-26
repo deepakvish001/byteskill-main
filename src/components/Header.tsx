@@ -1,5 +1,5 @@
 
-import { Search, Menu, BookOpen, Trophy, ChevronLeft } from "lucide-react";
+import { Search, Menu, BookOpen, Trophy, ChevronLeft, FileText, GraduationCap, Cpu, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -13,7 +13,7 @@ interface HeaderProps {
 
 const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onToggleSidebar }: HeaderProps) => {
   return (
-    <header className="w-full bg-black border-b border-gray-800 px-4 py-3 h-16 flex items-center">
+    <header className="w-full bg-black border-b border-gray-800 px-4 py-3 h-16 flex items-center backdrop-blur-md">
       <div className="flex items-center justify-between w-full">
         {/* Sidebar Toggle Button - Always visible */}
         <div className="flex items-center space-x-4">
@@ -52,6 +52,27 @@ const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onToggleSidebar
               </div>
             </Link>
           )}
+
+          {/* Enhanced Navigation - Show when sidebar is collapsed */}
+          {sidebarCollapsed && (
+            <nav className="hidden lg:flex items-center space-x-1 ml-8">
+              {[
+                { name: 'DSA Sheets', href: '/dsa-sheets', icon: FileText, color: 'text-blue-400' },
+                { name: 'Courses', href: '/courses', icon: GraduationCap, color: 'text-green-400' },
+                { name: 'Core CS', href: '/core-cs', icon: Cpu, color: 'text-purple-400' },
+                { name: 'Interview Prep', href: '/interview-prep', icon: Target, color: 'text-orange-400' }
+              ].map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all duration-200 group"
+                >
+                  <item.icon className={`w-4 h-4 ${item.color} group-hover:scale-110 transition-transform`} />
+                  <span className="text-sm font-medium">{item.name}</span>
+                </Link>
+              ))}
+            </nav>
+          )}
         </div>
         
         {/* Search and Menu section */}
@@ -61,7 +82,7 @@ const Header = ({ searchQuery, onSearchChange, sidebarCollapsed, onToggleSidebar
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input 
               placeholder="Search problems, topics, companies..." 
-              className="pl-10 pr-4 w-80 bg-black border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl transition-all duration-300 hover:border-gray-600 text-sm h-10" 
+              className="pl-10 pr-4 w-80 bg-gray-900 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl transition-all duration-300 hover:border-gray-600 text-sm h-10 backdrop-blur-sm" 
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
             />
