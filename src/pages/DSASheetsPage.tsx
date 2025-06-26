@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Clock, Target, Users, Star, ArrowRight } from 'lucide-react';
+import { BookOpen, Clock, Target, Users, Star, ArrowRight, Trophy, Code, GitBranch, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -18,13 +18,15 @@ interface DSASheet {
   title: string;
   description: string;
   difficulty: string;
-  estimated_duration: string;
+  estimated_hours: number;  // Changed from estimated_duration
   problem_count: number;
   tags: string[];
   created_at: string;
-  is_free: boolean;
+  is_premium: boolean;  // Changed from is_free
   rating?: number;
   enrolled_count?: number;
+  category: string;
+  tagline?: string;
 }
 
 interface UserProgress {
@@ -108,7 +110,7 @@ const DSASheetsPage = () => {
 
   const filteredSheets = dsaSheets.filter(sheet =>
     sheet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    sheet.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sheet.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     sheet.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -163,10 +165,63 @@ const DSASheetsPage = () => {
           <div className="max-w-7xl mx-auto">
             {/* Header Section */}
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">DSA Sheets</h1>
-              <p className="text-gray-400 text-lg">
-                Master Data Structures and Algorithms with our comprehensive problem sheets
-              </p>
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
+                  <Code className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold text-white">DSA Practice Sheets</h1>
+                  <p className="text-gray-400 text-lg">
+                    Master Data Structures and Algorithms with curated problem collections
+                  </p>
+                </div>
+              </div>
+
+              {/* Stats Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                  <div className="flex items-center space-x-3">
+                    <BookOpen className="w-8 h-8 text-blue-400" />
+                    <div>
+                      <p className="text-2xl font-bold text-white">{dsaSheets.length}</p>
+                      <p className="text-sm text-gray-400">Total Sheets</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                  <div className="flex items-center space-x-3">
+                    <Target className="w-8 h-8 text-green-400" />
+                    <div>
+                      <p className="text-2xl font-bold text-white">
+                        {dsaSheets.reduce((sum, sheet) => sum + (sheet.problem_count || 0), 0)}
+                      </p>
+                      <p className="text-sm text-gray-400">Total Problems</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                  <div className="flex items-center space-x-3">
+                    <TrendingUp className="w-8 h-8 text-purple-400" />
+                    <div>
+                      <p className="text-2xl font-bold text-white">
+                        {Object.values(userProgress).filter(p => p.progress_percentage > 0).length}
+                      </p>
+                      <p className="text-sm text-gray-400">In Progress</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                  <div className="flex items-center space-x-3">
+                    <Trophy className="w-8 h-8 text-yellow-400" />
+                    <div>
+                      <p className="text-2xl font-bold text-white">
+                        {Object.values(userProgress).filter(p => p.progress_percentage === 100).length}
+                      </p>
+                      <p className="text-sm text-gray-400">Completed</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {loading ? (
@@ -188,35 +243,42 @@ const DSASheetsPage = () => {
                   const progressPercentage = progress?.progress_percentage || 0;
                   
                   return (
-                    <Card key={sheet.course_id} className="bg-gray-900 border-gray-700 hover:border-gray-600 transition-all duration-300 group">
+                    <Card key={sheet.course_id} className="bg-gray-900 border-gray-700 hover:border-gray-600 transition-all duration-300 group cursor-pointer">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between mb-2">
                           <Badge className={getDifficultyColor(sheet.difficulty)}>
                             {sheet.difficulty}
                           </Badge>
-                          {sheet.is_free && (
-                            <Badge className="bg-green-900 text-green-400 border-green-800">
-                              Free
-                            </Badge>
-                          )}
+                          <Badge className={sheet.is_premium ? "bg-yellow-900 text-yellow-400 border-yellow-800" : "bg-green-900 text-green-400 border-green-800"}>
+                            {sheet.is_premium ? 'Premium' : 'Free'}
+                          </Badge>
                         </div>
-                        <CardTitle className="text-white text-xl group-hover:text-blue-400 transition-colors">
+                        <CardTitle className="text-white text-xl group-hover:text-blue-400 transition-colors line-clamp-2">
                           {sheet.title}
                         </CardTitle>
                         <CardDescription className="text-gray-400 line-clamp-2">
                           {sheet.description}
                         </CardDescription>
+                        {sheet.tagline && (
+                          <p className="text-sm text-blue-400 font-medium">{sheet.tagline}</p>
+                        )}
                       </CardHeader>
                       
                       <CardContent className="space-y-4">
-                        {/* Progress Bar (if user has progress) */}
+                        {/* Progress Bar */}
                         {progress && progressPercentage > 0 && (
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="text-gray-400">Progress</span>
-                              <span className="text-white">{progressPercentage}%</span>
+                              <span className="text-white font-medium">{progressPercentage}%</span>
                             </div>
-                            <Progress value={progressPercentage} className="h-2" />
+                            <Progress 
+                              value={progressPercentage} 
+                              className="h-2 bg-gray-800" 
+                            />
+                            <p className="text-xs text-gray-500">
+                              {Math.floor(progressPercentage / 10)} problems solved
+                            </p>
                           </div>
                         )}
 
@@ -225,11 +287,11 @@ const DSASheetsPage = () => {
                           <div className="flex items-center space-x-4">
                             <div className="flex items-center">
                               <Target className="w-4 h-4 mr-1" />
-                              <span>{sheet.problem_count} problems</span>
+                              <span>{sheet.problem_count || 0} problems</span>
                             </div>
                             <div className="flex items-center">
                               <Clock className="w-4 h-4 mr-1" />
-                              <span>{sheet.estimated_duration}</span>
+                              <span>{sheet.estimated_hours || 0}h</span>
                             </div>
                           </div>
                         </div>
@@ -238,12 +300,12 @@ const DSASheetsPage = () => {
                         {sheet.tags && sheet.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {sheet.tags.slice(0, 3).map((tag, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs bg-gray-800 text-gray-300">
+                              <Badge key={index} variant="secondary" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
                                 {tag}
                               </Badge>
                             ))}
                             {sheet.tags.length > 3 && (
-                              <Badge variant="secondary" className="text-xs bg-gray-800 text-gray-300">
+                              <Badge variant="secondary" className="text-xs bg-gray-800 text-gray-300 border-gray-700">
                                 +{sheet.tags.length - 3} more
                               </Badge>
                             )}
@@ -255,7 +317,9 @@ const DSASheetsPage = () => {
                           onClick={() => navigate(`/sheet/${sheet.course_id}`)}
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white group-hover:bg-blue-500 transition-colors"
                         >
-                          {progress && progressPercentage > 0 ? 'Continue' : 'Start Sheet'}
+                          {progress && progressPercentage > 0 ? (
+                            progressPercentage === 100 ? 'Review Sheet' : 'Continue Practice'
+                          ) : 'Start Practicing'}
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                       </CardContent>
