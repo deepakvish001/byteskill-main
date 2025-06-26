@@ -13,7 +13,6 @@ import CoreCSPage from "@/pages/CoreCSPage";
 import InterviewPrepPage from "@/pages/InterviewPrepPage";
 import CoursePage from "@/pages/CoursePage";
 import UserDashboard from "@/pages/UserDashboard";
-import ProfilePage from "@/pages/ProfilePage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import PublicProfile from "@/pages/PublicProfile";
 
@@ -37,7 +36,6 @@ function App() {
               <Route path="/course/:courseId" element={<CoursePage />} />
               <Route path="/sheet/:courseId" element={<CoursePage />} />
               <Route path="/u/:username" element={<UserDashboard />} />
-              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/public/:username" element={<PublicProfile />} />
               <Route path="/admin" element={<AdminDashboard />} />
             </Routes>
