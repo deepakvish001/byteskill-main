@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ProblemTable from "./ProblemTable";
 import NoteDialog from "./NoteDialog";
 import { toast } from "sonner";
+import { useProgressHandler } from "@/hooks/useProgressHandler";
 
 interface CourseContentProps {
   selectedSheet: string;
@@ -34,7 +35,7 @@ interface Problem {
   estimatedTime?: number;
   practice_link?: string;
   description?: string;
-  content_id?: string; // Add content_id to track the actual database record
+  content_id?: string;
 }
 
 interface Lecture {
@@ -67,13 +68,18 @@ const CourseContent = ({
   const [steps, setSteps] = useState<Step[]>([]);
   const [expandedSteps, setExpandedSteps] = useState<string[]>([]);
   const [expandedLectures, setExpandedLectures] = useState<string[]>([]);
-  const [problemStatuses, setProblemStatuses] = useState<Record<number, "Solved" | "Attempted" | "Not Started">>({});
-  const [bookmarkedProblems, setBookmarkedProblems] = useState<number[]>([]);
-  const [problemNotes, setProblemNotes] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [currentProblem, setCurrentProblem] = useState<{ id: number; title: string } | null>(null);
   const [contentIdMap, setContentIdMap] = useState<Record<number, string>>({});
+
+  const {
+    progressState,
+    fetchUserProgress,
+    toggleProblemStatus,
+    toggleBookmark,
+    saveNote
+  } = useProgressHandler(selectedSheet);
 
   // Handle collapse/expand controls from parent
   useEffect(() => {
@@ -96,9 +102,6 @@ const CourseContent = ({
   useEffect(() => {
     if (selectedSheet && isEnrolled) {
       fetchCourseData();
-      if (user) {
-        fetchUserProgress();
-      }
     } else {
       setSteps([]);
       setLoading(false);
@@ -159,7 +162,7 @@ const CourseContent = ({
           
           const problems: Problem[] = chapterContent.map(item => {
             const problemId = parseInt(item.id.replace(/-/g, '').substring(0, 8), 16);
-            idMap[problemId] = item.id; // Store the mapping
+            idMap[problemId] = item.id;
             
             return {
               id: problemId,
@@ -202,58 +205,17 @@ const CourseContent = ({
 
       setSteps(transformedSteps);
       setContentIdMap(idMap);
+      
+      // Fetch user progress after setting up the content
+      if (user) {
+        await fetchUserProgress(idMap);
+      }
     } catch (error) {
       console.error('Error fetching course data:', error);
       toast.error('Failed to load course content');
       setSteps([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchUserProgress = async () => {
-    if (!user) return;
-
-    try {
-      // Fetch user progress for this course
-      const { data: progress, error: progressError } = await supabase
-        .from('user_content_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('course_id', selectedSheet);
-
-      if (progressError) throw progressError;
-
-      // Update problem statuses and bookmarks based on progress
-      const statuses: Record<number, "Solved" | "Attempted" | "Not Started"> = {};
-      const bookmarks: number[] = [];
-      const notes: Record<number, string> = {};
-
-      progress?.forEach(p => {
-        const problemId = parseInt(p.content_id.replace(/-/g, '').substring(0, 8), 16);
-        
-        if (p.is_completed) {
-          statuses[problemId] = "Solved";
-        } else if (p.time_spent_minutes > 0) {
-          statuses[problemId] = "Attempted";
-        } else {
-          statuses[problemId] = "Not Started";
-        }
-
-        if (p.is_bookmarked) {
-          bookmarks.push(problemId);
-        }
-
-        if (p.notes) {
-          notes[problemId] = p.notes;
-        }
-      });
-
-      setProblemStatuses(statuses);
-      setBookmarkedProblems(bookmarks);
-      setProblemNotes(notes);
-    } catch (error) {
-      console.error('Error fetching user progress:', error);
     }
   };
 
@@ -274,34 +236,6 @@ const CourseContent = ({
   };
 
   const handleToggleProblemStatus = async (problemId: number) => {
-    if (!user) {
-      toast.error("Please sign in to track your progress");
-      return;
-    }
-
-    const currentStatus = problemStatuses[problemId] || "Not Started";
-    let newStatus: "Solved" | "Attempted" | "Not Started";
-    
-    switch (currentStatus) {
-      case "Not Started":
-        newStatus = "Attempted";
-        break;
-      case "Attempted":
-        newStatus = "Solved";
-        break;
-      case "Solved":
-        newStatus = "Not Started";
-        break;
-      default:
-        newStatus = "Not Started";
-    }
-
-    setProblemStatuses(prev => ({
-      ...prev,
-      [problemId]: newStatus
-    }));
-
-    // Get the actual content ID from our mapping
     const contentId = contentIdMap[problemId];
     if (!contentId) {
       console.error('Content ID not found for problem:', problemId);
@@ -309,74 +243,24 @@ const CourseContent = ({
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from('user_content_progress')
-        .upsert({
-          user_id: user.id,
-          content_id: contentId,
-          course_id: selectedSheet,
-          module_id: findModuleIdByProblemId(problemId),
-          chapter_id: findChapterIdByProblemId(problemId),
-          is_completed: newStatus === "Solved",
-          time_spent_minutes: newStatus !== "Not Started" ? 1 : 0,
-          completed_at: newStatus === "Solved" ? new Date().toISOString() : null
-        });
-
-      if (error) throw error;
-      
-      toast.success(`Problem marked as ${newStatus.toLowerCase()}`);
-    } catch (error) {
-      console.error('Error updating problem status:', error);
-      toast.error('Failed to update progress');
-      setProblemStatuses(prev => ({
-        ...prev,
-        [problemId]: currentStatus
-      }));
-    }
+    const moduleId = findModuleIdByProblemId(problemId);
+    const chapterId = findChapterIdByProblemId(problemId);
+    
+    await toggleProblemStatus(problemId, contentId, moduleId, chapterId);
   };
 
   const handleToggleBookmark = async (problemId: number) => {
-    if (!user) {
-      toast.error("Please sign in to bookmark problems");
-      return;
-    }
-
-    const isBookmarked = bookmarkedProblems.includes(problemId);
     const contentId = contentIdMap[problemId];
-    
     if (!contentId) {
       console.error('Content ID not found for problem:', problemId);
       toast.error('Failed to update bookmark - content not found');
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from('user_content_progress')
-        .upsert({
-          user_id: user.id,
-          content_id: contentId,
-          course_id: selectedSheet,
-          module_id: findModuleIdByProblemId(problemId),
-          chapter_id: findChapterIdByProblemId(problemId),
-          is_bookmarked: !isBookmarked,
-          bookmarked_at: !isBookmarked ? new Date().toISOString() : null
-        });
-
-      if (error) throw error;
-
-      setBookmarkedProblems(prev => 
-        isBookmarked 
-          ? prev.filter(id => id !== problemId)
-          : [...prev, problemId]
-      );
-
-      toast.success(isBookmarked ? 'Bookmark removed' : 'Problem bookmarked');
-    } catch (error) {
-      console.error('Error updating bookmark:', error);
-      toast.error('Failed to update bookmark');
-    }
+    const moduleId = findModuleIdByProblemId(problemId);
+    const chapterId = findChapterIdByProblemId(problemId);
+    
+    await toggleBookmark(problemId, contentId, moduleId, chapterId);
   };
 
   const handleOpenNoteDialog = (problemId: number, problemTitle: string) => {
@@ -398,30 +282,10 @@ const CourseContent = ({
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from('user_content_progress')
-        .upsert({
-          user_id: user.id,
-          content_id: contentId,
-          course_id: selectedSheet,
-          module_id: findModuleIdByProblemId(currentProblem.id),
-          chapter_id: findChapterIdByProblemId(currentProblem.id),
-          notes: noteContent
-        });
-
-      if (error) throw error;
-
-      setProblemNotes(prev => ({
-        ...prev,
-        [currentProblem.id]: noteContent
-      }));
-
-      toast.success('Note saved successfully');
-    } catch (error) {
-      console.error('Error saving note:', error);
-      toast.error('Failed to save note');
-    }
+    const moduleId = findModuleIdByProblemId(currentProblem.id);
+    const chapterId = findChapterIdByProblemId(currentProblem.id);
+    
+    await saveNote(currentProblem.id, contentId, moduleId, chapterId, noteContent);
   };
 
   // Helper functions to find IDs
@@ -458,7 +322,7 @@ const CourseContent = ({
     const totalProblems = step.lectures.reduce((sum, lecture) => sum + lecture.problems.length, 0);
     const solvedProblems = step.lectures.reduce((sum, lecture) => 
       sum + lecture.problems.filter(problem => 
-        (problemStatuses[problem.id] || problem.status) === "Solved"
+        (progressState.problemStatuses[problem.id] || problem.status) === "Solved"
       ).length, 0
     );
     return totalProblems > 0 ? (solvedProblems / totalProblems) * 100 : 0;
@@ -466,7 +330,7 @@ const CourseContent = ({
 
   const calculateLectureProgress = (lecture: Lecture) => {
     const solvedProblems = lecture.problems.filter(problem => 
-      (problemStatuses[problem.id] || problem.status) === "Solved"
+      (progressState.problemStatuses[problem.id] || problem.status) === "Solved"
     ).length;
     return lecture.problems.length > 0 ? (solvedProblems / lecture.problems.length) * 100 : 0;
   };
@@ -508,8 +372,8 @@ const CourseContent = ({
         lectures: step.lectures.map(lecture => ({
           ...lecture,
           problems: lecture.problems.filter(problem => 
-            (problemStatuses[problem.id] || problem.status) === "Solved" ||
-            bookmarkedProblems.includes(problem.id)
+            (progressState.problemStatuses[problem.id] || problem.status) === "Solved" ||
+            progressState.bookmarkedProblems.includes(problem.id)
           )
         })).filter(lecture => lecture.problems.length > 0)
       })).filter(step => step.lectures.length > 0)
@@ -521,9 +385,9 @@ const CourseContent = ({
         steps={filteredSteps}
         expandedSteps={expandedSteps}
         expandedLectures={expandedLectures}
-        problemStatuses={problemStatuses}
-        bookmarkedProblems={bookmarkedProblems}
-        problemNotes={problemNotes}
+        problemStatuses={progressState.problemStatuses}
+        bookmarkedProblems={progressState.bookmarkedProblems}
+        problemNotes={progressState.problemNotes}
         onToggleStep={handleToggleStep}
         onToggleLecture={handleToggleLecture}
         onToggleProblemStatus={handleToggleProblemStatus}
@@ -539,7 +403,7 @@ const CourseContent = ({
           open={noteDialogOpen}
           onOpenChange={setNoteDialogOpen}
           noteTitle={`Notes for: ${currentProblem.title}`}
-          noteContent={problemNotes[currentProblem.id] || ""}
+          noteContent={progressState.problemNotes[currentProblem.id] || ""}
           onSave={handleSaveNote}
         />
       )}

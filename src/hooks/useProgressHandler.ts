@@ -101,17 +101,22 @@ export const useProgressHandler = (courseId: string) => {
     }));
 
     try {
+      const progressData = {
+        user_id: user.id,
+        content_id: contentId,
+        course_id: courseId,
+        module_id: moduleId,
+        chapter_id: chapterId,
+        is_completed: newStatus === "Solved",
+        time_spent_minutes: newStatus !== "Not Started" ? 1 : 0,
+        completed_at: newStatus === "Solved" ? new Date().toISOString() : null
+      };
+
       const { error } = await supabase
         .from('user_content_progress')
-        .upsert({
-          user_id: user.id,
-          content_id: contentId,
-          course_id: courseId,
-          module_id: moduleId,
-          chapter_id: chapterId,
-          is_completed: newStatus === "Solved",
-          time_spent_minutes: newStatus !== "Not Started" ? 1 : 0,
-          completed_at: newStatus === "Solved" ? new Date().toISOString() : null
+        .upsert(progressData, { 
+          onConflict: 'user_id,content_id',
+          ignoreDuplicates: false 
         });
 
       if (error) throw error;
@@ -144,16 +149,21 @@ export const useProgressHandler = (courseId: string) => {
     const isBookmarked = progressState.bookmarkedProblems.includes(problemId);
 
     try {
+      const progressData = {
+        user_id: user.id,
+        content_id: contentId,
+        course_id: courseId,
+        module_id: moduleId,
+        chapter_id: chapterId,
+        is_bookmarked: !isBookmarked,
+        bookmarked_at: !isBookmarked ? new Date().toISOString() : null
+      };
+
       const { error } = await supabase
         .from('user_content_progress')
-        .upsert({
-          user_id: user.id,
-          content_id: contentId,
-          course_id: courseId,
-          module_id: moduleId,
-          chapter_id: chapterId,
-          is_bookmarked: !isBookmarked,
-          bookmarked_at: !isBookmarked ? new Date().toISOString() : null
+        .upsert(progressData, { 
+          onConflict: 'user_id,content_id',
+          ignoreDuplicates: false 
         });
 
       if (error) throw error;
@@ -185,15 +195,20 @@ export const useProgressHandler = (courseId: string) => {
     }
 
     try {
+      const progressData = {
+        user_id: user.id,
+        content_id: contentId,
+        course_id: courseId,
+        module_id: moduleId,
+        chapter_id: chapterId,
+        notes: noteContent
+      };
+
       const { error } = await supabase
         .from('user_content_progress')
-        .upsert({
-          user_id: user.id,
-          content_id: contentId,
-          course_id: courseId,
-          module_id: moduleId,
-          chapter_id: chapterId,
-          notes: noteContent
+        .upsert(progressData, { 
+          onConflict: 'user_id,content_id',
+          ignoreDuplicates: false 
         });
 
       if (error) throw error;
