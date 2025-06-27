@@ -179,7 +179,7 @@ const LoginPage = () => {
                   <TabsTrigger value="login" className="text-zinc-50 bg-gray-900 hover:bg-gray-800">
                     Sign In
                   </TabsTrigger>
-                  <TabsTrigger value="signup" className="text-gray-400 data-[state=active]:text-white">
+                  <TabsTrigger value="signup" className="text-zinc-50 bg-gray-900 hover:bg-gray-800">
                     Sign Up
                   </TabsTrigger>
                 </TabsList>
