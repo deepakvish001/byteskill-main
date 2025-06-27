@@ -508,7 +508,7 @@ const EnhancedUserProfile = () => {
             <GraduationCap className="w-4 h-4 mr-2" />
             Education
           </TabsTrigger>
-          <TabsTrigger value="experience" className="text-gray-400 data-[state=active]:text-white">
+          <TabsTrigger value="experience" className="bg-zinc-950 hover:bg-zinc-800 text-zinc-50">
             <Briefcase className="w-4 h-4 mr-2" />
             Experience
           </TabsTrigger>
