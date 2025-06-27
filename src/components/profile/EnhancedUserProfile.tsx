@@ -9,17 +9,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
-  User, Edit, Save, X, Plus, Trash2, Camera, 
+  User, Edit, Save, X, Plus, Trash2, Camera, Key,
   Github, Linkedin, Globe, Code, GraduationCap,
   Briefcase, Trophy, Calendar, MapPin, Building,
   ExternalLink, Upload
 } from 'lucide-react';
 import { toast } from 'sonner';
+import EducationForm from './EducationForm';
+import ExperienceForm from './ExperienceForm';
+import ProjectForm from './ProjectForm';
+import AchievementForm from './AchievementForm';
+import ChangePasswordForm from './ChangePasswordForm';
 
 interface UserProfile {
   id: string;
@@ -109,6 +112,14 @@ const EnhancedUserProfile = () => {
     company: '',
     job_title: ''
   });
+
+  // Dialog states
+  const [showEducationForm, setShowEducationForm] = useState(false);
+  const [showExperienceForm, setShowExperienceForm] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [showAchievementForm, setShowAchievementForm] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
   useEffect(() => {
     if (user) {
@@ -249,6 +260,61 @@ const EnhancedUserProfile = () => {
     }
   };
 
+  const handleDeleteItem = async (type: string, id: string) => {
+    try {
+      let error;
+      switch (type) {
+        case 'education':
+          ({ error } = await supabase.from('user_education').delete().eq('id', id));
+          break;
+        case 'experience':
+          ({ error } = await supabase.from('user_experience').delete().eq('id', id));
+          break;
+        case 'project':
+          ({ error } = await supabase.from('user_projects').delete().eq('id', id));
+          break;
+        case 'achievement':
+          ({ error } = await supabase.from('user_achievements').delete().eq('id', id));
+          break;
+      }
+
+      if (error) throw error;
+
+      await fetchUserData();
+      toast.success(`${type} deleted successfully`);
+    } catch (error: any) {
+      console.error(`Error deleting ${type}:`, error);
+      toast.error(`Failed to delete ${type}`);
+    }
+  };
+
+  const openEditForm = (type: string, item?: any) => {
+    setEditingItem(item);
+    switch (type) {
+      case 'education':
+        setShowEducationForm(true);
+        break;
+      case 'experience':
+        setShowExperienceForm(true);
+        break;
+      case 'project':
+        setShowProjectForm(true);
+        break;
+      case 'achievement':
+        setShowAchievementForm(true);
+        break;
+    }
+  };
+
+  const closeForm = () => {
+    setEditingItem(null);
+    setShowEducationForm(false);
+    setShowExperienceForm(false);
+    setShowProjectForm(false);
+    setShowAchievementForm(false);
+    setShowPasswordForm(false);
+  };
+
   if (loading || !profile) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -285,14 +351,24 @@ const EnhancedUserProfile = () => {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-bold text-white">{profile.full_name || profile.username}</h1>
-                <Button
-                  onClick={() => setEditing(!editing)}
-                  variant="outline"
-                  className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500"
-                >
-                  {editing ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
-                  {editing ? 'Cancel' : 'Edit Profile'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setEditing(!editing)}
+                    variant="outline"
+                    className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500"
+                  >
+                    {editing ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
+                    {editing ? 'Cancel' : 'Edit Profile'}
+                  </Button>
+                  <Button
+                    onClick={() => setShowPasswordForm(true)}
+                    variant="outline"
+                    className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500"
+                  >
+                    <Key className="w-4 h-4 mr-2" />
+                    Change Password
+                  </Button>
+                </div>
               </div>
               <p className="text-xl text-gray-400 mb-2">@{profile.username}</p>
               {profile.job_title && profile.company && (
@@ -547,7 +623,7 @@ const EnhancedUserProfile = () => {
                 <CardTitle className="text-white">Education</CardTitle>
                 <CardDescription className="text-gray-400">Your educational background</CardDescription>
               </div>
-              <Button className="bg-orange-600 hover:bg-orange-700">
+              <Button onClick={() => openEditForm('education')} className="bg-orange-600 hover:bg-orange-700">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Education
               </Button>
@@ -571,9 +647,24 @@ const EnhancedUserProfile = () => {
                             <p className="text-gray-300 mt-2">{edu.description}</p>
                           )}
                         </div>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-400 hover:text-white"
+                            onClick={() => openEditForm('education', edu)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-400 hover:text-red-400"
+                            onClick={() => handleDeleteItem('education', edu.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -585,7 +676,6 @@ const EnhancedUserProfile = () => {
           </Card>
         </TabsContent>
 
-        {/* Similar structure for other tabs - Experience, Projects, Achievements */}
         <TabsContent value="experience">
           <Card className="bg-gray-900/50 border-gray-800">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -593,7 +683,7 @@ const EnhancedUserProfile = () => {
                 <CardTitle className="text-white">Experience</CardTitle>
                 <CardDescription className="text-gray-400">Your work experience</CardDescription>
               </div>
-              <Button className="bg-orange-600 hover:bg-orange-700">
+              <Button onClick={() => openEditForm('experience')} className="bg-orange-600 hover:bg-orange-700">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Experience
               </Button>
@@ -620,9 +710,24 @@ const EnhancedUserProfile = () => {
                             <p className="text-gray-300 mt-2">{exp.description}</p>
                           )}
                         </div>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-400 hover:text-white"
+                            onClick={() => openEditForm('experience', exp)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-400 hover:text-red-400"
+                            onClick={() => handleDeleteItem('experience', exp.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -641,7 +746,7 @@ const EnhancedUserProfile = () => {
                 <CardTitle className="text-white">Projects</CardTitle>
                 <CardDescription className="text-gray-400">Your personal and professional projects</CardDescription>
               </div>
-              <Button className="bg-orange-600 hover:bg-orange-700">
+              <Button onClick={() => openEditForm('project')} className="bg-orange-600 hover:bg-orange-700">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Project
               </Button>
@@ -660,6 +765,15 @@ const EnhancedUserProfile = () => {
                           {proj.description && (
                             <p className="text-gray-300 mt-2">{proj.description}</p>
                           )}
+                          {proj.technologies && proj.technologies.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {proj.technologies.map((tech) => (
+                                <Badge key={tech} variant="secondary" className="bg-orange-600/20 text-orange-400">
+                                  {tech}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                           <div className="flex items-center gap-2 mt-2">
                             {proj.github_url && (
                               <a href={proj.github_url} target="_blank" rel="noopener noreferrer"
@@ -677,9 +791,24 @@ const EnhancedUserProfile = () => {
                             )}
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-400 hover:text-white"
+                            onClick={() => openEditForm('project', proj)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-400 hover:text-red-400"
+                            onClick={() => handleDeleteItem('project', proj.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -698,7 +827,7 @@ const EnhancedUserProfile = () => {
                 <CardTitle className="text-white">Achievements</CardTitle>
                 <CardDescription className="text-gray-400">Your awards, certifications, and achievements</CardDescription>
               </div>
-              <Button className="bg-orange-600 hover:bg-orange-700">
+              <Button onClick={() => openEditForm('achievement')} className="bg-orange-600 hover:bg-orange-700">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Achievement
               </Button>
@@ -726,9 +855,24 @@ const EnhancedUserProfile = () => {
                             </a>
                           )}
                         </div>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-400 hover:text-white"
+                            onClick={() => openEditForm('achievement', achievement)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-gray-400 hover:text-red-400"
+                            onClick={() => handleDeleteItem('achievement', achievement.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -740,6 +884,40 @@ const EnhancedUserProfile = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Forms */}
+      <EducationForm
+        education={editingItem}
+        onSave={() => { fetchUserData(); closeForm(); }}
+        onCancel={closeForm}
+        open={showEducationForm}
+      />
+      
+      <ExperienceForm
+        experience={editingItem}
+        onSave={() => { fetchUserData(); closeForm(); }}
+        onCancel={closeForm}
+        open={showExperienceForm}
+      />
+      
+      <ProjectForm
+        project={editingItem}
+        onSave={() => { fetchUserData(); closeForm(); }}
+        onCancel={closeForm}
+        open={showProjectForm}
+      />
+      
+      <AchievementForm
+        achievement={editingItem}
+        onSave={() => { fetchUserData(); closeForm(); }}
+        onCancel={closeForm}
+        open={showAchievementForm}
+      />
+      
+      <ChangePasswordForm
+        open={showPasswordForm}
+        onCancel={closeForm}
+      />
     </div>
   );
 };
