@@ -318,7 +318,7 @@ const EnhancedUserProfile = () => {
                     {editing ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
                     {editing ? 'Cancel' : 'Edit Profile'}
                   </Button>
-                  <Button onClick={() => setShowPasswordForm(true)} variant="outline" className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500">
+                  <Button onClick={() => setShowPasswordForm(true)} variant="outline" className="border-gray-600 text-white hover:border-orange-500 bg-zinc-950 hover:bg-zinc-800">
                     <Key className="w-4 h-4 mr-2" />
                     Change Password
                   </Button>
