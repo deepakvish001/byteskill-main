@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,10 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { BookOpen, Mail, Lock, User, Phone, Chrome } from 'lucide-react';
 import { toast } from 'sonner';
-
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const {
+    signIn,
+    signUp
+  } = useAuth();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -37,18 +38,17 @@ const LoginPage = () => {
   // Forgot password state
   const [forgotEmail, setForgotEmail] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const { error } = await signIn(loginForm.email, loginForm.password);
+      const {
+        error
+      } = await signIn(loginForm.email, loginForm.password);
       if (error) {
         toast.error(error.message || 'Failed to sign in');
         return;
       }
-
       toast.success('Successfully signed in!');
       navigate('/dashboard');
     } catch (error: any) {
@@ -57,34 +57,29 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (signupForm.password !== signupForm.confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
-
     if (signupForm.password.length < 6) {
       toast.error('Password must be at least 6 characters long');
       return;
     }
-
     setLoading(true);
-
     try {
-      const { error } = await signUp(signupForm.email, signupForm.password, {
+      const {
+        error
+      } = await signUp(signupForm.email, signupForm.password, {
         fullName: signupForm.fullName,
         username: signupForm.username,
         mobileNumber: signupForm.mobileNumber
       });
-
       if (error) {
         toast.error(error.message || 'Failed to sign up');
         return;
       }
-
       toast.success('Account created successfully! Please check your email to verify your account.');
     } catch (error: any) {
       toast.error('An unexpected error occurred');
@@ -92,17 +87,17 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
-
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const {
+        error
+      } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/dashboard`
         }
       });
-
       if (error) {
         toast.error(error.message || 'Failed to sign in with Google');
       }
@@ -112,21 +107,19 @@ const LoginPage = () => {
       setGoogleLoading(false);
     }
   };
-
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-        redirectTo: `${window.location.origin}/login`,
+      const {
+        error
+      } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/login`
       });
-
       if (error) {
         toast.error(error.message || 'Failed to send reset email');
         return;
       }
-
       toast.success('Password reset email sent! Check your inbox.');
       setShowForgotPassword(false);
       setForgotEmail('');
@@ -136,9 +129,7 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+  return <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="flex items-center justify-center space-x-3 mb-4">
@@ -155,8 +146,7 @@ const LoginPage = () => {
           <p className="text-gray-400">Welcome back! Please sign in to your account</p>
         </div>
 
-        {showForgotPassword ? (
-          <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
+        {showForgotPassword ? <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-white">Reset Password</CardTitle>
               <CardDescription className="text-gray-400">
@@ -169,39 +159,20 @@ const LoginPage = () => {
                   <Label htmlFor="forgot-email" className="text-white">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="forgot-email"
-                      type="email"
-                      value={forgotEmail}
-                      onChange={(e) => setForgotEmail(e.target.value)}
-                      className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                      placeholder="Enter your email"
-                      required
-                    />
+                    <Input id="forgot-email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="Enter your email" required />
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowForgotPassword(false)}
-                    className="flex-1 border-gray-600 text-white hover:bg-gray-800"
-                  >
+                  <Button type="button" variant="outline" onClick={() => setShowForgotPassword(false)} className="flex-1 border-gray-600 text-white hover:bg-gray-800">
                     Back
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
-                  >
+                  <Button type="submit" disabled={loading} className="flex-1 bg-orange-600 hover:bg-orange-700 text-white">
                     {loading ? 'Sending...' : 'Send Reset Link'}
                   </Button>
                 </div>
               </form>
             </CardContent>
-          </Card>
-        ) : (
-          <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
+          </Card> : <Card className="bg-gray-900/50 border-gray-800 backdrop-blur-sm">
             <CardContent className="p-6">
               <Tabs defaultValue="login" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-2 bg-gray-800/50">
@@ -214,12 +185,7 @@ const LoginPage = () => {
                 </TabsList>
 
                 <TabsContent value="login" className="space-y-4">
-                  <Button
-                    onClick={handleGoogleSignIn}
-                    disabled={googleLoading}
-                    className="w-full bg-white hover:bg-gray-100 text-gray-900 border border-gray-300"
-                    variant="outline"
-                  >
+                  <Button onClick={handleGoogleSignIn} disabled={googleLoading} variant="outline" className="w-full text-gray-900 border border-gray-300 bg-orange-700 hover:bg-orange-600">
                     <Chrome className="w-4 h-4 mr-2" />
                     {googleLoading ? 'Signing in...' : 'Continue with Google'}
                   </Button>
@@ -238,15 +204,10 @@ const LoginPage = () => {
                       <Label htmlFor="login-email" className="text-white">Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="login-email"
-                          type="email"
-                          value={loginForm.email}
-                          onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                          className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                          placeholder="Enter your email"
-                          required
-                        />
+                        <Input id="login-email" type="email" value={loginForm.email} onChange={e => setLoginForm({
+                      ...loginForm,
+                      email: e.target.value
+                    })} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="Enter your email" required />
                       </div>
                     </div>
 
@@ -254,45 +215,27 @@ const LoginPage = () => {
                       <Label htmlFor="login-password" className="text-white">Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="login-password"
-                          type="password"
-                          value={loginForm.password}
-                          onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                          className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                          placeholder="Enter your password"
-                          required
-                        />
+                        <Input id="login-password" type="password" value={loginForm.password} onChange={e => setLoginForm({
+                      ...loginForm,
+                      password: e.target.value
+                    })} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="Enter your password" required />
                       </div>
                     </div>
 
                     <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setShowForgotPassword(true)}
-                        className="text-sm text-orange-400 hover:text-orange-300"
-                      >
+                      <button type="button" onClick={() => setShowForgotPassword(true)} className="text-sm text-orange-400 hover:text-orange-300">
                         Forgot password?
                       </button>
                     </div>
 
-                    <Button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-                    >
+                    <Button type="submit" disabled={loading} className="w-full bg-orange-600 hover:bg-orange-700 text-white">
                       {loading ? 'Signing in...' : 'Sign In'}
                     </Button>
                   </form>
                 </TabsContent>
 
                 <TabsContent value="signup" className="space-y-4">
-                  <Button
-                    onClick={handleGoogleSignIn}
-                    disabled={googleLoading}
-                    className="w-full bg-white hover:bg-gray-100 text-gray-900 border border-gray-300"
-                    variant="outline"
-                  >
+                  <Button onClick={handleGoogleSignIn} disabled={googleLoading} className="w-full bg-white hover:bg-gray-100 text-gray-900 border border-gray-300" variant="outline">
                     <Chrome className="w-4 h-4 mr-2" />
                     {googleLoading ? 'Signing up...' : 'Sign up with Google'}
                   </Button>
@@ -312,15 +255,10 @@ const LoginPage = () => {
                         <Label htmlFor="signup-fullname" className="text-white">Full Name</Label>
                         <div className="relative">
                           <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                          <Input
-                            id="signup-fullname"
-                            type="text"
-                            value={signupForm.fullName}
-                            onChange={(e) => setSignupForm({ ...signupForm, fullName: e.target.value })}
-                            className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                            placeholder="John Doe"
-                            required
-                          />
+                          <Input id="signup-fullname" type="text" value={signupForm.fullName} onChange={e => setSignupForm({
+                        ...signupForm,
+                        fullName: e.target.value
+                      })} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="John Doe" required />
                         </div>
                       </div>
 
@@ -328,15 +266,10 @@ const LoginPage = () => {
                         <Label htmlFor="signup-username" className="text-white">Username</Label>
                         <div className="relative">
                           <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                          <Input
-                            id="signup-username"
-                            type="text"
-                            value={signupForm.username}
-                            onChange={(e) => setSignupForm({ ...signupForm, username: e.target.value })}
-                            className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                            placeholder="johndoe"
-                            required
-                          />
+                          <Input id="signup-username" type="text" value={signupForm.username} onChange={e => setSignupForm({
+                        ...signupForm,
+                        username: e.target.value
+                      })} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="johndoe" required />
                         </div>
                       </div>
                     </div>
@@ -345,15 +278,10 @@ const LoginPage = () => {
                       <Label htmlFor="signup-email" className="text-white">Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="signup-email"
-                          type="email"
-                          value={signupForm.email}
-                          onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
-                          className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                          placeholder="john@example.com"
-                          required
-                        />
+                        <Input id="signup-email" type="email" value={signupForm.email} onChange={e => setSignupForm({
+                      ...signupForm,
+                      email: e.target.value
+                    })} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="john@example.com" required />
                       </div>
                     </div>
 
@@ -361,14 +289,10 @@ const LoginPage = () => {
                       <Label htmlFor="signup-mobile" className="text-white">Mobile Number (Optional)</Label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="signup-mobile"
-                          type="tel"
-                          value={signupForm.mobileNumber}
-                          onChange={(e) => setSignupForm({ ...signupForm, mobileNumber: e.target.value })}
-                          className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                          placeholder="+1 234 567 8900"
-                        />
+                        <Input id="signup-mobile" type="tel" value={signupForm.mobileNumber} onChange={e => setSignupForm({
+                      ...signupForm,
+                      mobileNumber: e.target.value
+                    })} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="+1 234 567 8900" />
                       </div>
                     </div>
 
@@ -376,16 +300,10 @@ const LoginPage = () => {
                       <Label htmlFor="signup-password" className="text-white">Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="signup-password"
-                          type="password"
-                          value={signupForm.password}
-                          onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
-                          className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                          placeholder="Enter your password"
-                          required
-                          minLength={6}
-                        />
+                        <Input id="signup-password" type="password" value={signupForm.password} onChange={e => setSignupForm({
+                      ...signupForm,
+                      password: e.target.value
+                    })} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="Enter your password" required minLength={6} />
                       </div>
                     </div>
 
@@ -393,32 +311,21 @@ const LoginPage = () => {
                       <Label htmlFor="signup-confirm-password" className="text-white">Confirm Password</Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          id="signup-confirm-password"
-                          type="password"
-                          value={signupForm.confirmPassword}
-                          onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
-                          className="pl-10 bg-gray-800/50 border-gray-600 text-white"
-                          placeholder="Confirm your password"
-                          required
-                          minLength={6}
-                        />
+                        <Input id="signup-confirm-password" type="password" value={signupForm.confirmPassword} onChange={e => setSignupForm({
+                      ...signupForm,
+                      confirmPassword: e.target.value
+                    })} className="pl-10 bg-gray-800/50 border-gray-600 text-white" placeholder="Confirm your password" required minLength={6} />
                       </div>
                     </div>
 
-                    <Button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-                    >
+                    <Button type="submit" disabled={loading} className="w-full bg-orange-600 hover:bg-orange-700 text-white">
                       {loading ? 'Creating Account...' : 'Create Account'}
                     </Button>
                   </form>
                 </TabsContent>
               </Tabs>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         <div className="text-center mt-6">
           <Link to="/" className="text-gray-400 hover:text-white transition-colors">
@@ -426,8 +333,6 @@ const LoginPage = () => {
           </Link>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LoginPage;
