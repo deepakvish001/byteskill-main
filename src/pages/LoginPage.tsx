@@ -176,7 +176,7 @@ const LoginPage = () => {
             <CardContent className="p-6">
               <Tabs defaultValue="login" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-2 bg-gray-800/50">
-                  <TabsTrigger value="login" className="text-gray-400 data-[state=active]:text-white bg-slate-950 hover:bg-slate-800">
+                  <TabsTrigger value="login" className="text-zinc-50 bg-gray-900 hover:bg-gray-800">
                     Sign In
                   </TabsTrigger>
                   <TabsTrigger value="signup" className="text-gray-400 data-[state=active]:text-white">
