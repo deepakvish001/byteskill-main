@@ -3,7 +3,6 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useActivityTracker } from './useActivityTracker';
 
 interface ProgressState {
   problemStatuses: Record<number, "Solved" | "Attempted" | "Not Started">;
@@ -13,7 +12,6 @@ interface ProgressState {
 
 export const useProgressHandler = (courseId: string) => {
   const { user } = useAuth();
-  const { trackProblemSolved, trackBookmark, trackNoteCreated } = useActivityTracker();
   const [progressState, setProgressState] = useState<ProgressState>({
     problemStatuses: {},
     bookmarkedProblems: [],
@@ -70,8 +68,7 @@ export const useProgressHandler = (courseId: string) => {
     problemId: number, 
     contentId: string,
     moduleId: string,
-    chapterId: string,
-    difficulty: string = 'easy'
+    chapterId: string
   ) => {
     if (!user) {
       toast.error("Please sign in to track your progress");
@@ -124,11 +121,6 @@ export const useProgressHandler = (courseId: string) => {
 
       if (error) throw error;
       
-      // Track activity if problem was solved
-      if (newStatus === "Solved" && currentStatus !== "Solved") {
-        await trackProblemSolved(contentId, difficulty, 1);
-      }
-      
       toast.success(`Problem marked as ${newStatus.toLowerCase()}`);
     } catch (error) {
       console.error('Error updating problem status:', error);
@@ -141,7 +133,7 @@ export const useProgressHandler = (courseId: string) => {
         }
       }));
     }
-  }, [user, courseId, progressState.problemStatuses, trackProblemSolved]);
+  }, [user, courseId, progressState.problemStatuses]);
 
   const toggleBookmark = useCallback(async (
     problemId: number,
@@ -183,17 +175,12 @@ export const useProgressHandler = (courseId: string) => {
           : [...prev.bookmarkedProblems, problemId]
       }));
 
-      // Track bookmark activity
-      if (!isBookmarked) {
-        await trackBookmark(contentId, 'problem');
-      }
-
       toast.success(isBookmarked ? 'Bookmark removed' : 'Problem bookmarked');
     } catch (error) {
       console.error('Error updating bookmark:', error);
       toast.error('Failed to update bookmark');
     }
-  }, [user, courseId, progressState.bookmarkedProblems, trackBookmark]);
+  }, [user, courseId, progressState.bookmarkedProblems]);
 
   const saveNote = useCallback(async (
     problemId: number,
@@ -234,15 +221,12 @@ export const useProgressHandler = (courseId: string) => {
         }
       }));
 
-      // Track note creation activity
-      await trackNoteCreated(contentId, noteContent.length);
-
       toast.success('Note saved successfully');
     } catch (error) {
       console.error('Error saving note:', error);
       toast.error('Failed to save note');
     }
-  }, [user, courseId, trackNoteCreated]);
+  }, [user, courseId]);
 
   return {
     progressState,

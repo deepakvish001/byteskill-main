@@ -462,21 +462,13 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          bio: string | null
-          company: string | null
           created_at: string | null
           current_streak: number | null
           full_name: string
-          github_url: string | null
           id: string
           is_banned: boolean | null
-          job_title: string | null
-          leetcode_url: string | null
-          linkedin_url: string | null
-          location: string | null
           max_streak: number | null
           mobile_number: string | null
-          portfolio_url: string | null
           problems_solved: number | null
           updated_at: string | null
           username: string
@@ -484,21 +476,13 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          bio?: string | null
-          company?: string | null
           created_at?: string | null
           current_streak?: number | null
           full_name: string
-          github_url?: string | null
           id: string
           is_banned?: boolean | null
-          job_title?: string | null
-          leetcode_url?: string | null
-          linkedin_url?: string | null
-          location?: string | null
           max_streak?: number | null
           mobile_number?: string | null
-          portfolio_url?: string | null
           problems_solved?: number | null
           updated_at?: string | null
           username: string
@@ -506,21 +490,13 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
-          bio?: string | null
-          company?: string | null
           created_at?: string | null
           current_streak?: number | null
           full_name?: string
-          github_url?: string | null
           id?: string
           is_banned?: boolean | null
-          job_title?: string | null
-          leetcode_url?: string | null
-          linkedin_url?: string | null
-          location?: string | null
           max_streak?: number | null
           mobile_number?: string | null
-          portfolio_url?: string | null
           problems_solved?: number | null
           updated_at?: string | null
           username?: string
@@ -563,85 +539,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      user_achievements: {
-        Row: {
-          certificate_url: string | null
-          created_at: string | null
-          date_achieved: string | null
-          description: string | null
-          id: string
-          organization: string | null
-          title: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          certificate_url?: string | null
-          created_at?: string | null
-          date_achieved?: string | null
-          description?: string | null
-          id?: string
-          organization?: string | null
-          title: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          certificate_url?: string | null
-          created_at?: string | null
-          date_achieved?: string | null
-          description?: string | null
-          id?: string
-          organization?: string | null
-          title?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_achievements_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_activity: {
-        Row: {
-          activity_data: Json | null
-          activity_type: string
-          created_at: string | null
-          id: string
-          points_earned: number | null
-          user_id: string
-        }
-        Insert: {
-          activity_data?: Json | null
-          activity_type: string
-          created_at?: string | null
-          id?: string
-          points_earned?: number | null
-          user_id: string
-        }
-        Update: {
-          activity_data?: Json | null
-          activity_type?: string
-          created_at?: string | null
-          id?: string
-          points_earned?: number | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_activity_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_content_progress: {
         Row: {
@@ -761,106 +658,6 @@ export type Database = {
           },
         ]
       }
-      user_education: {
-        Row: {
-          created_at: string | null
-          degree: string
-          description: string | null
-          end_date: string | null
-          field_of_study: string | null
-          id: string
-          institution: string
-          is_current: boolean | null
-          start_date: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          degree: string
-          description?: string | null
-          end_date?: string | null
-          field_of_study?: string | null
-          id?: string
-          institution: string
-          is_current?: boolean | null
-          start_date?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          degree?: string
-          description?: string | null
-          end_date?: string | null
-          field_of_study?: string | null
-          id?: string
-          institution?: string
-          is_current?: boolean | null
-          start_date?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_education_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_experience: {
-        Row: {
-          company: string
-          created_at: string | null
-          description: string | null
-          end_date: string | null
-          id: string
-          is_current: boolean | null
-          location: string | null
-          position: string
-          start_date: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          company: string
-          created_at?: string | null
-          description?: string | null
-          end_date?: string | null
-          id?: string
-          is_current?: boolean | null
-          location?: string | null
-          position: string
-          start_date?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          company?: string
-          created_at?: string | null
-          description?: string | null
-          end_date?: string | null
-          id?: string
-          is_current?: boolean | null
-          location?: string | null
-          position?: string
-          start_date?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_experience_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_module_progress: {
         Row: {
           completed_at: string | null
@@ -941,59 +738,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      user_projects: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          end_date: string | null
-          github_url: string | null
-          id: string
-          is_ongoing: boolean | null
-          live_url: string | null
-          start_date: string | null
-          technologies: string[] | null
-          title: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          end_date?: string | null
-          github_url?: string | null
-          id?: string
-          is_ongoing?: boolean | null
-          live_url?: string | null
-          start_date?: string | null
-          technologies?: string[] | null
-          title: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          end_date?: string | null
-          github_url?: string | null
-          id?: string
-          is_ongoing?: boolean | null
-          live_url?: string | null
-          start_date?: string | null
-          technologies?: string[] | null
-          title?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_projects_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_roles: {
         Row: {
