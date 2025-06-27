@@ -512,7 +512,7 @@ const EnhancedUserProfile = () => {
             <Briefcase className="w-4 h-4 mr-2" />
             Experience
           </TabsTrigger>
-          <TabsTrigger value="projects" className="text-gray-400 data-[state=active]:text-white">
+          <TabsTrigger value="projects" className="text-zinc-50 bg-zinc-950 hover:bg-zinc-800">
             <Code className="w-4 h-4 mr-2" />
             Projects
           </TabsTrigger>
