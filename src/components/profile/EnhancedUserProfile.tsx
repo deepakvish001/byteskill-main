@@ -504,7 +504,7 @@ const EnhancedUserProfile = () => {
       {/* Detailed Sections - Education, Experience, Projects, Achievements */}
       <Tabs defaultValue="education" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 bg-gray-900/50 border-gray-800">
-          <TabsTrigger value="education" className="text-gray-400 data-[state=active]:text-white bg-zinc-950 hover:bg-zinc-800">
+          <TabsTrigger value="education" className="font-normal text-zinc-50 bg-zinc-950 hover:bg-zinc-800">
             <GraduationCap className="w-4 h-4 mr-2" />
             Education
           </TabsTrigger>
