@@ -235,7 +235,7 @@ const LoginPage = () => {
                 </TabsContent>
 
                 <TabsContent value="signup" className="space-y-4">
-                  <Button onClick={handleGoogleSignIn} disabled={googleLoading} className="w-full bg-white hover:bg-gray-100 text-gray-900 border border-gray-300" variant="outline">
+                  <Button onClick={handleGoogleSignIn} disabled={googleLoading} variant="outline" className="w-full border border-gray-300 bg-gray-900 hover:bg-gray-800 text-orange-600">
                     <Chrome className="w-4 h-4 mr-2" />
                     {googleLoading ? 'Signing up...' : 'Sign up with Google'}
                   </Button>
