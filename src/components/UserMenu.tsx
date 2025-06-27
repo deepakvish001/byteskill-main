@@ -95,7 +95,7 @@ const UserMenu = () => {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarImage src="" alt={user.email || ''} />
-            <AvatarFallback className="bg-blue-600 text-white text-sm">
+            <AvatarFallback className="bg-orange-600 text-white text-sm">
               {userInitial}
             </AvatarFallback>
           </Avatar>

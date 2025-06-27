@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "@/pages/Index";
-import AuthPageWrapper from "@/pages/AuthPage";
+import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import DSASheetsPage from "@/pages/DSASheetsPage";
 import CoursesOverview from "@/pages/CoursesOverview";
@@ -27,7 +27,7 @@ function App() {
             <Toaster />
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/login" element={<AuthPageWrapper />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/dsa-sheets" element={<DSASheetsPage />} />
               <Route path="/courses" element={<CoursesOverview />} />

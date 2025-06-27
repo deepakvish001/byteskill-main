@@ -1,7 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useActivityTracker } from '@/hooks/useActivityTracker';
 import { toast } from 'sonner';
 
 interface ProgressState {
@@ -12,6 +12,7 @@ interface ProgressState {
 
 export const useProgressHandler = (courseId: string) => {
   const { user } = useAuth();
+  const { trackProblemSolved, trackCourseProgress } = useActivityTracker();
   const [progressState, setProgressState] = useState<ProgressState>({
     problemStatuses: {},
     bookmarkedProblems: [],
@@ -68,7 +69,8 @@ export const useProgressHandler = (courseId: string) => {
     problemId: number, 
     contentId: string,
     moduleId: string,
-    chapterId: string
+    chapterId: string,
+    difficulty: 'easy' | 'medium' | 'hard' = 'medium'
   ) => {
     if (!user) {
       toast.error("Please sign in to track your progress");
@@ -121,6 +123,26 @@ export const useProgressHandler = (courseId: string) => {
 
       if (error) throw error;
       
+      // Track activity if problem was solved
+      if (newStatus === "Solved" && currentStatus !== "Solved") {
+        await trackProblemSolved(contentId, difficulty, 1);
+        
+        // Update course progress
+        const { data: courseProgress } = await supabase
+          .from('user_content_progress')
+          .select('is_completed')
+          .eq('user_id', user.id)
+          .eq('course_id', courseId);
+
+        if (courseProgress) {
+          const totalProblems = courseProgress.length;
+          const solvedProblems = courseProgress.filter(p => p.is_completed).length;
+          const progressPercentage = Math.round((solvedProblems / totalProblems) * 100);
+          
+          await trackCourseProgress(courseId, progressPercentage);
+        }
+      }
+      
       toast.success(`Problem marked as ${newStatus.toLowerCase()}`);
     } catch (error) {
       console.error('Error updating problem status:', error);
@@ -133,7 +155,7 @@ export const useProgressHandler = (courseId: string) => {
         }
       }));
     }
-  }, [user, courseId, progressState.problemStatuses]);
+  }, [user, courseId, progressState.problemStatuses, trackProblemSolved, trackCourseProgress]);
 
   const toggleBookmark = useCallback(async (
     problemId: number,
