@@ -314,7 +314,7 @@ const EnhancedUserProfile = () => {
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-bold text-white">{profile.full_name || profile.username}</h1>
                 <div className="flex gap-2">
-                  <Button onClick={() => setEditing(!editing)} variant="outline" className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500">
+                  <Button onClick={() => setEditing(!editing)} variant="outline" className="border-gray-600 hover:border-orange-500 bg-zinc-950 hover:bg-zinc-800 text-zinc-50">
                     {editing ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
                     {editing ? 'Cancel' : 'Edit Profile'}
                   </Button>
