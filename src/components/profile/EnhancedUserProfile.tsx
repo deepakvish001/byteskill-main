@@ -11,19 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  User, Edit, Save, X, Plus, Trash2, Camera, Key,
-  Github, Linkedin, Globe, Code, GraduationCap,
-  Briefcase, Trophy, Calendar, MapPin, Building,
-  ExternalLink, Upload
-} from 'lucide-react';
+import { User, Edit, Save, X, Plus, Trash2, Camera, Key, Github, Linkedin, Globe, Code, GraduationCap, Briefcase, Trophy, Calendar, MapPin, Building, ExternalLink, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import EducationForm from './EducationForm';
 import ExperienceForm from './ExperienceForm';
 import ProjectForm from './ProjectForm';
 import AchievementForm from './AchievementForm';
 import ChangePasswordForm from './ChangePasswordForm';
-
 interface UserProfile {
   id: string;
   username: string;
@@ -43,7 +37,6 @@ interface UserProfile {
   current_streak: number;
   max_streak: number;
 }
-
 interface Education {
   id: string;
   institution: string;
@@ -54,7 +47,6 @@ interface Education {
   is_current: boolean;
   description: string | null;
 }
-
 interface Experience {
   id: string;
   company: string;
@@ -65,7 +57,6 @@ interface Experience {
   description: string | null;
   location: string | null;
 }
-
 interface Project {
   id: string;
   title: string;
@@ -77,7 +68,6 @@ interface Project {
   end_date: string | null;
   is_ongoing: boolean;
 }
-
 interface Achievement {
   id: string;
   title: string;
@@ -86,10 +76,13 @@ interface Achievement {
   organization: string | null;
   certificate_url: string | null;
 }
-
 const EnhancedUserProfile = () => {
-  const { user } = useAuth();
-  const { trackProfileUpdate } = useActivityTracker();
+  const {
+    user
+  } = useAuth();
+  const {
+    trackProfileUpdate
+  } = useActivityTracker();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [education, setEducation] = useState<Education[]>([]);
   const [experience, setExperience] = useState<Experience[]>([]);
@@ -120,26 +113,21 @@ const EnhancedUserProfile = () => {
   const [showAchievementForm, setShowAchievementForm] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
-
   useEffect(() => {
     if (user) {
       fetchUserData();
     }
   }, [user]);
-
   const fetchUserData = async () => {
     if (!user) return;
-
     try {
       setLoading(true);
-      
-      // Fetch profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
 
+      // Fetch profile
+      const {
+        data: profileData,
+        error: profileError
+      } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       if (profileError) throw profileError;
       setProfile(profileData);
       setProfileForm({
@@ -156,41 +144,36 @@ const EnhancedUserProfile = () => {
       });
 
       // Fetch education
-      const { data: educationData } = await supabase
-        .from('user_education')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('start_date', { ascending: false });
-      
+      const {
+        data: educationData
+      } = await supabase.from('user_education').select('*').eq('user_id', user.id).order('start_date', {
+        ascending: false
+      });
       if (educationData) setEducation(educationData);
 
       // Fetch experience
-      const { data: experienceData } = await supabase
-        .from('user_experience')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('start_date', { ascending: false });
-      
+      const {
+        data: experienceData
+      } = await supabase.from('user_experience').select('*').eq('user_id', user.id).order('start_date', {
+        ascending: false
+      });
       if (experienceData) setExperience(experienceData);
 
       // Fetch projects
-      const { data: projectsData } = await supabase
-        .from('user_projects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('start_date', { ascending: false });
-      
+      const {
+        data: projectsData
+      } = await supabase.from('user_projects').select('*').eq('user_id', user.id).order('start_date', {
+        ascending: false
+      });
       if (projectsData) setProjects(projectsData);
 
       // Fetch achievements
-      const { data: achievementsData } = await supabase
-        .from('user_achievements')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date_achieved', { ascending: false });
-      
+      const {
+        data: achievementsData
+      } = await supabase.from('user_achievements').select('*').eq('user_id', user.id).order('date_achieved', {
+        ascending: false
+      });
       if (achievementsData) setAchievements(achievementsData);
-
     } catch (error: any) {
       console.error('Error fetching user data:', error);
       toast.error('Failed to load profile data');
@@ -198,21 +181,16 @@ const EnhancedUserProfile = () => {
       setLoading(false);
     }
   };
-
   const handleProfileUpdate = async () => {
     if (!user) return;
-
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          ...profileForm,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-
+      const {
+        error
+      } = await supabase.from('profiles').update({
+        ...profileForm,
+        updated_at: new Date().toISOString()
+      }).eq('id', user.id);
       if (error) throw error;
-
       await fetchUserData();
       setEditing(false);
       await trackProfileUpdate();
@@ -222,34 +200,26 @@ const EnhancedUserProfile = () => {
       toast.error('Failed to update profile');
     }
   };
-
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
-
     try {
       setUploading(true);
-      
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('profile-pictures')
-        .upload(fileName, file);
-
+      const {
+        error: uploadError
+      } = await supabase.storage.from('profile-pictures').upload(fileName, file);
       if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('profile-pictures')
-        .getPublicUrl(fileName);
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: data.publicUrl })
-        .eq('id', user.id);
-
+      const {
+        data
+      } = supabase.storage.from('profile-pictures').getPublicUrl(fileName);
+      const {
+        error: updateError
+      } = await supabase.from('profiles').update({
+        avatar_url: data.publicUrl
+      }).eq('id', user.id);
       if (updateError) throw updateError;
-
       await fetchUserData();
       toast.success('Profile picture updated successfully');
     } catch (error: any) {
@@ -259,27 +229,32 @@ const EnhancedUserProfile = () => {
       setUploading(false);
     }
   };
-
   const handleDeleteItem = async (type: string, id: string) => {
     try {
       let error;
       switch (type) {
         case 'education':
-          ({ error } = await supabase.from('user_education').delete().eq('id', id));
+          ({
+            error
+          } = await supabase.from('user_education').delete().eq('id', id));
           break;
         case 'experience':
-          ({ error } = await supabase.from('user_experience').delete().eq('id', id));
+          ({
+            error
+          } = await supabase.from('user_experience').delete().eq('id', id));
           break;
         case 'project':
-          ({ error } = await supabase.from('user_projects').delete().eq('id', id));
+          ({
+            error
+          } = await supabase.from('user_projects').delete().eq('id', id));
           break;
         case 'achievement':
-          ({ error } = await supabase.from('user_achievements').delete().eq('id', id));
+          ({
+            error
+          } = await supabase.from('user_achievements').delete().eq('id', id));
           break;
       }
-
       if (error) throw error;
-
       await fetchUserData();
       toast.success(`${type} deleted successfully`);
     } catch (error: any) {
@@ -287,7 +262,6 @@ const EnhancedUserProfile = () => {
       toast.error(`Failed to delete ${type}`);
     }
   };
-
   const openEditForm = (type: string, item?: any) => {
     setEditingItem(item);
     switch (type) {
@@ -305,7 +279,6 @@ const EnhancedUserProfile = () => {
         break;
     }
   };
-
   const closeForm = () => {
     setEditingItem(null);
     setShowEducationForm(false);
@@ -314,17 +287,12 @@ const EnhancedUserProfile = () => {
     setShowAchievementForm(false);
     setShowPasswordForm(false);
   };
-
   if (loading || !profile) {
-    return (
-      <div className="flex items-center justify-center p-8">
+    return <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Profile Header */}
       <Card className="bg-gray-900/50 border-gray-800 shadow-xl backdrop-blur-sm">
         <CardHeader>
@@ -338,13 +306,7 @@ const EnhancedUserProfile = () => {
               </Avatar>
               <label className="absolute bottom-0 right-0 bg-orange-500 hover:bg-orange-600 rounded-full p-2 cursor-pointer transition-colors">
                 <Camera className="h-4 w-4 text-white" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarUpload}
-                  className="hidden"
-                  disabled={uploading}
-                />
+                <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploading} />
               </label>
             </div>
             
@@ -352,64 +314,38 @@ const EnhancedUserProfile = () => {
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-bold text-white">{profile.full_name || profile.username}</h1>
                 <div className="flex gap-2">
-                  <Button
-                    onClick={() => setEditing(!editing)}
-                    variant="outline"
-                    className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500"
-                  >
+                  <Button onClick={() => setEditing(!editing)} variant="outline" className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500">
                     {editing ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
                     {editing ? 'Cancel' : 'Edit Profile'}
                   </Button>
-                  <Button
-                    onClick={() => setShowPasswordForm(true)}
-                    variant="outline"
-                    className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500"
-                  >
+                  <Button onClick={() => setShowPasswordForm(true)} variant="outline" className="border-gray-600 text-white hover:bg-gray-800 hover:border-orange-500">
                     <Key className="w-4 h-4 mr-2" />
                     Change Password
                   </Button>
                 </div>
               </div>
               <p className="text-xl text-gray-400 mb-2">@{profile.username}</p>
-              {profile.job_title && profile.company && (
-                <p className="text-gray-300 mb-2">{profile.job_title} at {profile.company}</p>
-              )}
-              {profile.location && (
-                <p className="text-gray-400 flex items-center gap-1">
+              {profile.job_title && profile.company && <p className="text-gray-300 mb-2">{profile.job_title} at {profile.company}</p>}
+              {profile.location && <p className="text-gray-400 flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
                   {profile.location}
-                </p>
-              )}
-              {profile.bio && (
-                <p className="text-gray-300 mt-3 max-w-2xl">{profile.bio}</p>
-              )}
+                </p>}
+              {profile.bio && <p className="text-gray-300 mt-3 max-w-2xl">{profile.bio}</p>}
               
               {/* Social Links */}
               <div className="flex items-center gap-4 mt-4">
-                {profile.github_url && (
-                  <a href={profile.github_url} target="_blank" rel="noopener noreferrer" 
-                     className="text-gray-400 hover:text-white transition-colors">
+                {profile.github_url && <a href={profile.github_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                     <Github className="h-5 w-5" />
-                  </a>
-                )}
-                {profile.linkedin_url && (
-                  <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer"
-                     className="text-gray-400 hover:text-white transition-colors">
+                  </a>}
+                {profile.linkedin_url && <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                     <Linkedin className="h-5 w-5" />
-                  </a>
-                )}
-                {profile.leetcode_url && (
-                  <a href={profile.leetcode_url} target="_blank" rel="noopener noreferrer"
-                     className="text-gray-400 hover:text-white transition-colors">
+                  </a>}
+                {profile.leetcode_url && <a href={profile.leetcode_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                     <Code className="h-5 w-5" />
-                  </a>
-                )}
-                {profile.portfolio_url && (
-                  <a href={profile.portfolio_url} target="_blank" rel="noopener noreferrer"
-                     className="text-gray-400 hover:text-white transition-colors">
+                  </a>}
+                {profile.portfolio_url && <a href={profile.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                     <Globe className="h-5 w-5" />
-                  </a>
-                )}
+                  </a>}
               </div>
             </div>
           </div>
@@ -476,8 +412,7 @@ const EnhancedUserProfile = () => {
       </div>
 
       {/* Profile Edit Form */}
-      {editing && (
-        <Card className="bg-gray-900/50 border-gray-800">
+      {editing && <Card className="bg-gray-900/50 border-gray-800">
           <CardHeader>
             <CardTitle className="text-white">Edit Profile</CardTitle>
           </CardHeader>
@@ -485,120 +420,91 @@ const EnhancedUserProfile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="full_name" className="text-white">Full Name</Label>
-                <Input
-                  id="full_name"
-                  value={profileForm.full_name}
-                  onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="full_name" value={profileForm.full_name} onChange={e => setProfileForm({
+              ...profileForm,
+              full_name: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="mobile_number" className="text-white">Mobile Number</Label>
-                <Input
-                  id="mobile_number"
-                  value={profileForm.mobile_number}
-                  onChange={(e) => setProfileForm({ ...profileForm, mobile_number: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="mobile_number" value={profileForm.mobile_number} onChange={e => setProfileForm({
+              ...profileForm,
+              mobile_number: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="job_title" className="text-white">Job Title</Label>
-                <Input
-                  id="job_title"
-                  value={profileForm.job_title}
-                  onChange={(e) => setProfileForm({ ...profileForm, job_title: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="job_title" value={profileForm.job_title} onChange={e => setProfileForm({
+              ...profileForm,
+              job_title: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company" className="text-white">Company</Label>
-                <Input
-                  id="company"
-                  value={profileForm.company}
-                  onChange={(e) => setProfileForm({ ...profileForm, company: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="company" value={profileForm.company} onChange={e => setProfileForm({
+              ...profileForm,
+              company: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="location" className="text-white">Location</Label>
-                <Input
-                  id="location"
-                  value={profileForm.location}
-                  onChange={(e) => setProfileForm({ ...profileForm, location: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="location" value={profileForm.location} onChange={e => setProfileForm({
+              ...profileForm,
+              location: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="github_url" className="text-white">GitHub URL</Label>
-                <Input
-                  id="github_url"
-                  value={profileForm.github_url}
-                  onChange={(e) => setProfileForm({ ...profileForm, github_url: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="github_url" value={profileForm.github_url} onChange={e => setProfileForm({
+              ...profileForm,
+              github_url: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="linkedin_url" className="text-white">LinkedIn URL</Label>
-                <Input
-                  id="linkedin_url"
-                  value={profileForm.linkedin_url}
-                  onChange={(e) => setProfileForm({ ...profileForm, linkedin_url: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="linkedin_url" value={profileForm.linkedin_url} onChange={e => setProfileForm({
+              ...profileForm,
+              linkedin_url: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="leetcode_url" className="text-white">LeetCode URL</Label>
-                <Input
-                  id="leetcode_url"
-                  value={profileForm.leetcode_url}
-                  onChange={(e) => setProfileForm({ ...profileForm, leetcode_url: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="leetcode_url" value={profileForm.leetcode_url} onChange={e => setProfileForm({
+              ...profileForm,
+              leetcode_url: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="portfolio_url" className="text-white">Portfolio URL</Label>
-                <Input
-                  id="portfolio_url"
-                  value={profileForm.portfolio_url}
-                  onChange={(e) => setProfileForm({ ...profileForm, portfolio_url: e.target.value })}
-                  className="bg-gray-800/50 border-gray-600 text-white"
-                />
+                <Input id="portfolio_url" value={profileForm.portfolio_url} onChange={e => setProfileForm({
+              ...profileForm,
+              portfolio_url: e.target.value
+            })} className="bg-gray-800/50 border-gray-600 text-white" />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="bio" className="text-white">Bio</Label>
-              <Textarea
-                id="bio"
-                value={profileForm.bio}
-                onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
-                className="bg-gray-800/50 border-gray-600 text-white"
-                rows={3}
-              />
+              <Textarea id="bio" value={profileForm.bio} onChange={e => setProfileForm({
+            ...profileForm,
+            bio: e.target.value
+          })} className="bg-gray-800/50 border-gray-600 text-white" rows={3} />
             </div>
             <div className="flex justify-end space-x-2">
-              <Button
-                onClick={() => setEditing(false)}
-                variant="outline"
-                className="border-gray-600 text-white hover:bg-gray-800"
-              >
+              <Button onClick={() => setEditing(false)} variant="outline" className="border-gray-600 text-white hover:bg-gray-800">
                 Cancel
               </Button>
-              <Button
-                onClick={handleProfileUpdate}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
+              <Button onClick={handleProfileUpdate} className="bg-orange-600 hover:bg-orange-700 text-white">
                 <Save className="w-4 h-4 mr-2" />
                 Save Changes
               </Button>
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Detailed Sections - Education, Experience, Projects, Achievements */}
       <Tabs defaultValue="education" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 bg-gray-900/50 border-gray-800">
-          <TabsTrigger value="education" className="text-gray-400 data-[state=active]:text-white">
+          <TabsTrigger value="education" className="text-gray-400 data-[state=active]:text-white bg-zinc-950 hover:bg-zinc-800">
             <GraduationCap className="w-4 h-4 mr-2" />
             Education
           </TabsTrigger>
@@ -629,49 +535,29 @@ const EnhancedUserProfile = () => {
               </Button>
             </CardHeader>
             <CardContent>
-              {education.length > 0 ? (
-                <div className="space-y-4">
-                  {education.map((edu) => (
-                    <div key={edu.id} className="p-4 bg-gray-800/50 rounded-lg">
+              {education.length > 0 ? <div className="space-y-4">
+                  {education.map(edu => <div key={edu.id} className="p-4 bg-gray-800/50 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="text-white font-medium">{edu.degree}</h3>
                           <p className="text-orange-400">{edu.institution}</p>
-                          {edu.field_of_study && (
-                            <p className="text-gray-400">{edu.field_of_study}</p>
-                          )}
+                          {edu.field_of_study && <p className="text-gray-400">{edu.field_of_study}</p>}
                           <p className="text-sm text-gray-500">
                             {edu.start_date} - {edu.is_current ? 'Present' : edu.end_date}
                           </p>
-                          {edu.description && (
-                            <p className="text-gray-300 mt-2">{edu.description}</p>
-                          )}
+                          {edu.description && <p className="text-gray-300 mt-2">{edu.description}</p>}
                         </div>
                         <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-400 hover:text-white"
-                            onClick={() => openEditForm('education', edu)}
-                          >
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={() => openEditForm('education', edu)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-400 hover:text-red-400"
-                            onClick={() => handleDeleteItem('education', edu.id)}
-                          >
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-400" onClick={() => handleDeleteItem('education', edu.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-center py-8">No education records added yet.</p>
-              )}
+                    </div>)}
+                </div> : <p className="text-gray-400 text-center py-8">No education records added yet.</p>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -689,52 +575,32 @@ const EnhancedUserProfile = () => {
               </Button>
             </CardHeader>
             <CardContent>
-              {experience.length > 0 ? (
-                <div className="space-y-4">
-                  {experience.map((exp) => (
-                    <div key={exp.id} className="p-4 bg-gray-800/50 rounded-lg">
+              {experience.length > 0 ? <div className="space-y-4">
+                  {experience.map(exp => <div key={exp.id} className="p-4 bg-gray-800/50 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="text-white font-medium">{exp.position}</h3>
                           <p className="text-orange-400">{exp.company}</p>
-                          {exp.location && (
-                            <p className="text-gray-400 flex items-center gap-1">
+                          {exp.location && <p className="text-gray-400 flex items-center gap-1">
                               <MapPin className="h-4 w-4" />
                               {exp.location}
-                            </p>
-                          )}
+                            </p>}
                           <p className="text-sm text-gray-500">
                             {exp.start_date} - {exp.is_current ? 'Present' : exp.end_date}
                           </p>
-                          {exp.description && (
-                            <p className="text-gray-300 mt-2">{exp.description}</p>
-                          )}
+                          {exp.description && <p className="text-gray-300 mt-2">{exp.description}</p>}
                         </div>
                         <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-400 hover:text-white"
-                            onClick={() => openEditForm('experience', exp)}
-                          >
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={() => openEditForm('experience', exp)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-400 hover:text-red-400"
-                            onClick={() => handleDeleteItem('experience', exp.id)}
-                          >
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-400" onClick={() => handleDeleteItem('experience', exp.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-center py-8">No experience records added yet.</p>
-              )}
+                    </div>)}
+                </div> : <p className="text-gray-400 text-center py-8">No experience records added yet.</p>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -752,70 +618,42 @@ const EnhancedUserProfile = () => {
               </Button>
             </CardHeader>
             <CardContent>
-              {projects.length > 0 ? (
-                <div className="space-y-4">
-                  {projects.map((proj) => (
-                    <div key={proj.id} className="p-4 bg-gray-800/50 rounded-lg">
+              {projects.length > 0 ? <div className="space-y-4">
+                  {projects.map(proj => <div key={proj.id} className="p-4 bg-gray-800/50 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="text-white font-medium">{proj.title}</h3>
                           <p className="text-sm text-gray-500">
                             {proj.start_date} - {proj.is_ongoing ? 'Ongoing' : proj.end_date}
                           </p>
-                          {proj.description && (
-                            <p className="text-gray-300 mt-2">{proj.description}</p>
-                          )}
-                          {proj.technologies && proj.technologies.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {proj.technologies.map((tech) => (
-                                <Badge key={tech} variant="secondary" className="bg-orange-600/20 text-orange-400">
+                          {proj.description && <p className="text-gray-300 mt-2">{proj.description}</p>}
+                          {proj.technologies && proj.technologies.length > 0 && <div className="flex flex-wrap gap-1 mt-2">
+                              {proj.technologies.map(tech => <Badge key={tech} variant="secondary" className="bg-orange-600/20 text-orange-400">
                                   {tech}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
+                                </Badge>)}
+                            </div>}
                           <div className="flex items-center gap-2 mt-2">
-                            {proj.github_url && (
-                              <a href={proj.github_url} target="_blank" rel="noopener noreferrer"
-                                className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                            {proj.github_url && <a href={proj.github_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
                                 <Github className="h-4 w-4" />
                                 GitHub
-                              </a>
-                            )}
-                            {proj.live_url && (
-                              <a href={proj.live_url} target="_blank" rel="noopener noreferrer"
-                                className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                              </a>}
+                            {proj.live_url && <a href={proj.live_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
                                 <ExternalLink className="h-4 w-4" />
                                 Live Demo
-                              </a>
-                            )}
+                              </a>}
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-400 hover:text-white"
-                            onClick={() => openEditForm('project', proj)}
-                          >
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={() => openEditForm('project', proj)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-400 hover:text-red-400"
-                            onClick={() => handleDeleteItem('project', proj.id)}
-                          >
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-400" onClick={() => handleDeleteItem('project', proj.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-center py-8">No project records added yet.</p>
-              )}
+                    </div>)}
+                </div> : <p className="text-gray-400 text-center py-8">No project records added yet.</p>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -833,10 +671,8 @@ const EnhancedUserProfile = () => {
               </Button>
             </CardHeader>
             <CardContent>
-              {achievements.length > 0 ? (
-                <div className="space-y-4">
-                  {achievements.map((achievement) => (
-                    <div key={achievement.id} className="p-4 bg-gray-800/50 rounded-lg">
+              {achievements.length > 0 ? <div className="space-y-4">
+                  {achievements.map(achievement => <div key={achievement.id} className="p-4 bg-gray-800/50 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="text-white font-medium">{achievement.title}</h3>
@@ -844,82 +680,50 @@ const EnhancedUserProfile = () => {
                           <p className="text-sm text-gray-500">
                             {achievement.date_achieved}
                           </p>
-                          {achievement.description && (
-                            <p className="text-gray-300 mt-2">{achievement.description}</p>
-                          )}
-                          {achievement.certificate_url && (
-                            <a href={achievement.certificate_url} target="_blank" rel="noopener noreferrer"
-                              className="text-gray-400 hover:text-white transition-colors flex items-center gap-1 mt-2">
+                          {achievement.description && <p className="text-gray-300 mt-2">{achievement.description}</p>}
+                          {achievement.certificate_url && <a href={achievement.certificate_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1 mt-2">
                               <Upload className="h-4 w-4" />
                               View Certificate
-                            </a>
-                          )}
+                            </a>}
                         </div>
                         <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-400 hover:text-white"
-                            onClick={() => openEditForm('achievement', achievement)}
-                          >
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={() => openEditForm('achievement', achievement)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-gray-400 hover:text-red-400"
-                            onClick={() => handleDeleteItem('achievement', achievement.id)}
-                          >
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-400" onClick={() => handleDeleteItem('achievement', achievement.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-center py-8">No achievement records added yet.</p>
-              )}
+                    </div>)}
+                </div> : <p className="text-gray-400 text-center py-8">No achievement records added yet.</p>}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
       {/* Forms */}
-      <EducationForm
-        education={editingItem}
-        onSave={() => { fetchUserData(); closeForm(); }}
-        onCancel={closeForm}
-        open={showEducationForm}
-      />
+      <EducationForm education={editingItem} onSave={() => {
+      fetchUserData();
+      closeForm();
+    }} onCancel={closeForm} open={showEducationForm} />
       
-      <ExperienceForm
-        experience={editingItem}
-        onSave={() => { fetchUserData(); closeForm(); }}
-        onCancel={closeForm}
-        open={showExperienceForm}
-      />
+      <ExperienceForm experience={editingItem} onSave={() => {
+      fetchUserData();
+      closeForm();
+    }} onCancel={closeForm} open={showExperienceForm} />
       
-      <ProjectForm
-        project={editingItem}
-        onSave={() => { fetchUserData(); closeForm(); }}
-        onCancel={closeForm}
-        open={showProjectForm}
-      />
+      <ProjectForm project={editingItem} onSave={() => {
+      fetchUserData();
+      closeForm();
+    }} onCancel={closeForm} open={showProjectForm} />
       
-      <AchievementForm
-        achievement={editingItem}
-        onSave={() => { fetchUserData(); closeForm(); }}
-        onCancel={closeForm}
-        open={showAchievementForm}
-      />
+      <AchievementForm achievement={editingItem} onSave={() => {
+      fetchUserData();
+      closeForm();
+    }} onCancel={closeForm} open={showAchievementForm} />
       
-      <ChangePasswordForm
-        open={showPasswordForm}
-        onCancel={closeForm}
-      />
-    </div>
-  );
+      <ChangePasswordForm open={showPasswordForm} onCancel={closeForm} />
+    </div>;
 };
-
 export default EnhancedUserProfile;
