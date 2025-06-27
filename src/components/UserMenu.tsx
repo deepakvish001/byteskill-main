@@ -85,7 +85,18 @@ const UserMenu = () => {
     }
   };
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="flex items-center space-x-4">
+        <Button variant="outline" onClick={() => navigate('/login')} className="border-gray-600 hover:border-gray-500 text-orange-50 bg-orange-700 hover:bg-orange-600">
+          Sign In
+        </Button>
+        <Button onClick={() => navigate('/login')} className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all">
+          Get Started
+        </Button>
+      </div>
+    );
+  }
 
   const userInitial = user.email?.charAt(0).toUpperCase() || 'U';
 

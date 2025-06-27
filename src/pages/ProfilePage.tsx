@@ -7,14 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Target, Flame, Calendar, Edit, Save, X, BookOpen, Code, Star, TrendingUp } from 'lucide-react';
+import { Trophy, Target, Flame, Calendar, BookOpen, Code, Star, TrendingUp, ExternalLink, Github, Linkedin, Globe, MapPin, Building } from 'lucide-react';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
 import UserMenu from '@/components/UserMenu';
+import EnhancedUserProfile from '@/components/profile/EnhancedUserProfile';
 
 interface Profile {
   id: string;
@@ -26,6 +24,14 @@ interface Profile {
   problems_solved: number;
   current_streak: number;
   max_streak: number;
+  bio: string | null;
+  github_url: string | null;
+  linkedin_url: string | null;
+  leetcode_url: string | null;
+  portfolio_url: string | null;
+  location: string | null;
+  company: string | null;
+  job_title: string | null;
   created_at: string;
 }
 
@@ -35,12 +41,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [formData, setFormData] = useState({
-    full_name: '',
-    mobile_number: '',
-  });
 
   useEffect(() => {
     if (username) {
@@ -60,39 +61,11 @@ const ProfilePage = () => {
       if (error) throw error;
       
       setProfile(data);
-      setFormData({
-        full_name: data.full_name || '',
-        mobile_number: data.mobile_number || '',
-      });
     } catch (error: any) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!user || !profile) return;
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          mobile_number: formData.mobile_number,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      await fetchProfile();
-      setEditing(false);
-      toast.success('Profile updated successfully');
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
     }
   };
 
@@ -143,6 +116,42 @@ const ProfilePage = () => {
   const badge = getXPBadge(profile.xp_points);
   const isOwnProfile = user?.id === profile.id;
 
+  // If it's the user's own profile, show the enhanced version
+  if (isOwnProfile) {
+    return (
+      <div className="min-h-screen bg-black">
+        {/* Header */}
+        <div className="fixed top-0 left-0 right-0 z-30 bg-black border-b border-gray-800">
+          <div className="flex items-center justify-between h-16 px-4">
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => navigate('/')}
+                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-lg opacity-50 animate-pulse"></div>
+                  <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl shadow-2xl">
+                    <BookOpen className="w-6 h-6 text-white animate-bounce" />
+                  </div>
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
+                  Byteskill
+                </span>
+              </button>
+            </div>
+            <UserMenu />
+          </div>
+        </div>
+
+        {/* Enhanced Profile Content */}
+        <div className="pt-16">
+          <EnhancedUserProfile />
+        </div>
+      </div>
+    );
+  }
+
+  // For other users' profiles, show the simplified public view
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -189,20 +198,74 @@ const ProfilePage = () => {
                     </Badge>
                   </div>
                   <p className="text-xl text-gray-400 mb-2">@{profile.username}</p>
-                  <p className="text-gray-500">
+                  
+                  {/* Location and Company */}
+                  <div className="flex flex-wrap items-center gap-4 text-gray-400 mb-3">
+                    {profile.location && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" />
+                        <span>{profile.location}</span>
+                      </div>
+                    )}
+                    {profile.company && (
+                      <div className="flex items-center gap-1">
+                        <Building className="h-4 w-4" />
+                        <span>{profile.job_title ? `${profile.job_title} at ` : ''}{profile.company}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bio */}
+                  {profile.bio && (
+                    <p className="text-gray-300 mb-3 max-w-2xl">
+                      {profile.bio}
+                    </p>
+                  )}
+
+                  {/* Social Links */}
+                  <div className="flex flex-wrap gap-3">
+                    {profile.github_url && (
+                      <Button variant="outline" size="sm" asChild className="border-gray-600 hover:border-gray-500">
+                        <a href={profile.github_url} target="_blank" rel="noopener noreferrer">
+                          <Github className="h-4 w-4 mr-2" />
+                          GitHub
+                          <ExternalLink className="h-3 w-3 ml-1" />
+                        </a>
+                      </Button>
+                    )}
+                    {profile.linkedin_url && (
+                      <Button variant="outline" size="sm" asChild className="border-gray-600 hover:border-gray-500">
+                        <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
+                          <Linkedin className="h-4 w-4 mr-2" />
+                          LinkedIn
+                          <ExternalLink className="h-3 w-3 ml-1" />
+                        </a>
+                      </Button>
+                    )}
+                    {profile.leetcode_url && (
+                      <Button variant="outline" size="sm" asChild className="border-gray-600 hover:border-gray-500">
+                        <a href={profile.leetcode_url} target="_blank" rel="noopener noreferrer">
+                          <Code className="h-4 w-4 mr-2" />
+                          LeetCode
+                          <ExternalLink className="h-3 w-3 ml-1" />
+                        </a>
+                      </Button>
+                    )}
+                    {profile.portfolio_url && (
+                      <Button variant="outline" size="sm" asChild className="border-gray-600 hover:border-gray-500">
+                        <a href={profile.portfolio_url} target="_blank" rel="noopener noreferrer">
+                          <Globe className="h-4 w-4 mr-2" />
+                          Portfolio
+                          <ExternalLink className="h-3 w-3 ml-1" />
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <p className="text-gray-500 mt-2">
                     Member since {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </p>
                 </div>
-                {isOwnProfile && (
-                  <Button
-                    onClick={() => setEditing(!editing)}
-                    variant="outline"
-                    className="border-gray-600 text-white hover:bg-gray-800"
-                  >
-                    {editing ? <X className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
-                    {editing ? 'Cancel' : 'Edit Profile'}
-                  </Button>
-                )}
               </div>
             </CardHeader>
           </Card>
@@ -258,115 +321,33 @@ const ProfilePage = () => {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Profile Information */}
-            {isOwnProfile && (
-              <Card className="bg-gray-900 border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-white">Profile Information</CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Manage your personal information
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="full_name" className="text-white">Full Name</Label>
-                      <Input
-                        id="full_name"
-                        value={editing ? formData.full_name : profile.full_name}
-                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                        disabled={!editing}
-                        className="bg-gray-800 border-gray-600 text-white"
-                      />
+          {/* Progress Section */}
+          <Card className="bg-gray-900 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-400" />
+                Topic Progress
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Progress across different coding topics
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {progressData.map((topic) => {
+                const progress = Math.min((topic.solved / topic.total) * 100, 100);
+                return (
+                  <div key={topic.topic} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-300">{topic.topic}</span>
+                      <span className="text-xs text-gray-400">{topic.solved}/{topic.total}</span>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="username" className="text-white">Username</Label>
-                      <Input
-                        id="username"
-                        value={profile.username}
-                        disabled
-                        className="bg-gray-800 border-gray-600 text-white opacity-50"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-white">Email</Label>
-                      <Input
-                        id="email"
-                        value={user?.email || ''}
-                        disabled
-                        className="bg-gray-800 border-gray-600 text-white opacity-50"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="mobile_number" className="text-white">Mobile Number</Label>
-                      <Input
-                        id="mobile_number"
-                        value={editing ? formData.mobile_number : (profile.mobile_number || '')}
-                        onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value })}
-                        disabled={!editing}
-                        className="bg-gray-800 border-gray-600 text-white"
-                        placeholder="Enter your mobile number"
-                      />
-                    </div>
+                    <Progress value={progress} className="h-2" />
+                    <div className="text-xs text-gray-400 text-right">{Math.round(progress)}% complete</div>
                   </div>
-
-                  {editing && (
-                    <>
-                      <Separator className="bg-gray-700" />
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          onClick={() => setEditing(false)}
-                          variant="outline"
-                          className="border-gray-600 text-white hover:bg-gray-800"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleSave}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <Save className="w-4 h-4 mr-2" />
-                          Save Changes
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Progress Section */}
-            <Card className="bg-gray-900 border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-blue-400" />
-                  Topic Progress
-                </CardTitle>
-                <CardDescription className="text-gray-400">
-                  Progress across different coding topics
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {progressData.map((topic) => {
-                  const progress = Math.min((topic.solved / topic.total) * 100, 100);
-                  return (
-                    <div key={topic.topic} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-300">{topic.topic}</span>
-                        <span className="text-xs text-gray-400">{topic.solved}/{topic.total}</span>
-                      </div>
-                      <Progress value={progress} className="h-2" />
-                      <div className="text-xs text-gray-400 text-right">{Math.round(progress)}% complete</div>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          </div>
+                );
+              })}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
