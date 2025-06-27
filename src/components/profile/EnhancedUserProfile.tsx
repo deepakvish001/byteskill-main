@@ -490,7 +490,7 @@ const EnhancedUserProfile = () => {
           })} className="bg-gray-800/50 border-gray-600 text-white" rows={3} />
             </div>
             <div className="flex justify-end space-x-2">
-              <Button onClick={() => setEditing(false)} variant="outline" className="border-gray-600 text-white hover:bg-gray-800">
+              <Button onClick={() => setEditing(false)} variant="outline" className="border-gray-600 bg-zinc-950 hover:bg-zinc-800 text-zinc-50">
                 Cancel
               </Button>
               <Button onClick={handleProfileUpdate} className="bg-orange-600 hover:bg-orange-700 text-white">
