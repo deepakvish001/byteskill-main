@@ -10,7 +10,7 @@ import { Trophy, Flame, Target } from 'lucide-react';
 
 const DashboardPage = () => {
   const { user } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default to collapsed
   const [searchQuery, setSearchQuery] = useState('');
 
   // Mock awards data with proper Award type structure
