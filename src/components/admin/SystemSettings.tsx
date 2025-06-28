@@ -87,14 +87,11 @@ const SystemSettings = () => {
 
       const { error } = await supabase
         .from('system_settings')
-        .upsert({
-          key,
+        .update({
           value: stringValue,
-          type,
           updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'key'
-        });
+        })
+        .eq('key', key);
 
       if (error) throw error;
     },
@@ -341,4 +338,3 @@ const SystemSettings = () => {
 };
 
 export default SystemSettings;
-

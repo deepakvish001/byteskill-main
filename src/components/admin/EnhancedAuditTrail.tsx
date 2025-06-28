@@ -31,10 +31,6 @@ interface AuditLog {
   target_id: string | null;
   timestamp: string;
   payload: any;
-  profiles?: {
-    username: string;
-    full_name: string;
-  };
 }
 
 interface EnhancedAuditTrailProps {
@@ -48,10 +44,7 @@ const EnhancedAuditTrail = ({ searchQuery }: EnhancedAuditTrailProps) => {
     queryFn: async (): Promise<AuditLog[]> => {
       let query = supabase
         .from('audit_logs')
-        .select(`
-          *,
-          profiles(username, full_name)
-        `)
+        .select('*')
         .order('timestamp', { ascending: false })
         .limit(100);
 
@@ -216,7 +209,7 @@ const EnhancedAuditTrail = ({ searchQuery }: EnhancedAuditTrailProps) => {
                   </TableCell>
                   <TableCell>
                     <div className="text-white">
-                      {log.profiles?.full_name || log.profiles?.username || 'System'}
+                      Actor
                     </div>
                     <div className="text-gray-400 text-xs">
                       ID: {log.actor_id?.slice(0, 8)}...
@@ -267,4 +260,3 @@ const EnhancedAuditTrail = ({ searchQuery }: EnhancedAuditTrailProps) => {
 };
 
 export default EnhancedAuditTrail;
-

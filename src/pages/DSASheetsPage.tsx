@@ -14,6 +14,12 @@ const DSASheetsPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
+  const [filters, setFilters] = useState({
+    difficulty: '',
+    topics: [],
+    tags: [],
+    status: ''
+  });
 
   const sheets = [
     {
@@ -67,7 +73,14 @@ const DSASheetsPage = () => {
     onProgressUpdate: () => {},
     onNotesUpdate: () => {},
     problemNotes: {},
-    currentSheet: 'dsa-sheets'
+    currentSheet: 'dsa-sheets',
+    onToggleStep: () => {},
+    onToggleLecture: () => {},
+    onToggleProblemStatus: () => {},
+    onOpenNoteDialog: () => {},
+    noteDialogOpen: false,
+    currentNoteContent: {},
+    onCloseNoteDialog: () => {}
   };
 
   return (
@@ -140,7 +153,10 @@ const DSASheetsPage = () => {
             {/* Advanced Filter */}
             {showAdvancedFilter && (
               <div className="max-w-4xl mx-auto">
-                <AdvancedFilter onFiltersChange={() => {}} />
+                <AdvancedFilter 
+                  filters={filters} 
+                  onFiltersChange={setFilters} 
+                />
               </div>
             )}
 
@@ -234,4 +250,3 @@ const DSASheetsPage = () => {
 };
 
 export default DSASheetsPage;
-
