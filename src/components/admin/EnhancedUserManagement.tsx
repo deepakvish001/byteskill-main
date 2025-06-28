@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Search, MoreHorizontal, Shield, Ban, User, Mail, Calendar, Activity } from 'lucide-react';
+import { Search, MoreHorizontal, Shield, Ban, User, Mail, Calendar, Activity, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UserRole {
@@ -57,9 +57,10 @@ interface EnhancedUserManagementProps {
 const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) => {
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [isRealTimeActive, setIsRealTimeActive] = useState(true);
 
   // Fetch users with real-time updates
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['admin-users', searchQuery],
     queryFn: async (): Promise<UserProfile[]> => {
       let query = supabase
@@ -88,8 +89,45 @@ const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) =>
         recent_activity: Array.isArray(user.user_activity) ? user.user_activity.slice(0, 5) : []
       })) || [];
     },
-    refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+    refetchInterval: isRealTimeActive ? 10000 : false, // Real-time updates every 10 seconds
   });
+
+  // Set up real-time subscriptions
+  useEffect(() => {
+    if (!isRealTimeActive) return;
+
+    const channel = supabase
+      .channel('user-management-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+          toast.success('User data updated in real-time');
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_roles'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+          toast.success('User roles updated in real-time');
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isRealTimeActive, queryClient]);
 
   // Ban/Unban user mutation
   const banUserMutation = useMutation({
@@ -102,11 +140,12 @@ const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) =>
       if (error) throw error;
 
       // Log admin action
-      await supabase.rpc('log_admin_action', {
-        action_type_param: banned ? 'user_banned' : 'user_unbanned',
-        target_type_param: 'user',
-        target_id_param: userId,
-        payload_param: { banned, timestamp: new Date().toISOString() }
+      await supabase.from('audit_logs').insert({
+        action_type: banned ? 'user_banned' : 'user_unbanned',
+        actor_id: (await supabase.auth.getUser()).data.user?.id,
+        target_type: 'user',
+        target_id: userId,
+        payload: { banned, timestamp: new Date().toISOString() }
       });
     },
     onSuccess: (_, { banned }) => {
@@ -138,11 +177,12 @@ const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) =>
       if (error) throw error;
 
       // Log admin action
-      await supabase.rpc('log_admin_action', {
-        action_type_param: 'role_change',
-        target_type_param: 'user',
-        target_id_param: userId,
-        payload_param: { new_role: role, timestamp: new Date().toISOString() }
+      await supabase.from('audit_logs').insert({
+        action_type: 'role_change',
+        actor_id: (await supabase.auth.getUser()).data.user?.id,
+        target_type: 'user',
+        target_id: userId,
+        payload: { new_role: role, timestamp: new Date().toISOString() }
       });
     },
     onSuccess: () => {
@@ -187,14 +227,44 @@ const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) =>
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64 bg-black">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-black min-h-screen">
+      {/* Header with Real-time Controls */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-white">User Management</h2>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <div className={`w-2 h-2 rounded-full ${isRealTimeActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}></div>
+            <span className="text-sm text-gray-400">
+              {isRealTimeActive ? 'Real-time Active' : 'Real-time Paused'}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsRealTimeActive(!isRealTimeActive)}
+            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+          >
+            {isRealTimeActive ? 'Pause' : 'Resume'} Real-time
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-gray-900 border-gray-800">
@@ -261,99 +331,101 @@ const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) =>
         <CardHeader>
           <CardTitle className="text-white">User Management</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-gray-800">
-                <TableHead className="text-gray-300">User</TableHead>
-                <TableHead className="text-gray-300">Role</TableHead>
-                <TableHead className="text-gray-300">Stats</TableHead>
-                <TableHead className="text-gray-300">Status</TableHead>
-                <TableHead className="text-gray-300">Last Activity</TableHead>
-                <TableHead className="text-gray-300">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users?.map((user) => (
-                <TableRow key={user.id} className="border-gray-800">
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-bold">
-                          {user.full_name?.charAt(0) || user.username?.charAt(0) || 'U'}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">{user.full_name || user.username}</p>
-                        <p className="text-gray-400 text-sm">@{user.username}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getUserRoleBadge(user)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="text-white text-sm">{user.xp_points} XP</div>
-                      <div className="text-gray-400 text-xs">
-                        {user.problems_solved} problems • {user.current_streak} streak
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={user.is_banned ? "destructive" : "default"}>
-                      {user.is_banned ? 'Banned' : 'Active'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="text-gray-300 text-sm">
-                        {new Date(user.updated_at).toLocaleDateString()}
-                      </div>
-                      {user.recent_activity && user.recent_activity.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {user.recent_activity.slice(0, 2).map((activity, idx) => (
-                            <div key={idx}>
-                              {getActivityBadge(activity.activity_type)}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-gray-800 border-gray-700">
-                        <DropdownMenuItem
-                          onClick={() => updateRoleMutation.mutate({ userId: user.id, role: 'admin' })}
-                          className="text-white hover:bg-gray-700"
-                        >
-                          Make Admin
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => updateRoleMutation.mutate({ userId: user.id, role: 'user' })}
-                          className="text-white hover:bg-gray-700"
-                        >
-                          Make User
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => banUserMutation.mutate({ userId: user.id, banned: !user.is_banned })}
-                          className={user.is_banned ? "text-green-400 hover:bg-gray-700" : "text-red-400 hover:bg-gray-700"}
-                        >
-                          {user.is_banned ? 'Unban User' : 'Ban User'}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-gray-800 hover:bg-gray-800/50">
+                  <TableHead className="text-gray-300">User</TableHead>
+                  <TableHead className="text-gray-300">Role</TableHead>
+                  <TableHead className="text-gray-300">Stats</TableHead>
+                  <TableHead className="text-gray-300">Status</TableHead>
+                  <TableHead className="text-gray-300">Last Activity</TableHead>
+                  <TableHead className="text-gray-300">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {users?.map((user) => (
+                  <TableRow key={user.id} className="border-gray-800 hover:bg-gray-800/30">
+                    <TableCell>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-sm font-bold">
+                            {user.full_name?.charAt(0) || user.username?.charAt(0) || 'U'}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{user.full_name || user.username}</p>
+                          <p className="text-gray-400 text-sm">@{user.username}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {getUserRoleBadge(user)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="text-white text-sm">{user.xp_points} XP</div>
+                        <div className="text-gray-400 text-xs">
+                          {user.problems_solved} problems • {user.current_streak} streak
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={user.is_banned ? "destructive" : "default"} className={user.is_banned ? 'bg-red-900 text-red-300' : 'bg-green-900 text-green-300'}>
+                        {user.is_banned ? 'Banned' : 'Active'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="text-gray-300 text-sm">
+                          {new Date(user.updated_at).toLocaleDateString()}
+                        </div>
+                        {user.recent_activity && user.recent_activity.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {user.recent_activity.slice(0, 2).map((activity, idx) => (
+                              <div key={idx}>
+                                {getActivityBadge(activity.activity_type)}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-800">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-gray-800 border-gray-700" align="end">
+                          <DropdownMenuItem
+                            onClick={() => updateRoleMutation.mutate({ userId: user.id, role: 'admin' })}
+                            className="text-white hover:bg-gray-700 cursor-pointer"
+                          >
+                            Make Admin
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => updateRoleMutation.mutate({ userId: user.id, role: 'user' })}
+                            className="text-white hover:bg-gray-700 cursor-pointer"
+                          >
+                            Make User
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => banUserMutation.mutate({ userId: user.id, banned: !user.is_banned })}
+                            className={`cursor-pointer ${user.is_banned ? "text-green-400 hover:bg-gray-700" : "text-red-400 hover:bg-gray-700"}`}
+                          >
+                            {user.is_banned ? 'Unban User' : 'Ban User'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -361,4 +433,3 @@ const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) =>
 };
 
 export default EnhancedUserManagement;
-

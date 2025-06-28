@@ -16,15 +16,17 @@ import {
   Code, 
   Shield, 
   Settings,
-  Search
+  Search,
+  Activity
 } from 'lucide-react';
-import UserManagement from '@/components/admin/UserManagement';
+import EnhancedUserManagement from '@/components/admin/EnhancedUserManagement';
 import CourseManagement from '@/components/admin/CourseManagement';
 import DSASheetManagement from '@/components/admin/DSASheetManagement';
 import InterviewPrepManagement from '@/components/admin/InterviewPrepManagement';
 import CoreCSManagement from '@/components/admin/CoreCSManagement';
-import AuditTrail from '@/components/admin/AuditTrail';
+import EnhancedAuditTrail from '@/components/admin/EnhancedAuditTrail';
 import RoleManagement from '@/components/admin/RoleManagement';
+import SystemSettings from '@/components/admin/SystemSettings';
 
 const AdminPanel = () => {
   const { user } = useAuth();
@@ -49,7 +51,7 @@ const AdminPanel = () => {
     enabled: !!user?.id,
   });
 
-  // Get dashboard stats
+  // Get dashboard stats with real-time updates
   const { data: stats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
@@ -67,6 +69,7 @@ const AdminPanel = () => {
         interviewPrep: interviewPrepCount.count || 0,
       };
     },
+    refetchInterval: 30000, // Real-time updates every 30 seconds
   });
 
   if (roleLoading) {
@@ -100,58 +103,74 @@ const AdminPanel = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Admin Panel</h1>
-            <p className="text-gray-400 text-lg">Manage your platform content and users</p>
+            <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+            <p className="text-gray-400 text-lg">Manage your platform with real-time insights</p>
           </div>
-          <Badge variant="destructive" className="text-sm px-4 py-2">
+          <Badge variant="destructive" className="text-sm px-4 py-2 bg-orange-600 hover:bg-orange-700">
             {userRole.role.replace('_', ' ').toUpperCase()}
           </Badge>
         </div>
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-850 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-400 text-sm font-medium">Total Users</p>
                   <p className="text-3xl font-bold text-white mt-1">{stats?.users || 0}</p>
+                  <div className="flex items-center mt-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                    <span className="text-xs text-green-400">Live</span>
+                  </div>
                 </div>
                 <Users className="w-10 h-10 text-blue-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-850 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-400 text-sm font-medium">Courses</p>
                   <p className="text-3xl font-bold text-white mt-1">{stats?.courses || 0}</p>
+                  <div className="flex items-center mt-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                    <span className="text-xs text-green-400">Live</span>
+                  </div>
                 </div>
                 <BookOpen className="w-10 h-10 text-green-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-850 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-400 text-sm font-medium">DSA Sheets</p>
                   <p className="text-3xl font-bold text-white mt-1">{stats?.dsaSheets || 0}</p>
+                  <div className="flex items-center mt-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                    <span className="text-xs text-green-400">Live</span>
+                  </div>
                 </div>
                 <Code className="w-10 h-10 text-purple-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-850 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-400 text-sm font-medium">Interview Prep</p>
                   <p className="text-3xl font-bold text-white mt-1">{stats?.interviewPrep || 0}</p>
+                  <div className="flex items-center mt-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                    <span className="text-xs text-green-400">Live</span>
+                  </div>
                 </div>
                 <BrainCircuit className="w-10 h-10 text-orange-500" />
               </div>
@@ -164,71 +183,71 @@ const AdminPanel = () => {
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
-              placeholder="Search..."
+              placeholder="Search across all sections..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 bg-gray-900 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20"
+              className="pl-12 bg-gray-900 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 placeholder-gray-500"
             />
           </div>
         </div>
 
         {/* Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-gray-900 border-gray-700 p-1">
+          <TabsList className="bg-gray-900 border-gray-700 p-1 grid grid-cols-7 w-full">
             <TabsTrigger 
               value="users" 
-              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
             <TabsTrigger 
               value="courses" 
-              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Courses
             </TabsTrigger>
             <TabsTrigger 
               value="dsa-sheets" 
-              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <Code className="w-4 h-4 mr-2" />
               DSA Sheets
             </TabsTrigger>
             <TabsTrigger 
               value="interview-prep" 
-              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <BrainCircuit className="w-4 h-4 mr-2" />
               Interview Prep
             </TabsTrigger>
             <TabsTrigger 
               value="core-cs" 
-              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <FileText className="w-4 h-4 mr-2" />
               Core CS
             </TabsTrigger>
             <TabsTrigger 
-              value="roles" 
-              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+              value="audit" 
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
-              <Shield className="w-4 h-4 mr-2" />
-              Roles
+              <Activity className="w-4 h-4 mr-2" />
+              Audit Trail
             </TabsTrigger>
             <TabsTrigger 
-              value="audit" 
-              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+              value="settings" 
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <Settings className="w-4 h-4 mr-2" />
-              Audit
+              Settings
             </TabsTrigger>
           </TabsList>
 
-          <div className="bg-black min-h-[60vh]">
+          <div className="bg-black min-h-[70vh] rounded-lg">
             <TabsContent value="users" className="mt-0">
-              <UserManagement searchQuery={searchQuery} />
+              <EnhancedUserManagement searchQuery={searchQuery} />
             </TabsContent>
 
             <TabsContent value="courses" className="mt-0">
@@ -247,12 +266,12 @@ const AdminPanel = () => {
               <CoreCSManagement searchQuery={searchQuery} />
             </TabsContent>
 
-            <TabsContent value="roles" className="mt-0">
-              <RoleManagement searchQuery={searchQuery} />
+            <TabsContent value="audit" className="mt-0">
+              <EnhancedAuditTrail searchQuery={searchQuery} />
             </TabsContent>
 
-            <TabsContent value="audit" className="mt-0">
-              <AuditTrail searchQuery={searchQuery} />
+            <TabsContent value="settings" className="mt-0">
+              <SystemSettings />
             </TabsContent>
           </div>
         </Tabs>

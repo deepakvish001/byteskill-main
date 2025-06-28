@@ -1,9 +1,10 @@
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   Table, 
   TableBody, 
@@ -20,8 +21,12 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  RefreshCw,
+  Play,
+  Pause
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AuditLog {
   id: string;
@@ -38,15 +43,19 @@ interface EnhancedAuditTrailProps {
 }
 
 const EnhancedAuditTrail = ({ searchQuery }: EnhancedAuditTrailProps) => {
+  const queryClient = useQueryClient();
+  const [isRealTimeActive, setIsRealTimeActive] = useState(true);
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
+
   // Fetch audit logs with real-time updates
-  const { data: auditLogs, isLoading } = useQuery({
+  const { data: auditLogs, isLoading, refetch } = useQuery({
     queryKey: ['admin-audit-logs', searchQuery],
     queryFn: async (): Promise<AuditLog[]> => {
       let query = supabase
         .from('audit_logs')
         .select('*')
         .order('timestamp', { ascending: false })
-        .limit(100);
+        .limit(200);
 
       if (searchQuery) {
         query = query.or(`action_type.ilike.%${searchQuery}%,target_type.ilike.%${searchQuery}%`);
@@ -56,8 +65,34 @@ const EnhancedAuditTrail = ({ searchQuery }: EnhancedAuditTrailProps) => {
       if (error) throw error;
       return data || [];
     },
-    refetchInterval: 5000, // Real-time updates every 5 seconds
+    refetchInterval: isRealTimeActive ? 5000 : false, // Real-time updates every 5 seconds
   });
+
+  // Set up real-time subscriptions
+  useEffect(() => {
+    if (!isRealTimeActive) return;
+
+    const channel = supabase
+      .channel('audit-trail-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'audit_logs'
+        },
+        (payload) => {
+          queryClient.invalidateQueries({ queryKey: ['admin-audit-logs'] });
+          setLastUpdateTime(new Date());
+          toast.success(`New audit log: ${payload.new.action_type}`);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isRealTimeActive, queryClient]);
 
   const getActionIcon = (actionType: string) => {
     switch (actionType.toLowerCase()) {
@@ -113,14 +148,50 @@ const EnhancedAuditTrail = ({ searchQuery }: EnhancedAuditTrailProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64 bg-black">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-black min-h-screen">
+      {/* Header with Real-time Controls */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Audit Trail</h2>
+          <p className="text-gray-400 text-sm">
+            Last updated: {lastUpdateTime.toLocaleTimeString()}
+          </p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <div className={`w-2 h-2 rounded-full ${isRealTimeActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}></div>
+            <span className="text-sm text-gray-400">
+              {isRealTimeActive ? 'Live Updates' : 'Updates Paused'}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsRealTimeActive(!isRealTimeActive)}
+            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+          >
+            {isRealTimeActive ? <Pause className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+            {isRealTimeActive ? 'Pause' : 'Resume'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-gray-900 border-gray-800">
@@ -185,69 +256,79 @@ const EnhancedAuditTrail = ({ searchQuery }: EnhancedAuditTrailProps) => {
       {/* Audit Logs Table */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle className="text-white">Audit Trail</CardTitle>
+          <CardTitle className="text-white">Activity Logs</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="border-gray-800">
-                <TableHead className="text-gray-300">Action</TableHead>
-                <TableHead className="text-gray-300">Actor</TableHead>
-                <TableHead className="text-gray-300">Target</TableHead>
-                <TableHead className="text-gray-300">Details</TableHead>
-                <TableHead className="text-gray-300">Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {auditLogs?.map((log) => (
-                <TableRow key={log.id} className="border-gray-800">
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      {getActionIcon(log.action_type)}
-                      {getActionBadge(log.action_type)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-white">
-                      Actor
-                    </div>
-                    <div className="text-gray-400 text-xs">
-                      ID: {log.actor_id?.slice(0, 8)}...
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-gray-300">
-                      {log.target_type || 'N/A'}
-                    </div>
-                    {log.target_id && (
-                      <div className="text-gray-500 text-xs">
-                        {log.target_id.slice(0, 8)}...
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-gray-300 text-sm max-w-xs truncate">
-                      {log.payload && typeof log.payload === 'object' 
-                        ? JSON.stringify(log.payload).slice(0, 50) + '...'
-                        : 'No details'
-                      }
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-gray-300 text-sm">
-                      {formatTimestamp(log.timestamp)}
-                    </div>
-                    <div className="text-gray-500 text-xs">
-                      {new Date(log.timestamp).toLocaleTimeString()}
-                    </div>
-                  </TableCell>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-gray-800 hover:bg-gray-800/50">
+                  <TableHead className="text-gray-300">Action</TableHead>
+                  <TableHead className="text-gray-300">Actor</TableHead>
+                  <TableHead className="text-gray-300">Target</TableHead>
+                  <TableHead className="text-gray-300">Details</TableHead>
+                  <TableHead className="text-gray-300">Time</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {auditLogs?.map((log) => (
+                  <TableRow key={log.id} className="border-gray-800 hover:bg-gray-800/30">
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        {getActionIcon(log.action_type)}
+                        {getActionBadge(log.action_type)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-white">
+                        Actor
+                      </div>
+                      <div className="text-gray-400 text-xs">
+                        ID: {log.actor_id?.slice(0, 8)}...
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-gray-300">
+                        {log.target_type || 'N/A'}
+                      </div>
+                      {log.target_id && (
+                        <div className="text-gray-500 text-xs">
+                          {log.target_id.slice(0, 8)}...
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-gray-300 text-sm max-w-xs">
+                        {log.payload && typeof log.payload === 'object' ? (
+                          <details className="cursor-pointer">
+                            <summary className="text-orange-400 hover:text-orange-300">
+                              View Details
+                            </summary>
+                            <pre className="text-xs bg-gray-800 p-2 rounded mt-2 overflow-auto max-h-32">
+                              {JSON.stringify(log.payload, null, 2)}
+                            </pre>
+                          </details>
+                        ) : (
+                          'No details'
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-gray-300 text-sm">
+                        {formatTimestamp(log.timestamp)}
+                      </div>
+                      <div className="text-gray-500 text-xs">
+                        {new Date(log.timestamp).toLocaleTimeString()}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           
           {(!auditLogs || auditLogs.length === 0) && (
-            <div className="text-center py-8">
+            <div className="text-center py-12">
               <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">No Audit Logs</h3>
               <p className="text-gray-400">No activity has been logged yet.</p>

@@ -159,28 +159,28 @@ const DSASheetsPage = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center">
+              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center hover:bg-gray-900/70 transition-colors">
                 <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <BookOpen className="w-6 h-6 text-blue-400" />
                 </div>
                 <div className="text-2xl font-bold text-white">12</div>
                 <div className="text-gray-400 text-sm">DSA Sheets</div>
               </div>
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center">
+              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center hover:bg-gray-900/70 transition-colors">
                 <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Target className="w-6 h-6 text-green-400" />
                 </div>
                 <div className="text-2xl font-bold text-white">1,200+</div>
                 <div className="text-gray-400 text-sm">Problems</div>
               </div>
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center">
+              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center hover:bg-gray-900/70 transition-colors">
                 <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Code className="w-6 h-6 text-purple-400" />
                 </div>
                 <div className="text-2xl font-bold text-white">15</div>
                 <div className="text-gray-400 text-sm">Topics</div>
               </div>
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center">
+              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center hover:bg-gray-900/70 transition-colors">
                 <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <Trophy className="w-6 h-6 text-orange-400" />
                 </div>

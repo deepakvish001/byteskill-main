@@ -19,7 +19,9 @@ import {
   Bell,
   Save,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Plus,
+  Trash2
 } from 'lucide-react';
 
 interface SystemSetting {
@@ -38,9 +40,18 @@ const SystemSettings = () => {
   const queryClient = useQueryClient();
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [changedSettings, setChangedSettings] = useState<Set<string>>(new Set());
+  const [isRealTimeActive, setIsRealTimeActive] = useState(true);
+  const [newSettingForm, setNewSettingForm] = useState({
+    key: '',
+    value: '',
+    type: 'string' as const,
+    description: '',
+    category: 'general',
+    is_public: false
+  });
 
   // Fetch system settings
-  const { data: systemSettings, isLoading } = useQuery({
+  const { data: systemSettings, isLoading, refetch } = useQuery({
     queryKey: ['system-settings'],
     queryFn: async (): Promise<SystemSetting[]> => {
       const { data, error } = await supabase
@@ -54,7 +65,33 @@ const SystemSettings = () => {
         type: setting.type as 'string' | 'number' | 'boolean' | 'json'
       }));
     },
+    refetchInterval: isRealTimeActive ? 30000 : false,
   });
+
+  // Set up real-time subscriptions
+  useEffect(() => {
+    if (!isRealTimeActive) return;
+
+    const channel = supabase
+      .channel('system-settings-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'system_settings'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['system-settings'] });
+          toast.success('System settings updated in real-time');
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isRealTimeActive, queryClient]);
 
   // Update settings state when data loads
   useEffect(() => {
@@ -104,6 +141,65 @@ const SystemSettings = () => {
     },
     onError: (error) => {
       toast.error('Failed to update settings: ' + error.message);
+    },
+  });
+
+  // Create new setting mutation
+  const createSettingMutation = useMutation({
+    mutationFn: async (newSetting: typeof newSettingForm) => {
+      let stringValue = newSetting.value;
+      if (newSetting.type === 'json') {
+        try {
+          JSON.parse(stringValue);
+        } catch {
+          throw new Error('Invalid JSON format');
+        }
+      }
+
+      const { error } = await supabase
+        .from('system_settings')
+        .insert([{
+          ...newSetting,
+          value: stringValue,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['system-settings'] });
+      toast.success('Setting created successfully');
+      setNewSettingForm({
+        key: '',
+        value: '',
+        type: 'string',
+        description: '',
+        category: 'general',
+        is_public: false
+      });
+    },
+    onError: (error) => {
+      toast.error('Failed to create setting: ' + error.message);
+    },
+  });
+
+  // Delete setting mutation
+  const deleteSettingMutation = useMutation({
+    mutationFn: async (settingId: string) => {
+      const { error } = await supabase
+        .from('system_settings')
+        .delete()
+        .eq('id', settingId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['system-settings'] });
+      toast.success('Setting deleted successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to delete setting: ' + error.message);
     },
   });
 
@@ -240,50 +336,66 @@ const SystemSettings = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">System Settings</h2>
-          <p className="text-gray-400">Configure system-wide settings and preferences</p>
+          <p className="text-gray-400">Configure platform-wide settings and preferences</p>
         </div>
         
-        {changedSettings.size > 0 && (
+        <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <Badge variant="outline" className="text-orange-400 border-orange-400">
-              {changedSettings.size} unsaved changes
-            </Badge>
-            <Button
-              variant="outline"
-              onClick={resetChanges}
-              className="border-gray-600 text-gray-300 hover:bg-gray-800"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Reset
-            </Button>
-            <Button
-              onClick={saveAllChanges}
-              disabled={updateSettingMutation.isPending}
-              className="bg-orange-600 hover:bg-orange-700"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {updateSettingMutation.isPending ? 'Saving...' : 'Save All'}
-            </Button>
+            <div className={`w-2 h-2 rounded-full ${isRealTimeActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}></div>
+            <span className="text-sm text-gray-400">
+              {isRealTimeActive ? 'Auto-sync Active' : 'Auto-sync Paused'}
+            </span>
           </div>
-        )}
+          
+          {changedSettings.size > 0 && (
+            <>
+              <Badge variant="outline" className="text-orange-400 border-orange-400">
+                {changedSettings.size} unsaved changes
+              </Badge>
+              <Button
+                variant="outline"
+                onClick={resetChanges}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset
+              </Button>
+              <Button
+                onClick={saveAllChanges}
+                disabled={updateSettingMutation.isPending}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {updateSettingMutation.isPending ? 'Saving...' : 'Save All'}
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Settings Tabs */}
-      <Tabs defaultValue={Object.keys(groupedSettings)[0]} className="space-y-6">
-        <TabsList className="bg-gray-800">
+      <Tabs defaultValue={Object.keys(groupedSettings)[0] || 'general'} className="space-y-6">
+        <TabsList className="bg-gray-800 grid grid-cols-6 w-full">
           {Object.keys(groupedSettings).map((category) => {
             const Icon = getCategoryIcon(category);
             return (
               <TabsTrigger 
                 key={category} 
                 value={category}
-                className="data-[state=active]:bg-orange-600"
+                className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300"
               >
                 <Icon className="w-4 h-4 mr-2" />
                 {category.charAt(0).toUpperCase() + category.slice(1)}
               </TabsTrigger>
             );
           })}
+          <TabsTrigger 
+            value="new"
+            className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New Setting
+          </TabsTrigger>
         </TabsList>
 
         {Object.entries(groupedSettings).map(([category, categorySettings]) => (
@@ -308,6 +420,14 @@ const SystemSettings = () => {
                         <Badge variant="outline" className="text-xs">
                           {setting.type}
                         </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteSettingMutation.mutate(setting.id)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardHeader>
@@ -322,6 +442,76 @@ const SystemSettings = () => {
             </div>
           </TabsContent>
         ))}
+
+        {/* New Setting Tab */}
+        <TabsContent value="new">
+          <Card className="bg-gray-900 border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-white">Create New Setting</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white">Key</Label>
+                  <Input
+                    value={newSettingForm.key}
+                    onChange={(e) => setNewSettingForm(prev => ({ ...prev, key: e.target.value }))}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    placeholder="setting_key"
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Category</Label>
+                  <Input
+                    value={newSettingForm.category}
+                    onChange={(e) => setNewSettingForm(prev => ({ ...prev, category: e.target.value }))}
+                    className="bg-gray-800 border-gray-700 text-white"
+                    placeholder="general"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label className="text-white">Description</Label>
+                <Input
+                  value={newSettingForm.description}
+                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="bg-gray-800 border-gray-700 text-white"
+                  placeholder="Setting description"
+                />
+              </div>
+              
+              <div>
+                <Label className="text-white">Value</Label>
+                <Textarea
+                  value={newSettingForm.value}
+                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, value: e.target.value }))}
+                  className="bg-gray-800 border-gray-700 text-white"
+                  placeholder="Setting value"
+                />
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={newSettingForm.is_public}
+                    onCheckedChange={(checked) => setNewSettingForm(prev => ({ ...prev, is_public: checked }))}
+                  />
+                  <Label className="text-white">Public Setting</Label>
+                </div>
+              </div>
+              
+              <Button
+                onClick={() => createSettingMutation.mutate(newSettingForm)}
+                disabled={createSettingMutation.isPending || !newSettingForm.key || !newSettingForm.description}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                {createSettingMutation.isPending ? 'Creating...' : 'Create Setting'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {Object.keys(groupedSettings).length === 0 && (
@@ -330,7 +520,7 @@ const SystemSettings = () => {
             <AlertTriangle className="w-12 h-12 text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No Settings Found</h3>
             <p className="text-gray-400 text-center">
-              No system settings have been configured yet. Settings will appear here once they are created.
+              No system settings have been configured yet. Create your first setting using the "New Setting" tab.
             </p>
           </CardContent>
         </Card>
