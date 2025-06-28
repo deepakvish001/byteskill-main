@@ -62,28 +62,20 @@ const DSASheetsPage = () => {
     }
   ];
 
-  // Mock problem table props
+  // Mock problem table props with correct types
   const mockProblemTableProps = {
     steps: [],
-    expandedSteps: {},
-    expandedLectures: {},
+    expandedSteps: [],
+    expandedLectures: [],
     problemStatuses: {},
-    bookmarkedProblems: new Set(),
-    onStepExpand: () => {},
-    onLectureExpand: () => {},
-    onToggleBookmark: () => {},
-    onProgressUpdate: () => {},
-    onNotesUpdate: () => {},
+    bookmarkedProblems: [],
     problemNotes: {},
-    currentSheet: 'dsa-sheets',
     onToggleStep: () => {},
     onToggleLecture: () => {},
     onToggleProblemStatus: () => {},
+    onToggleBookmark: () => {},
     onOpenNoteDialog: () => {},
-    noteDialogOpen: false,
-    currentNoteContent: {},
-    onCloseNoteDialog: () => {},
-    applyAdvancedFilters: () => {},
+    applyAdvancedFilters: (problems: any[]) => problems,
     calculateStepProgress: () => 0,
     calculateLectureProgress: () => 0
   };
