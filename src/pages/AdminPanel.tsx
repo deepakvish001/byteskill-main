@@ -72,7 +72,10 @@ const AdminPanel = () => {
   if (roleLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <span className="text-white">Loading...</span>
+        </div>
       </div>
     );
   }
@@ -97,60 +100,60 @@ const AdminPanel = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Admin Panel</h1>
-            <p className="text-gray-400 mt-1">Manage your platform content and users</p>
+            <h1 className="text-4xl font-bold text-white mb-2">Admin Panel</h1>
+            <p className="text-gray-400 text-lg">Manage your platform content and users</p>
           </div>
-          <Badge variant="destructive" className="text-sm">
+          <Badge variant="destructive" className="text-sm px-4 py-2">
             {userRole.role.replace('_', ' ').toUpperCase()}
           </Badge>
         </div>
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Total Users</p>
-                  <p className="text-2xl font-bold text-white">{stats?.users || 0}</p>
+                  <p className="text-gray-400 text-sm font-medium">Total Users</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats?.users || 0}</p>
                 </div>
-                <Users className="w-8 h-8 text-blue-500" />
+                <Users className="w-10 h-10 text-blue-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Courses</p>
-                  <p className="text-2xl font-bold text-white">{stats?.courses || 0}</p>
+                  <p className="text-gray-400 text-sm font-medium">Courses</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats?.courses || 0}</p>
                 </div>
-                <BookOpen className="w-8 h-8 text-green-500" />
+                <BookOpen className="w-10 h-10 text-green-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">DSA Sheets</p>
-                  <p className="text-2xl font-bold text-white">{stats?.dsaSheets || 0}</p>
+                  <p className="text-gray-400 text-sm font-medium">DSA Sheets</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats?.dsaSheets || 0}</p>
                 </div>
-                <Code className="w-8 h-8 text-purple-500" />
+                <Code className="w-10 h-10 text-purple-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-800 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Interview Prep</p>
-                  <p className="text-2xl font-bold text-white">{stats?.interviewPrep || 0}</p>
+                  <p className="text-gray-400 text-sm font-medium">Interview Prep</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats?.interviewPrep || 0}</p>
                 </div>
-                <BrainCircuit className="w-8 h-8 text-orange-500" />
+                <BrainCircuit className="w-10 h-10 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -159,76 +162,99 @@ const AdminPanel = () => {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-gray-900 border-gray-700 text-white"
+              className="pl-12 bg-gray-900 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20"
             />
           </div>
         </div>
 
         {/* Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-gray-900 border-gray-700">
-            <TabsTrigger value="users" className="data-[state=active]:bg-gray-700">
+          <TabsList className="bg-gray-900 border-gray-700 p-1">
+            <TabsTrigger 
+              value="users" 
+              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+            >
               <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
-            <TabsTrigger value="courses" className="data-[state=active]:bg-gray-700">
+            <TabsTrigger 
+              value="courses" 
+              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+            >
               <BookOpen className="w-4 h-4 mr-2" />
               Courses
             </TabsTrigger>
-            <TabsTrigger value="dsa-sheets" className="data-[state=active]:bg-gray-700">
+            <TabsTrigger 
+              value="dsa-sheets" 
+              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+            >
               <Code className="w-4 h-4 mr-2" />
               DSA Sheets
             </TabsTrigger>
-            <TabsTrigger value="interview-prep" className="data-[state=active]:bg-gray-700">
+            <TabsTrigger 
+              value="interview-prep" 
+              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+            >
               <BrainCircuit className="w-4 h-4 mr-2" />
               Interview Prep
             </TabsTrigger>
-            <TabsTrigger value="core-cs" className="data-[state=active]:bg-gray-700">
+            <TabsTrigger 
+              value="core-cs" 
+              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+            >
               <FileText className="w-4 h-4 mr-2" />
               Core CS
             </TabsTrigger>
-            <TabsTrigger value="roles" className="data-[state=active]:bg-gray-700">
+            <TabsTrigger 
+              value="roles" 
+              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+            >
               <Shield className="w-4 h-4 mr-2" />
               Roles
             </TabsTrigger>
-            <TabsTrigger value="audit" className="data-[state=active]:bg-gray-700">
+            <TabsTrigger 
+              value="audit" 
+              className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-300"
+            >
               <Settings className="w-4 h-4 mr-2" />
               Audit
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="users">
-            <UserManagement searchQuery={searchQuery} />
-          </TabsContent>
+          <div className="bg-black min-h-[60vh]">
+            <TabsContent value="users" className="mt-0">
+              <UserManagement searchQuery={searchQuery} />
+            </TabsContent>
 
-          <TabsContent value="courses">
-            <CourseManagement searchQuery={searchQuery} />
-          </TabsContent>
+            <TabsContent value="courses" className="mt-0">
+              <CourseManagement searchQuery={searchQuery} />
+            </TabsContent>
 
-          <TabsContent value="dsa-sheets">
-            <DSASheetManagement searchQuery={searchQuery} />
-          </TabsContent>
+            <TabsContent value="dsa-sheets" className="mt-0">
+              <DSASheetManagement searchQuery={searchQuery} />
+            </TabsContent>
 
-          <TabsContent value="interview-prep">
-            <InterviewPrepManagement searchQuery={searchQuery} />
-          </TabsContent>
+            <TabsContent value="interview-prep" className="mt-0">
+              <InterviewPrepManagement searchQuery={searchQuery} />
+            </TabsContent>
 
-          <TabsContent value="core-cs">
-            <CoreCSManagement searchQuery={searchQuery} />
-          </TabsContent>
+            <TabsContent value="core-cs" className="mt-0">
+              <CoreCSManagement searchQuery={searchQuery} />
+            </TabsContent>
 
-          <TabsContent value="roles">
-            <RoleManagement searchQuery={searchQuery} />
-          </TabsContent>
+            <TabsContent value="roles" className="mt-0">
+              <RoleManagement searchQuery={searchQuery} />
+            </TabsContent>
 
-          <TabsContent value="audit">
-            <AuditTrail searchQuery={searchQuery} />
-          </TabsContent>
+            <TabsContent value="audit" className="mt-0">
+              <AuditTrail searchQuery={searchQuery} />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </div>
