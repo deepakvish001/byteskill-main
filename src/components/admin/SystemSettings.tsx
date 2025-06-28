@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -249,57 +250,58 @@ const SystemSettings = () => {
     const value = settings[setting.key];
     const hasChanged = changedSettings.has(setting.key);
 
-    switch (setting.type) {
-      case 'boolean':
-        return (
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={Boolean(value)}
-              onCheckedChange={(checked) => handleSettingChange(setting.key, checked)}
-            />
-            <Label className={`text-white ${hasChanged ? 'text-orange-400' : ''}`}>
-              {value ? 'Enabled' : 'Disabled'}
-            </Label>
-          </div>
-        );
-      
-      case 'number':
-        return (
-          <Input
-            type="number"
-            value={Number(value) || ''}
-            onChange={(e) => handleSettingChange(setting.key, parseFloat(e.target.value) || 0)}
-            className={`bg-gray-800 border-gray-700 text-white ${hasChanged ? 'border-orange-400' : ''}`}
+    if (setting.type === 'boolean') {
+      return (
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={Boolean(value)}
+            onCheckedChange={(checked) => handleSettingChange(setting.key, checked)}
           />
-        );
-      
-      case 'json':
-        return (
-          <Textarea
-            value={JSON.stringify(value || {}, null, 2)}
-            onChange={(e) => {
-              try {
-                const parsed = JSON.parse(e.target.value);
-                handleSettingChange(setting.key, parsed);
-              } catch {
-                // Invalid JSON, don't update
-              }
-            }}
-            rows={4}
-            className={`bg-gray-800 border-gray-700 text-white font-mono text-sm ${hasChanged ? 'border-orange-400' : ''}`}
-          />
-        );
-      
-      default:
-        return (
-          <Input
-            type="text"
-            value={String(value) || ''}
-            onChange={(e) => handleSettingChange(setting.key, e.target.value)}
-            className={`bg-gray-800 border-gray-700 text-white ${hasChanged ? 'border-orange-400' : ''}`}
-          />
-        );
+          <Label className={`text-white ${hasChanged ? 'text-orange-400' : ''}`}>
+            {value ? 'Enabled' : 'Disabled'}
+          </Label>
+        </div>
+      );
     }
+    
+    if (setting.type === 'number') {
+      return (
+        <Input
+          type="number"
+          value={Number(value) || ''}
+          onChange={(e) => handleSettingChange(setting.key, parseFloat(e.target.value) || 0)}
+          className={`bg-gray-800 border-gray-700 text-white ${hasChanged ? 'border-orange-400' : ''}`}
+        />
+      );
+    }
+    
+    if (setting.type === 'json') {
+      return (
+        <Textarea
+          value={JSON.stringify(value || {}, null, 2)}
+          onChange={(e) => {
+            try {
+              const parsed = JSON.parse(e.target.value);
+              handleSettingChange(setting.key, parsed);
+            } catch {
+              // Invalid JSON, don't update
+            }
+          }}
+          rows={4}
+          className={`bg-gray-800 border-gray-700 text-white font-mono text-sm ${hasChanged ? 'border-orange-400' : ''}`}
+        />
+      );
+    }
+    
+    // Default case for 'string' type
+    return (
+      <Input
+        type="text"
+        value={String(value) || ''}
+        onChange={(e) => handleSettingChange(setting.key, e.target.value)}
+        className={`bg-gray-800 border-gray-700 text-white ${hasChanged ? 'border-orange-400' : ''}`}
+      />
+    );
   };
 
   const groupedSettings = systemSettings?.reduce((acc, setting) => {
@@ -441,7 +443,7 @@ const SystemSettings = () => {
               ))}
             </div>
           </TabsContent>
-        ))}
+        ))}</Tabs>
 
         {/* New Setting Tab */}
         <TabsContent value="new">
