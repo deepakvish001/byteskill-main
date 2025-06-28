@@ -15,10 +15,12 @@ const DSASheetsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [filters, setFilters] = useState({
-    difficulty: '',
-    topics: [],
-    tags: [],
-    status: ''
+    difficulty: 'all',
+    status: 'all',
+    hasArticle: false,
+    hasVideo: false,
+    hasPractice: false,
+    searchQuery: ''
   });
 
   const sheets = [
@@ -80,7 +82,10 @@ const DSASheetsPage = () => {
     onOpenNoteDialog: () => {},
     noteDialogOpen: false,
     currentNoteContent: {},
-    onCloseNoteDialog: () => {}
+    onCloseNoteDialog: () => {},
+    applyAdvancedFilters: () => {},
+    calculateStepProgress: () => 0,
+    calculateLectureProgress: () => 0
   };
 
   return (

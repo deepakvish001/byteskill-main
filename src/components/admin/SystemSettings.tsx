@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,7 +49,11 @@ const SystemSettings = () => {
         .order('category, key');
       
       if (error) throw error;
-      return data || [];
+      // Cast the type field to ensure TypeScript compatibility
+      return (data || []).map(setting => ({
+        ...setting,
+        type: setting.type as 'string' | 'number' | 'boolean' | 'json'
+      }));
     },
   });
 
@@ -59,14 +62,14 @@ const SystemSettings = () => {
     if (systemSettings) {
       const settingsMap: Record<string, any> = {};
       systemSettings.forEach(setting => {
-        let value = setting.value;
+        let value: any = setting.value;
         if (setting.type === 'boolean') {
-          value = value === 'true';
+          value = setting.value === 'true';
         } else if (setting.type === 'number') {
-          value = parseFloat(value);
+          value = parseFloat(setting.value) || 0;
         } else if (setting.type === 'json') {
           try {
-            value = JSON.parse(value);
+            value = JSON.parse(setting.value);
           } catch {
             value = {};
           }
@@ -128,14 +131,14 @@ const SystemSettings = () => {
     if (systemSettings) {
       const settingsMap: Record<string, any> = {};
       systemSettings.forEach(setting => {
-        let value = setting.value;
+        let value: any = setting.value;
         if (setting.type === 'boolean') {
-          value = value === 'true';
+          value = setting.value === 'true';
         } else if (setting.type === 'number') {
-          value = parseFloat(value);
+          value = parseFloat(setting.value) || 0;
         } else if (setting.type === 'json') {
           try {
-            value = JSON.parse(value);
+            value = JSON.parse(setting.value);
           } catch {
             value = {};
           }
@@ -156,7 +159,7 @@ const SystemSettings = () => {
         return (
           <div className="flex items-center space-x-2">
             <Switch
-              checked={value || false}
+              checked={Boolean(value)}
               onCheckedChange={(checked) => handleSettingChange(setting.key, checked)}
             />
             <Label className={`text-white ${hasChanged ? 'text-orange-400' : ''}`}>
@@ -169,7 +172,7 @@ const SystemSettings = () => {
         return (
           <Input
             type="number"
-            value={value || ''}
+            value={Number(value) || ''}
             onChange={(e) => handleSettingChange(setting.key, parseFloat(e.target.value) || 0)}
             className={`bg-gray-800 border-gray-700 text-white ${hasChanged ? 'border-orange-400' : ''}`}
           />
@@ -196,7 +199,7 @@ const SystemSettings = () => {
         return (
           <Input
             type="text"
-            value={value || ''}
+            value={String(value) || ''}
             onChange={(e) => handleSettingChange(setting.key, e.target.value)}
             className={`bg-gray-800 border-gray-700 text-white ${hasChanged ? 'border-orange-400' : ''}`}
           />
