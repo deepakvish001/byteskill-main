@@ -564,6 +564,42 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_public: boolean
+          key: string
+          type: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          is_public?: boolean
+          key: string
+          type: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_public?: boolean
+          key?: string
+          type?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           certificate_url: string | null

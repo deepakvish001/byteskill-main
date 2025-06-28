@@ -23,6 +23,16 @@ import {
 import { Search, MoreHorizontal, Shield, Ban, User, Mail, Calendar, Activity } from 'lucide-react';
 import { toast } from 'sonner';
 
+interface UserRole {
+  role: string;
+}
+
+interface UserActivity {
+  activity_type: string;
+  created_at: string;
+  points_earned: number;
+}
+
 interface UserProfile {
   id: string;
   username: string;
@@ -36,12 +46,8 @@ interface UserProfile {
   created_at: string;
   updated_at: string;
   is_banned: boolean;
-  user_roles?: Array<{ role: string }>;
-  recent_activity?: Array<{
-    activity_type: string;
-    created_at: string;
-    points_earned: number;
-  }>;
+  user_roles?: UserRole[];
+  recent_activity?: UserActivity[];
 }
 
 interface EnhancedUserManagementProps {
@@ -78,7 +84,8 @@ const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) =>
 
       return data?.map(user => ({
         ...user,
-        recent_activity: user.user_activity?.slice(0, 5) || []
+        user_roles: Array.isArray(user.user_roles) ? user.user_roles : [],
+        recent_activity: Array.isArray(user.user_activity) ? user.user_activity.slice(0, 5) : []
       })) || [];
     },
     refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
@@ -354,3 +361,4 @@ const EnhancedUserManagement = ({ searchQuery }: EnhancedUserManagementProps) =>
 };
 
 export default EnhancedUserManagement;
+

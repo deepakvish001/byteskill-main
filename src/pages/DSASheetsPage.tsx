@@ -54,6 +54,22 @@ const DSASheetsPage = () => {
     }
   ];
 
+  // Mock problem table props
+  const mockProblemTableProps = {
+    steps: [],
+    expandedSteps: {},
+    expandedLectures: {},
+    problemStatuses: {},
+    bookmarkedProblems: new Set(),
+    onStepExpand: () => {},
+    onLectureExpand: () => {},
+    onToggleBookmark: () => {},
+    onProgressUpdate: () => {},
+    onNotesUpdate: () => {},
+    problemNotes: {},
+    currentSheet: 'dsa-sheets'
+  };
+
   return (
     <div className="min-h-screen bg-black flex">
       {/* Fixed Sidebar */}
@@ -124,7 +140,7 @@ const DSASheetsPage = () => {
             {/* Advanced Filter */}
             {showAdvancedFilter && (
               <div className="max-w-4xl mx-auto">
-                <AdvancedFilter onFilterChange={() => {}} />
+                <AdvancedFilter onFiltersChange={() => {}} />
               </div>
             )}
 
@@ -208,7 +224,7 @@ const DSASheetsPage = () => {
 
             {/* Problem Table */}
             <div className="mt-12">
-              <ProblemTable />
+              <ProblemTable {...mockProblemTableProps} />
             </div>
           </div>
         </main>
@@ -218,3 +234,4 @@ const DSASheetsPage = () => {
 };
 
 export default DSASheetsPage;
+
