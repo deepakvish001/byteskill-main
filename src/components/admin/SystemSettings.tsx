@@ -24,11 +24,13 @@ import {
   Trash2
 } from 'lucide-react';
 
+type SettingType = 'string' | 'number' | 'boolean' | 'json';
+
 interface SystemSetting {
   id: string;
   key: string;
   value: string;
-  type: 'string' | 'number' | 'boolean' | 'json';
+  type: SettingType;
   description: string;
   category: string;
   is_public: boolean;
@@ -44,7 +46,7 @@ const SystemSettings = () => {
   const [newSettingForm, setNewSettingForm] = useState({
     key: '',
     value: '',
-    type: 'string' as const,
+    type: 'string' as SettingType,
     description: '',
     category: 'general',
     is_public: false
@@ -62,7 +64,7 @@ const SystemSettings = () => {
       if (error) throw error;
       return (data || []).map(setting => ({
         ...setting,
-        type: setting.type as 'string' | 'number' | 'boolean' | 'json'
+        type: setting.type as SettingType
       }));
     },
     refetchInterval: isRealTimeActive ? 30000 : false,
@@ -118,7 +120,7 @@ const SystemSettings = () => {
 
   // Update setting mutation
   const updateSettingMutation = useMutation({
-    mutationFn: async ({ key, value, type }: { key: string; value: any; type: string }) => {
+    mutationFn: async ({ key, value, type }: { key: string; value: any; type: SettingType }) => {
       let stringValue = String(value);
       if (type === 'json') {
         stringValue = JSON.stringify(value);
