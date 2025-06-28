@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X } from 'lucide-react';
+import { X, Save, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ModernDialogProps {
   isOpen: boolean;
@@ -10,6 +11,11 @@ interface ModernDialogProps {
   children: React.ReactNode;
   maxWidth?: string;
   preventClose?: boolean;
+  showActionButtons?: boolean;
+  onSave?: () => void;
+  onReset?: () => void;
+  isSaving?: boolean;
+  saveLabel?: string;
 }
 
 const ModernDialog = ({ 
@@ -18,7 +24,12 @@ const ModernDialog = ({
   title, 
   children, 
   maxWidth = "max-w-4xl",
-  preventClose = false 
+  preventClose = true,
+  showActionButtons = false,
+  onSave,
+  onReset,
+  isSaving = false,
+  saveLabel = "Save"
 }: ModernDialogProps) => {
   const handleOpenChange = (open: boolean) => {
     if (!open && !preventClose) {
@@ -46,15 +57,43 @@ const ModernDialog = ({
             <DialogTitle className="text-2xl font-semibold text-white">
               {title}
             </DialogTitle>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {showActionButtons && (
+                <>
+                  {onReset && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={onReset}
+                      className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-1" />
+                      Reset
+                    </Button>
+                  )}
+                  {onSave && (
+                    <Button
+                      size="sm"
+                      onClick={onSave}
+                      disabled={isSaving}
+                      className="bg-orange-600 hover:bg-orange-700"
+                    >
+                      <Save className="w-4 h-4 mr-1" />
+                      {isSaving ? 'Saving...' : saveLabel}
+                    </Button>
+                  )}
+                </>
+              )}
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </DialogHeader>
-        <div className="p-6">
+        <div className="p-6 bg-gray-900">
           {children}
         </div>
       </DialogContent>

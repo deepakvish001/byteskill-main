@@ -49,7 +49,6 @@ const SystemSettings = () => {
         .order('category, key');
       
       if (error) throw error;
-      // Cast the type field to ensure TypeScript compatibility
       return (data || []).map(setting => ({
         ...setting,
         type: setting.type as 'string' | 'number' | 'boolean' | 'json'
@@ -229,14 +228,14 @@ const SystemSettings = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64 bg-black">
         <RefreshCw className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-black min-h-screen p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
