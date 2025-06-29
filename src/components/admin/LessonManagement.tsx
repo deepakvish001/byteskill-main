@@ -80,16 +80,20 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-black border-gray-800">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between text-white">
+          <CardTitle className="flex items-center justify-between text-gray-100">
             Lesson Management - Course: {courseId}
             <div className="flex gap-2">
-              <Button onClick={handleAddLesson}>
+              <Button onClick={handleAddLesson} className="bg-orange-600 hover:bg-orange-700">
                 <Plus className="w-4 h-4 mr-2" />
                 Add Lesson
               </Button>
-              <Button variant="outline" onClick={onClose}>
+              <Button 
+                variant="outline" 
+                onClick={onClose}
+                className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
+              >
                 Close
               </Button>
             </div>
@@ -98,33 +102,33 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Lesson #</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Has Video</TableHead>
-                <TableHead>Actions</TableHead>
+              <TableRow className="border-gray-800">
+                <TableHead className="text-gray-300">Lesson #</TableHead>
+                <TableHead className="text-gray-300">Title</TableHead>
+                <TableHead className="text-gray-300">Duration</TableHead>
+                <TableHead className="text-gray-300">Has Video</TableHead>
+                <TableHead className="text-gray-300">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow>
+                <TableRow className="border-gray-800">
                   <TableCell colSpan={5} className="text-center text-gray-400">Loading...</TableCell>
                 </TableRow>
               ) : lessons?.length === 0 ? (
-                <TableRow>
+                <TableRow className="border-gray-800">
                   <TableCell colSpan={5} className="text-center text-gray-400">
                     No lessons found. Add your first lesson!
                   </TableCell>
                 </TableRow>
               ) : (
                 lessons?.map((lesson) => (
-                  <TableRow key={lesson.id}>
+                  <TableRow key={lesson.id} className="border-gray-800">
                     <TableCell>
-                      <Badge variant="outline">#{lesson.lesson_number}</Badge>
+                      <Badge variant="outline" className="border-gray-600 text-gray-300">#{lesson.lesson_number}</Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="text-white font-medium">{lesson.title}</div>
+                      <div className="text-gray-100 font-medium">{lesson.title}</div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center text-gray-400">
@@ -134,11 +138,11 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
                     </TableCell>
                     <TableCell>
                       {lesson.video_url ? (
-                        <Badge className="bg-green-900 text-green-400">
+                        <Badge className="bg-green-900 text-green-400 border-green-700">
                           Has Video
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-gray-400">
+                        <Badge variant="outline" className="text-gray-400 border-gray-600">
                           No Video
                         </Badge>
                       )}
@@ -149,6 +153,7 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
                           size="sm" 
                           variant="outline" 
                           onClick={() => handleEditLesson(lesson)}
+                          className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -160,6 +165,7 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
                               deleteMutation.mutate(lesson.id);
                             }
                           }}
+                          className="bg-red-900 hover:bg-red-800 border-red-700"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -175,7 +181,7 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
 
       {/* Lesson Form Dialog */}
       <Dialog open={showLessonForm} onOpenChange={setShowLessonForm}>
-        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
+        <DialogContent className="max-w-4xl bg-black border-gray-800">
           <LessonForm
             courseId={courseId}
             lesson={selectedLesson}

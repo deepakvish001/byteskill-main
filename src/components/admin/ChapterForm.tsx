@@ -153,9 +153,9 @@ const ChapterForm = ({ chapter, moduleId, courseId, onClose }: ChapterFormProps)
   };
 
   return (
-    <div className="bg-gray-900 text-white p-6 rounded-lg">
+    <div className="bg-black text-gray-100 p-6 rounded-lg">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-white">
+        <h3 className="text-2xl font-bold text-gray-100">
           {chapter ? 'Edit Chapter' : 'Create Chapter'}
         </h3>
         <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ const ChapterForm = ({ chapter, moduleId, courseId, onClose }: ChapterFormProps)
             type="button"
             variant="outline"
             onClick={handleReset}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
           >
             <RotateCcw className="w-4 h-4 mr-1" />
             Reset
@@ -171,7 +171,7 @@ const ChapterForm = ({ chapter, moduleId, courseId, onClose }: ChapterFormProps)
           <Button
             onClick={handleSubmit}
             disabled={mutation.isPending}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-orange-600 hover:bg-orange-700 text-white"
           >
             <Save className="w-4 h-4 mr-1" />
             {mutation.isPending ? 'Saving...' : (chapter ? 'Update' : 'Create')}
@@ -196,7 +196,7 @@ const ChapterForm = ({ chapter, moduleId, courseId, onClose }: ChapterFormProps)
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="title" className="text-white font-medium">Chapter Title *</Label>
+            <Label htmlFor="title" className="text-gray-200 font-medium">Chapter Title *</Label>
             <Input
               id="title"
               value={formData.title}
@@ -204,12 +204,12 @@ const ChapterForm = ({ chapter, moduleId, courseId, onClose }: ChapterFormProps)
               placeholder="Enter chapter title"
               required
               maxLength={200}
-              className="bg-gray-800 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 mt-2"
             />
           </div>
 
           <div>
-            <Label htmlFor="description" className="text-white font-medium">Description</Label>
+            <Label htmlFor="description" className="text-gray-200 font-medium">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -217,12 +217,12 @@ const ChapterForm = ({ chapter, moduleId, courseId, onClose }: ChapterFormProps)
               placeholder="Enter chapter description"
               rows={3}
               maxLength={1000}
-              className="bg-gray-800 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 mt-2"
             />
           </div>
 
           <div>
-            <Label htmlFor="estimated_time_minutes" className="text-white font-medium">Estimated Time (minutes)</Label>
+            <Label htmlFor="estimated_time_minutes" className="text-gray-200 font-medium">Estimated Time (minutes)</Label>
             <Input
               id="estimated_time_minutes"
               type="number"
@@ -230,18 +230,18 @@ const ChapterForm = ({ chapter, moduleId, courseId, onClose }: ChapterFormProps)
               onChange={(e) => setFormData({ ...formData, estimated_time_minutes: parseInt(e.target.value) || 0 })}
               min="0"
               max="600"
-              className="bg-gray-800 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 mt-2"
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
+          <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
             <div className="flex items-center space-x-3">
               <Switch
                 id="is_published"
                 checked={formData.is_published}
                 onCheckedChange={(checked) => setFormData({ ...formData, is_published: checked })}
               />
-              <Label htmlFor="is_published" className="text-white font-medium">Published</Label>
+              <Label htmlFor="is_published" className="text-gray-200 font-medium">Published</Label>
             </div>
             <div className={`px-3 py-1 rounded-full text-xs font-medium ${
               formData.is_published 
@@ -258,7 +258,7 @@ const ChapterForm = ({ chapter, moduleId, courseId, onClose }: ChapterFormProps)
             type="button" 
             variant="outline" 
             onClick={onClose}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
           >
             Cancel
           </Button>
