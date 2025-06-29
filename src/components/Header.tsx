@@ -60,10 +60,7 @@ const Header = ({
           
           {/* Sign In Button - Show when user is not logged in */}
           {!user && <Link to="/login">
-              <Button variant="outline" size="sm" className="border-orange-600 transition-all duration-200 bg-orange-600 hover:bg-orange-500 text-orange-50">
-                <LogIn className="w-4 h-4 mr-2" />
-                Sign In
-              </Button>
+              
             </Link>}
           
           {/* Mobile Menu */}
