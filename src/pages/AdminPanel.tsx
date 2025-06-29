@@ -74,10 +74,10 @@ const AdminPanel = () => {
 
   if (roleLoading) {
     return (
-      <div className="min-h-screen bg-[#1B1C2D] flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="flex items-center space-x-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="text-[#B0B8C1]">Loading...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <span className="text-white">Loading...</span>
         </div>
       </div>
     );
@@ -85,12 +85,12 @@ const AdminPanel = () => {
 
   if (!userRole || !['admin', 'super_admin'].includes(userRole.role)) {
     return (
-      <div className="min-h-screen bg-[#1B1C2D] flex items-center justify-center">
-        <Card className="bg-[#2A2B3D] border-[#3A3B4D] shadow-xl">
-          <CardContent className="p-8 text-center">
-            <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-[#E2E8F0] mb-2">Access Denied</h2>
-            <p className="text-[#8F9BAA]">You don't have permission to access the admin panel.</p>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Card className="bg-gray-900 border-gray-700">
+          <CardContent className="p-6 text-center">
+            <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Access Denied</h2>
+            <p className="text-gray-400">You don't have permission to access the admin panel.</p>
           </CardContent>
         </Card>
       </div>
@@ -98,89 +98,81 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#1B1C2D] text-[#E2E8F0]">
+    <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-[#E2E8F0] mb-2">Admin Dashboard</h1>
-            <p className="text-[#8F9BAA] text-lg">Manage your platform with real-time insights</p>
+            <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+            <p className="text-gray-400 text-lg">Manage your platform with real-time insights</p>
           </div>
-          <Badge className="text-sm px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 shadow-lg">
+          <Badge variant="destructive" className="text-sm px-4 py-2 bg-orange-600 hover:bg-orange-700">
             {userRole.role.replace('_', ' ').toUpperCase()}
           </Badge>
         </div>
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-[#2A2B3D] border-[#3A3B4D] hover:bg-[#2E2F41] transition-all duration-300 shadow-lg hover:shadow-xl">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-850 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#8F9BAA] text-sm font-medium">Total Users</p>
-                  <p className="text-3xl font-bold text-[#E2E8F0] mt-1">{stats?.users || 0}</p>
+                  <p className="text-gray-400 text-sm font-medium">Total Users</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats?.users || 0}</p>
                   <div className="flex items-center mt-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
                     <span className="text-xs text-green-400">Live</span>
                   </div>
                 </div>
-                <div className="p-3 bg-blue-500/20 rounded-xl">
-                  <Users className="w-8 h-8 text-blue-400" />
-                </div>
+                <Users className="w-10 h-10 text-blue-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#2A2B3D] border-[#3A3B4D] hover:bg-[#2E2F41] transition-all duration-300 shadow-lg hover:shadow-xl">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-850 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#8F9BAA] text-sm font-medium">Courses</p>
-                  <p className="text-3xl font-bold text-[#E2E8F0] mt-1">{stats?.courses || 0}</p>
+                  <p className="text-gray-400 text-sm font-medium">Courses</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats?.courses || 0}</p>
                   <div className="flex items-center mt-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
                     <span className="text-xs text-green-400">Live</span>
                   </div>
                 </div>
-                <div className="p-3 bg-green-500/20 rounded-xl">
-                  <BookOpen className="w-8 h-8 text-green-400" />
-                </div>
+                <BookOpen className="w-10 h-10 text-green-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#2A2B3D] border-[#3A3B4D] hover:bg-[#2E2F41] transition-all duration-300 shadow-lg hover:shadow-xl">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-850 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#8F9BAA] text-sm font-medium">DSA Sheets</p>
-                  <p className="text-3xl font-bold text-[#E2E8F0] mt-1">{stats?.dsaSheets || 0}</p>
+                  <p className="text-gray-400 text-sm font-medium">DSA Sheets</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats?.dsaSheets || 0}</p>
                   <div className="flex items-center mt-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
                     <span className="text-xs text-green-400">Live</span>
                   </div>
                 </div>
-                <div className="p-3 bg-purple-500/20 rounded-xl">
-                  <Code className="w-8 h-8 text-purple-400" />
-                </div>
+                <Code className="w-10 h-10 text-purple-500" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#2A2B3D] border-[#3A3B4D] hover:bg-[#2E2F41] transition-all duration-300 shadow-lg hover:shadow-xl">
+          <Card className="bg-gray-900 border-gray-800 hover:bg-gray-850 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#8F9BAA] text-sm font-medium">Interview Prep</p>
-                  <p className="text-3xl font-bold text-[#E2E8F0] mt-1">{stats?.interviewPrep || 0}</p>
+                  <p className="text-gray-400 text-sm font-medium">Interview Prep</p>
+                  <p className="text-3xl font-bold text-white mt-1">{stats?.interviewPrep || 0}</p>
                   <div className="flex items-center mt-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
                     <span className="text-xs text-green-400">Live</span>
                   </div>
                 </div>
-                <div className="p-3 bg-orange-500/20 rounded-xl">
-                  <BrainCircuit className="w-8 h-8 text-orange-400" />
-                </div>
+                <BrainCircuit className="w-10 h-10 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -189,96 +181,96 @@ const AdminPanel = () => {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8F9BAA] w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               placeholder="Search across all sections..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 bg-[#2A2B3D] border-[#3A3B4D] text-[#E2E8F0] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 placeholder-[#8F9BAA] rounded-xl h-12 shadow-inner"
+              className="pl-12 bg-gray-900 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 placeholder-gray-500"
             />
           </div>
         </div>
 
         {/* Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-[#2A2B3D] border-[#3A3B4D] p-1 grid grid-cols-7 w-full rounded-xl shadow-lg">
+          <TabsList className="bg-gray-900 border-gray-700 p-1 grid grid-cols-7 w-full">
             <TabsTrigger 
               value="users" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-[#8F9BAA] transition-all duration-200 rounded-lg hover:text-[#B0B8C1]"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
             <TabsTrigger 
               value="courses" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-[#8F9BAA] transition-all duration-200 rounded-lg hover:text-[#B0B8C1]"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Courses
             </TabsTrigger>
             <TabsTrigger 
               value="dsa-sheets" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-[#8F9BAA] transition-all duration-200 rounded-lg hover:text-[#B0B8C1]"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <Code className="w-4 h-4 mr-2" />
               DSA Sheets
             </TabsTrigger>
             <TabsTrigger 
               value="interview-prep" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-[#8F9BAA] transition-all duration-200 rounded-lg hover:text-[#B0B8C1]"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <BrainCircuit className="w-4 h-4 mr-2" />
               Interview Prep
             </TabsTrigger>
             <TabsTrigger 
               value="core-cs" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-[#8F9BAA] transition-all duration-200 rounded-lg hover:text-[#B0B8C1]"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <FileText className="w-4 h-4 mr-2" />
               Core CS
             </TabsTrigger>
             <TabsTrigger 
               value="audit" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-[#8F9BAA] transition-all duration-200 rounded-lg hover:text-[#B0B8C1]"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <Activity className="w-4 h-4 mr-2" />
               Audit Trail
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-[#8F9BAA] transition-all duration-200 rounded-lg hover:text-[#B0B8C1]"
+              className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-gray-300 transition-all"
             >
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </TabsTrigger>
           </TabsList>
 
-          <div className="bg-[#1B1C2D] min-h-[70vh] rounded-xl border border-[#3A3B4D] shadow-xl">
-            <TabsContent value="users" className="mt-0 p-6">
+          <div className="bg-black min-h-[70vh] rounded-lg">
+            <TabsContent value="users" className="mt-0">
               <EnhancedUserManagement searchQuery={searchQuery} />
             </TabsContent>
 
-            <TabsContent value="courses" className="mt-0 p-6">
+            <TabsContent value="courses" className="mt-0">
               <CourseManagement searchQuery={searchQuery} />
             </TabsContent>
 
-            <TabsContent value="dsa-sheets" className="mt-0 p-6">
+            <TabsContent value="dsa-sheets" className="mt-0">
               <DSASheetManagement searchQuery={searchQuery} />
             </TabsContent>
 
-            <TabsContent value="interview-prep" className="mt-0 p-6">
+            <TabsContent value="interview-prep" className="mt-0">
               <InterviewPrepManagement searchQuery={searchQuery} />
             </TabsContent>
 
-            <TabsContent value="core-cs" className="mt-0 p-6">
+            <TabsContent value="core-cs" className="mt-0">
               <CoreCSManagement searchQuery={searchQuery} />
             </TabsContent>
 
-            <TabsContent value="audit" className="mt-0 p-6">
+            <TabsContent value="audit" className="mt-0">
               <EnhancedAuditTrail searchQuery={searchQuery} />
             </TabsContent>
 
-            <TabsContent value="settings" className="mt-0 p-6">
+            <TabsContent value="settings" className="mt-0">
               <SystemSettings />
             </TabsContent>
           </div>
