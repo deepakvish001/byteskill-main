@@ -105,9 +105,9 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
   };
 
   return (
-    <div className="bg-gray-900 text-white p-6 rounded-lg">
+    <div className="bg-[#2A2B3D] text-[#E2E8F0] p-6 rounded-xl border border-[#3A3B4D] shadow-xl">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-white">
+        <h3 className="text-2xl font-bold text-[#E2E8F0]">
           {lesson ? 'Edit Lesson' : 'Add New Lesson'}
         </h3>
         <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
             type="button"
             variant="outline"
             onClick={handleReset}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            className="border-[#3A3B4D] text-[#B0B8C1] hover:bg-[#1E1E2F] hover:text-[#E2E8F0] hover:border-[#4A4B5D] transition-all duration-200"
           >
             <RotateCcw className="w-4 h-4 mr-1" />
             Reset
@@ -123,7 +123,7 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
           <Button
             onClick={handleSubmit}
             disabled={mutation.isPending}
-            className="bg-orange-600 hover:bg-orange-700"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 shadow-lg transition-all duration-200"
           >
             <Save className="w-4 h-4 mr-1" />
             {mutation.isPending ? 'Saving...' : (lesson ? 'Update Lesson' : 'Create Lesson')}
@@ -134,19 +134,19 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="title" className="text-white font-medium">Lesson Title *</Label>
+            <Label htmlFor="title" className="text-[#E2E8F0] font-medium">Lesson Title *</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Enter lesson title"
               required
-              className="bg-gray-800 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+              className="bg-[#1E1E2F] border-[#3A3B4D] text-[#E2E8F0] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 mt-2 placeholder-[#8F9BAA] rounded-lg transition-all duration-200"
             />
           </div>
 
           <div>
-            <Label htmlFor="content" className="text-white font-medium flex items-center gap-2">
+            <Label htmlFor="content" className="text-[#E2E8F0] font-medium flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Content
             </Label>
@@ -156,25 +156,25 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               placeholder="Enter lesson content"
               rows={6}
-              className="bg-gray-800 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+              className="bg-[#1E1E2F] border-[#3A3B4D] text-[#E2E8F0] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 mt-2 placeholder-[#8F9BAA] rounded-lg transition-all duration-200"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="duration_minutes" className="text-white font-medium">Duration (minutes)</Label>
+              <Label htmlFor="duration_minutes" className="text-[#E2E8F0] font-medium">Duration (minutes)</Label>
               <Input
                 id="duration_minutes"
                 type="number"
                 value={formData.duration_minutes}
                 onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 0 })}
                 min="0"
-                className="bg-gray-800 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+                className="bg-[#1E1E2F] border-[#3A3B4D] text-[#E2E8F0] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 mt-2 rounded-lg transition-all duration-200"
               />
             </div>
 
             <div>
-              <Label htmlFor="video_url" className="text-white font-medium flex items-center gap-2">
+              <Label htmlFor="video_url" className="text-[#E2E8F0] font-medium flex items-center gap-2">
                 <Video className="w-4 h-4" />
                 Video URL
               </Label>
@@ -183,18 +183,18 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
                 value={formData.video_url}
                 onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
                 placeholder="Enter video URL"
-                className="bg-gray-800 border-gray-700 text-white focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+                className="bg-[#1E1E2F] border-[#3A3B4D] text-[#E2E8F0] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 mt-2 placeholder-[#8F9BAA] rounded-lg transition-all duration-200"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-700">
+        <div className="flex justify-end space-x-3 pt-6 border-t border-[#3A3B4D]">
           <Button 
             type="button" 
             variant="outline" 
             onClick={onClose}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            className="border-[#3A3B4D] text-[#B0B8C1] hover:bg-[#1E1E2F] hover:text-[#E2E8F0] hover:border-[#4A4B5D] transition-all duration-200"
           >
             Cancel
           </Button>

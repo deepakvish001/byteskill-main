@@ -80,102 +80,129 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-[#1B1C2D] border-[#3A3B4D] shadow-xl">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between text-white">
-            Lesson Management - Course: {courseId}
+          <CardTitle className="flex items-center justify-between text-[#E2E8F0] text-xl">
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-6 h-6 text-blue-400" />
+              Lesson Management - Course: {courseId}
+            </div>
             <div className="flex gap-2">
-              <Button onClick={handleAddLesson}>
+              <Button 
+                onClick={handleAddLesson}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg transition-all duration-200"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Lesson
               </Button>
-              <Button variant="outline" onClick={onClose}>
+              <Button 
+                variant="outline" 
+                onClick={onClose}
+                className="border-[#3A3B4D] text-[#B0B8C1] hover:bg-[#1E1E2F] hover:text-[#E2E8F0] hover:border-[#4A4B5D] transition-all duration-200"
+              >
                 Close
               </Button>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Lesson #</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Has Video</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray-400">Loading...</TableCell>
+          <div className="bg-[#2A2B3D] rounded-lg border border-[#3A3B4D] overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-[#3A3B4D] hover:bg-[#1E1E2F]">
+                  <TableHead className="text-[#B0B8C1] font-medium">Lesson #</TableHead>
+                  <TableHead className="text-[#B0B8C1] font-medium">Title</TableHead>
+                  <TableHead className="text-[#B0B8C1] font-medium">Duration</TableHead>
+                  <TableHead className="text-[#B0B8C1] font-medium">Has Video</TableHead>
+                  <TableHead className="text-[#B0B8C1] font-medium">Actions</TableHead>
                 </TableRow>
-              ) : lessons?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray-400">
-                    No lessons found. Add your first lesson!
-                  </TableCell>
-                </TableRow>
-              ) : (
-                lessons?.map((lesson) => (
-                  <TableRow key={lesson.id}>
-                    <TableCell>
-                      <Badge variant="outline">#{lesson.lesson_number}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-white font-medium">{lesson.title}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center text-gray-400">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {lesson.duration_minutes}m
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {lesson.video_url ? (
-                        <Badge className="bg-green-900 text-green-400">
-                          Has Video
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-gray-400">
-                          No Video
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleEditLesson(lesson)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          onClick={() => {
-                            if (confirm('Are you sure you want to delete this lesson?')) {
-                              deleteMutation.mutate(lesson.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow className="border-[#3A3B4D]">
+                    <TableCell colSpan={5} className="text-center text-[#8F9BAA] py-8">
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
+                        <span className="ml-2">Loading...</span>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : lessons?.length === 0 ? (
+                  <TableRow className="border-[#3A3B4D]">
+                    <TableCell colSpan={5} className="text-center text-[#8F9BAA] py-8">
+                      No lessons found. Add your first lesson!
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  lessons?.map((lesson) => (
+                    <TableRow key={lesson.id} className="border-[#3A3B4D] hover:bg-[#1E1E2F] transition-colors">
+                      <TableCell>
+                        <Badge 
+                          variant="outline" 
+                          className="bg-[#1E1E2F] border-[#3A3B4D] text-[#B0B8C1] hover:bg-[#2A2B3D] hover:border-[#4A4B5D]"
+                        >
+                          #{lesson.lesson_number}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-[#E2E8F0] font-medium">{lesson.title}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center text-[#8F9BAA]">
+                          <Clock className="w-4 h-4 mr-1" />
+                          {lesson.duration_minutes}m
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {lesson.video_url ? (
+                          <Badge className="bg-green-500/20 text-green-300 border-green-500/50 hover:bg-green-500/30">
+                            Has Video
+                          </Badge>
+                        ) : (
+                          <Badge 
+                            variant="outline" 
+                            className="bg-[#1E1E2F] border-[#3A3B4D] text-[#8F9BAA] hover:bg-[#2A2B3D] hover:border-[#4A4B5D]"
+                          >
+                            No Video
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleEditLesson(lesson)}
+                            className="border-[#3A3B4D] text-[#B0B8C1] hover:bg-[#1E1E2F] hover:text-[#E2E8F0] hover:border-[#4A4B5D] transition-all duration-200"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this lesson?')) {
+                                deleteMutation.mutate(lesson.id);
+                              }
+                            }}
+                            className="bg-red-500/20 text-red-300 border-red-500/50 hover:bg-red-500/30 hover:border-red-500/70 transition-all duration-200"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
       {/* Lesson Form Dialog */}
       <Dialog open={showLessonForm} onOpenChange={setShowLessonForm}>
-        <DialogContent className="max-w-4xl bg-gray-900 border-gray-800">
+        <DialogContent className="max-w-4xl bg-[#1B1C2D] border-[#3A3B4D] text-[#E2E8F0] shadow-2xl">
           <LessonForm
             courseId={courseId}
             lesson={selectedLesson}

@@ -102,72 +102,97 @@ const AuditTrail = ({ searchQuery }: AuditTrailProps) => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-[#1B1C2D] border-[#3A3B4D] shadow-xl">
         <CardHeader>
-          <CardTitle>Audit Trail</CardTitle>
+          <CardTitle className="text-[#E2E8F0] text-xl">Audit Trail</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Action</TableHead>
-                <TableHead>Actor</TableHead>
-                <TableHead>Target</TableHead>
-                <TableHead>Timestamp</TableHead>
-                <TableHead>Details</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">Loading...</TableCell>
+          <div className="bg-[#2A2B3D] rounded-lg border border-[#3A3B4D] overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-[#3A3B4D] hover:bg-[#1E1E2F]">
+                  <TableHead className="text-[#B0B8C1] font-medium">Action</TableHead>
+                  <TableHead className="text-[#B0B8C1] font-medium">Actor</TableHead>
+                  <TableHead className="text-[#B0B8C1] font-medium">Target</TableHead>
+                  <TableHead className="text-[#B0B8C1] font-medium">Timestamp</TableHead>
+                  <TableHead className="text-[#B0B8C1] font-medium">Details</TableHead>
                 </TableRow>
-              ) : auditLogs?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center">No audit logs found</TableCell>
-                </TableRow>
-              ) : (
-                auditLogs?.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getActionIcon(log.action_type)}
-                        <Badge variant={getActionBadgeVariant(log.action_type)}>
-                          {log.action_type}
-                        </Badge>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow className="border-[#3A3B4D]">
+                    <TableCell colSpan={5} className="text-center text-[#8F9BAA] py-8">
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400"></div>
+                        <span className="ml-2">Loading...</span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{log.profile?.full_name || 'Unknown'}</div>
-                        <div className="text-sm text-gray-500">@{log.profile?.username || 'unknown'}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        {log.target_type && (
-                          <Badge variant="outline">{log.target_type}</Badge>
-                        )}
-                        {log.target_id && (
-                          <div className="text-sm text-gray-500 mt-1">{log.target_id}</div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(log.timestamp).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      {log.payload && Object.keys(log.payload).length > 0 && (
-                        <pre className="text-xs bg-gray-100 p-2 rounded max-w-xs overflow-hidden">
-                          {JSON.stringify(log.payload, null, 2)}
-                        </pre>
-                      )}
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : auditLogs?.length === 0 ? (
+                  <TableRow className="border-[#3A3B4D]">
+                    <TableCell colSpan={5} className="text-center text-[#8F9BAA] py-8">No audit logs found</TableCell>
+                  </TableRow>
+                ) : (
+                  auditLogs?.map((log) => (
+                    <TableRow key={log.id} className="border-[#3A3B4D] hover:bg-[#1E1E2F] transition-colors">
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="text-[#8F9BAA]">
+                            {getActionIcon(log.action_type)}
+                          </div>
+                          <Badge 
+                            variant={getActionBadgeVariant(log.action_type)}
+                            className={`${
+                              getActionBadgeVariant(log.action_type) === 'destructive' 
+                                ? 'bg-red-500/20 text-red-300 border-red-500/50 hover:bg-red-500/30' 
+                                : getActionBadgeVariant(log.action_type) === 'secondary'
+                                ? 'bg-green-500/20 text-green-300 border-green-500/50 hover:bg-green-500/30'
+                                : 'bg-blue-500/20 text-blue-300 border-blue-500/50 hover:bg-blue-500/30'
+                            }`}
+                          >
+                            {log.action_type}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium text-[#E2E8F0]">{log.profile?.full_name || 'Unknown'}</div>
+                          <div className="text-sm text-[#8F9BAA]">@{log.profile?.username || 'unknown'}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          {log.target_type && (
+                            <Badge 
+                              variant="outline" 
+                              className="bg-[#1E1E2F] border-[#3A3B4D] text-[#B0B8C1] hover:bg-[#2A2B3D] hover:border-[#4A4B5D]"
+                            >
+                              {log.target_type}
+                            </Badge>
+                          )}
+                          {log.target_id && (
+                            <div className="text-sm text-[#8F9BAA] mt-1 font-mono">{log.target_id}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-[#B0B8C1] text-sm">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {log.payload && Object.keys(log.payload).length > 0 && (
+                          <pre className="text-xs bg-[#1E1E2F] border border-[#3A3B4D] text-[#B0B8C1] p-2 rounded max-w-xs overflow-hidden">
+                            {JSON.stringify(log.payload, null, 2)}
+                          </pre>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
