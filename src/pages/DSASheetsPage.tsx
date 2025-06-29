@@ -7,7 +7,7 @@ import ProblemTable from '@/components/ProblemTable';
 import AdvancedFilter from '@/components/AdvancedFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, BookOpen, Trophy, Target, Code } from 'lucide-react';
+import { Search, Filter, BookOpen, Trophy, Target, Code, Play, Star, Clock, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const DSASheetsPage = () => {
@@ -27,38 +27,93 @@ const DSASheetsPage = () => {
     {
       id: 1,
       title: "Striver's A2Z DSA Sheet",
-      description: "Complete DSA preparation with 400+ problems",
+      description: "Master Data Structures and Algorithms from zero to hero.",
       problems: 456,
       difficulty: "All Levels",
-      badge: "Popular",
-      color: "bg-gradient-to-r from-blue-600 to-purple-600"
+      badge: "FREE",
+      badgeColor: "bg-green-500",
+      estimatedTime: "120h",
+      rating: 4.9,
+      topics: 25,
+      color: "from-orange-500 to-red-500"
     },
     {
       id: 2,
       title: "Blind 75 LeetCode",
-      description: "Essential coding interview problems",
+      description: "Essential coding interview problems for FAANG companies.",
       problems: 75,
       difficulty: "Medium-Hard",
-      badge: "Essential",
-      color: "bg-gradient-to-r from-green-600 to-blue-600"
+      badge: "FREE",
+      badgeColor: "bg-green-500",
+      estimatedTime: "40h",
+      rating: 4.8,
+      topics: 15,
+      color: "from-red-500 to-pink-500"
     },
     {
       id: 3,
       title: "NeetCode 150",
-      description: "Comprehensive coding interview prep",
+      description: "Comprehensive coding interview preparation course.",
       problems: 150,
       difficulty: "All Levels",
-      badge: "Trending",
-      color: "bg-gradient-to-r from-purple-600 to-pink-600"
+      badge: "FREE",
+      badgeColor: "bg-green-500",
+      estimatedTime: "80h",
+      rating: 4.9,
+      topics: 18,
+      color: "from-orange-400 to-yellow-500"
     },
     {
       id: 4,
-      title: "Top Interview Questions",
-      description: "Most frequently asked in interviews",
+      title: "DSA Fundamentals",
+      description: "Master the fundamentals of Data Structures and Algorithms.",
       problems: 200,
-      difficulty: "Easy-Medium",
-      badge: "Hot",
-      color: "bg-gradient-to-r from-orange-600 to-red-600"
+      difficulty: "Beginner",
+      badge: "FREE",
+      badgeColor: "bg-green-500",
+      estimatedTime: "60h",
+      rating: 4.7,
+      topics: 20,
+      color: "from-pink-500 to-purple-500"
+    },
+    {
+      id: 5,
+      title: "Advanced Algorithms",
+      description: "Advanced algorithmic concepts and problem-solving techniques.",
+      problems: 180,
+      difficulty: "Hard",
+      badge: "PREMIUM",
+      badgeColor: "bg-yellow-500",
+      estimatedTime: "90h",
+      rating: 4.6,
+      topics: 16,
+      color: "from-purple-500 to-indigo-500"
+    },
+    {
+      id: 6,
+      title: "System Design Prep",
+      description: "System design problems and solutions for interviews.",
+      problems: 120,
+      difficulty: "Advanced",
+      badge: "PREMIUM",
+      badgeColor: "bg-yellow-500",
+      estimatedTime: "70h",
+      rating: 4.8,
+      topics: 12,
+      color: "from-blue-500 to-cyan-500"
+    },
+    {
+      id: 7,
+      title: "Dynamic Programming",
+      description: "Master dynamic programming with comprehensive problems.",
+      problems: 100,
+      difficulty: "Medium-Hard",
+      badge: "PREMIUM",
+      badgeColor: "bg-yellow-500",
+      estimatedTime: "50h",
+      rating: 4.9,
+      topics: 10,
+      color: "from-green-500 to-teal-500"
     }
   ];
 
@@ -118,11 +173,10 @@ const DSASheetsPage = () => {
             {/* Page Header */}
             <div className="text-center mb-8">
               <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-                DSA Practice Sheets
+                All DSA Sheets
               </h1>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
-                Master Data Structures and Algorithms with our curated problem sets. 
-                Track your progress and improve your coding skills systematically.
+                Explore our comprehensive collection of Data Structures and Algorithms practice sheets
               </p>
 
               {/* Search Bar */}
@@ -130,7 +184,7 @@ const DSASheetsPage = () => {
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
-                    placeholder="Search DSA sheets, topics, or problems..."
+                    placeholder="Search courses, topics, or technologies..."
                     className="pl-12 pr-12 h-12 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl text-base"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -157,77 +211,80 @@ const DSASheetsPage = () => {
               </div>
             )}
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center hover:bg-gray-900/70 transition-colors">
-                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <BookOpen className="w-6 h-6 text-blue-400" />
-                </div>
-                <div className="text-2xl font-bold text-white">12</div>
-                <div className="text-gray-400 text-sm">DSA Sheets</div>
-              </div>
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center hover:bg-gray-900/70 transition-colors">
-                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Target className="w-6 h-6 text-green-400" />
-                </div>
-                <div className="text-2xl font-bold text-white">1,200+</div>
-                <div className="text-gray-400 text-sm">Problems</div>
-              </div>
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center hover:bg-gray-900/70 transition-colors">
-                <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Code className="w-6 h-6 text-purple-400" />
-                </div>
-                <div className="text-2xl font-bold text-white">15</div>
-                <div className="text-gray-400 text-sm">Topics</div>
-              </div>
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 text-center hover:bg-gray-900/70 transition-colors">
-                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Trophy className="w-6 h-6 text-orange-400" />
-                </div>
-                <div className="text-2xl font-bold text-white">85%</div>
-                <div className="text-gray-400 text-sm">Success Rate</div>
-              </div>
-            </div>
-
             {/* DSA Sheets Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sheets.map((sheet) => (
                 <div
                   key={sheet.id}
-                  className="group relative bg-gray-900/50 border border-gray-800 rounded-2xl p-8 hover:border-gray-600 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                  className="relative bg-gradient-to-br group hover:scale-105 transition-all duration-300 cursor-pointer rounded-2xl overflow-hidden"
+                  style={{
+                    background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
+                  }}
                 >
-                  {/* Background Gradient */}
-                  <div className={`absolute inset-0 ${sheet.color} opacity-5 rounded-2xl group-hover:opacity-10 transition-opacity`}></div>
+                  {/* Gradient Background */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${sheet.color} opacity-90`}></div>
                   
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-12 h-12 ${sheet.color} rounded-xl flex items-center justify-center`}>
-                        <Code className="w-6 h-6 text-white" />
+                  {/* Content */}
+                  <div className="relative z-10 p-6 text-white h-full flex flex-col">
+                    {/* Badge */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <BookOpen className="w-6 h-6 text-white" />
                       </div>
-                      <Badge className="bg-orange-900 text-orange-300 border-orange-800">
+                      <Badge className={`${sheet.badgeColor} text-white font-bold px-3 py-1 rounded-full`}>
                         {sheet.badge}
                       </Badge>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-orange-400 transition-colors">
-                      {sheet.title}
-                    </h3>
+                    {/* Title and Description */}
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold mb-3 leading-tight">
+                        {sheet.title}
+                      </h3>
+                      
+                      <p className="text-white/80 text-sm mb-4 leading-relaxed">
+                        {sheet.description}
+                      </p>
+                    </div>
                     
-                    <p className="text-gray-400 mb-6 leading-relaxed">
-                      {sheet.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-2xl font-bold text-white">{sheet.problems}</span>
-                          <span className="text-gray-400">problems</span>
+                    {/* Stats */}
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center space-x-1">
+                          <BookOpen className="w-3 h-3" />
+                          <span>{sheet.topics} topics</span>
                         </div>
-                        <div className="text-sm text-gray-500">{sheet.difficulty}</div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{sheet.estimatedTime}</span>
+                        </div>
                       </div>
                       
-                      <Button className="bg-orange-600 hover:bg-orange-700 text-white px-6">
-                        Start Practice
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center space-x-1">
+                          <Code className="w-3 h-3" />
+                          <span>{sheet.problems} problems</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          <span>{sheet.rating}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs bg-white/10 rounded-full px-3 py-1 text-center backdrop-blur-sm">
+                        {sheet.difficulty.toUpperCase()}
+                      </div>
+                    </div>
+                    
+                    {/* Buttons */}
+                    <div className="space-y-2">
+                      <Button className="w-full bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm transition-all duration-200">
+                        <Play className="w-4 h-4 mr-2" />
+                        View Course
+                      </Button>
+                      <Button className="w-full bg-white text-black hover:bg-gray-100 font-semibold transition-all duration-200">
+                        <Play className="w-4 h-4 mr-2" />
+                        Start Now
                       </Button>
                     </div>
                   </div>
