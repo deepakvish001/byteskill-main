@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { 
   Table, 
   TableBody, 
@@ -17,6 +16,7 @@ import {
 import { Edit, Trash2, Plus, Clock, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import LessonForm from './LessonForm';
+import ModernDialog from './ModernDialog';
 
 interface LessonManagementProps {
   courseId: string;
@@ -76,6 +76,15 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
   const handleAddLesson = () => {
     setSelectedLesson(null);
     setShowLessonForm(true);
+  };
+
+  const handleSave = () => {
+    // This will be handled by the form's mutation
+    setShowLessonForm(false);
+  };
+
+  const handleReset = () => {
+    // This will be handled by the form
   };
 
   return (
@@ -180,15 +189,22 @@ const LessonManagement = ({ courseId, onClose }: LessonManagementProps) => {
       </Card>
 
       {/* Lesson Form Dialog */}
-      <Dialog open={showLessonForm} onOpenChange={setShowLessonForm}>
-        <DialogContent className="max-w-4xl bg-black border-gray-800">
-          <LessonForm
-            courseId={courseId}
-            lesson={selectedLesson}
-            onClose={() => setShowLessonForm(false)}
-          />
-        </DialogContent>
-      </Dialog>
+      <ModernDialog
+        isOpen={showLessonForm}
+        onClose={() => setShowLessonForm(false)}
+        title={selectedLesson ? 'Edit Lesson' : 'Add New Lesson'}
+        maxWidth="max-w-4xl"
+        showActionButtons={true}
+        onSave={handleSave}
+        onReset={handleReset}
+        saveLabel={selectedLesson ? 'Update Lesson' : 'Create Lesson'}
+      >
+        <LessonForm
+          courseId={courseId}
+          lesson={selectedLesson}
+          onClose={() => setShowLessonForm(false)}
+        />
+      </ModernDialog>
     </div>
   );
 };
