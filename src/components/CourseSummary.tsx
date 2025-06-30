@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Clock, Star, Users, CheckCircle, Lock } from "lucide-react";
+import { BookOpen, Clock, Star, Users, CheckCircle, Lock, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface CourseSummaryProps {
@@ -18,6 +18,7 @@ interface CourseSummaryProps {
     estimated_hours: number;
     tags: string[];
     is_premium: boolean;
+    is_published?: boolean;
   };
   enrollment?: {
     progress_percentage: number;
@@ -37,6 +38,11 @@ const CourseSummary = ({ course, enrollment, compact = false }: CourseSummaryPro
     }
   };
 
+  const handleViewCourse = () => {
+    console.log('Navigating to course:', course.course_id);
+    navigate(`/course/${course.course_id}`);
+  };
+
   return (
     <Card className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-colors">
       <CardHeader className={compact ? "pb-2" : ""}>
@@ -53,6 +59,12 @@ const CourseSummary = ({ course, enrollment, compact = false }: CourseSummaryPro
                 <Badge className="bg-purple-900 text-purple-400 border-purple-800">
                   <Lock className="w-3 h-3 mr-1" />
                   Premium
+                </Badge>
+              )}
+              {course.is_published === false && (
+                <Badge className="bg-yellow-900 text-yellow-400 border-yellow-800">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Draft
                 </Badge>
               )}
               {enrollment && (
@@ -89,11 +101,11 @@ const CourseSummary = ({ course, enrollment, compact = false }: CourseSummaryPro
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
                 <BookOpen className="w-4 h-4" />
-                <span>{course.total_lessons} lessons</span>
+                <span>{course.total_lessons || 0} lessons</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Clock className="w-4 h-4" />
-                <span>{course.estimated_hours}h</span>
+                <span>{course.estimated_hours || 0}h</span>
               </div>
             </div>
           </div>
@@ -110,7 +122,7 @@ const CourseSummary = ({ course, enrollment, compact = false }: CourseSummaryPro
           )}
 
           {/* Tags */}
-          {!compact && (
+          {!compact && course.tags && course.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {course.tags.slice(0, 3).map((tag) => (
                 <Badge key={tag} variant="outline" className="text-xs bg-gray-800 text-gray-400 border-gray-700">
@@ -127,7 +139,7 @@ const CourseSummary = ({ course, enrollment, compact = false }: CourseSummaryPro
 
           {/* Action Button */}
           <Button 
-            onClick={() => navigate(`/course/${course.course_id}`)}
+            onClick={handleViewCourse}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             size={compact ? "sm" : "default"}
           >

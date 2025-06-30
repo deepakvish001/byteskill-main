@@ -56,12 +56,17 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log('Submitting lesson data:', data);
+      
       if (lesson) {
         const { error } = await supabase
           .from('course_lessons')
           .update(data)
           .eq('id', lesson.id);
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
       } else {
         // Get the next lesson number
         const { data: existingLessons, error: countError } = await supabase
@@ -71,9 +76,12 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
           .order('lesson_number', { ascending: false })
           .limit(1);
 
-        if (countError) throw countError;
+        if (countError) {
+          console.error('Count error:', countError);
+          throw countError;
+        }
 
-        const nextNumber = existingLessons.length > 0 ? existingLessons[0].lesson_number + 1 : 1;
+        const nextNumber = existingLessons && existingLessons.length > 0 ? existingLessons[0].lesson_number + 1 : 1;
 
         const { error } = await supabase
           .from('course_lessons')
@@ -82,18 +90,26 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
             course_id: courseId,
             lesson_number: nextNumber,
           });
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['course-lessons', courseId] });
-      toast({ title: `Lesson ${lesson ? 'updated' : 'created'} successfully` });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      toast({ 
+        title: `Lesson ${lesson ? 'updated' : 'created'} successfully`,
+        description: `The lesson "${formData.title}" has been ${lesson ? 'updated' : 'created'}.`
+      });
       onClose();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Mutation error:', error);
       toast({
         title: `Error ${lesson ? 'updating' : 'creating'} lesson`,
-        description: error.message,
+        description: error.message || 'An unexpected error occurred',
         variant: 'destructive',
       });
     },
@@ -101,6 +117,16 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.title.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please enter a lesson title',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     mutation.mutate(formData);
   };
 
