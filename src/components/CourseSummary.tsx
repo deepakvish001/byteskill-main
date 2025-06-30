@@ -14,13 +14,10 @@ interface CourseSummaryProps {
     description: string;
     category: string;
     difficulty: string;
-    total_lessons?: number;
+    total_lessons: number;
     estimated_hours: number;
-    tags?: string[];
+    tags: string[];
     is_premium: boolean;
-    module_count?: number;
-    chapter_count?: number;
-    problem_count?: number;
   };
   enrollment?: {
     progress_percentage: number;
@@ -39,9 +36,6 @@ const CourseSummary = ({ course, enrollment, compact = false }: CourseSummaryPro
       default: return 'bg-gray-900 text-gray-400 border-gray-800';
     }
   };
-
-  // Calculate total lessons from modules/chapters/content
-  const totalLessons = course.total_lessons || course.problem_count || course.module_count || 0;
 
   return (
     <Card className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-colors">
@@ -95,7 +89,7 @@ const CourseSummary = ({ course, enrollment, compact = false }: CourseSummaryPro
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-1">
                 <BookOpen className="w-4 h-4" />
-                <span>{totalLessons} lessons</span>
+                <span>{course.total_lessons} lessons</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Clock className="w-4 h-4" />
@@ -116,7 +110,7 @@ const CourseSummary = ({ course, enrollment, compact = false }: CourseSummaryPro
           )}
 
           {/* Tags */}
-          {!compact && course.tags && course.tags.length > 0 && (
+          {!compact && (
             <div className="flex flex-wrap gap-1">
               {course.tags.slice(0, 3).map((tag) => (
                 <Badge key={tag} variant="outline" className="text-xs bg-gray-800 text-gray-400 border-gray-700">

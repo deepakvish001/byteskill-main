@@ -105,7 +105,32 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="bg-black text-gray-100 p-6 rounded-lg">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-2xl font-bold text-gray-100">
+          {lesson ? 'Edit Lesson' : 'Add New Lesson'}
+        </h3>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleReset}
+            className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
+          >
+            <RotateCcw className="w-4 h-4 mr-1" />
+            Reset
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={mutation.isPending}
+            className="bg-orange-600 hover:bg-orange-700 text-white"
+          >
+            <Save className="w-4 h-4 mr-1" />
+            {mutation.isPending ? 'Saving...' : (lesson ? 'Update Lesson' : 'Create Lesson')}
+          </Button>
+        </div>
+      </div>
+      
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
@@ -162,6 +187,17 @@ const LessonForm = ({ courseId, lesson, onClose }: LessonFormProps) => {
               />
             </div>
           </div>
+        </div>
+
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-700">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onClose}
+            className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
+          >
+            Cancel
+          </Button>
         </div>
       </form>
     </div>
