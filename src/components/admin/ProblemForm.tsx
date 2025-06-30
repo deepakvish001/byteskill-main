@@ -104,7 +104,7 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
   };
 
   return (
-    <div className="bg-black text-gray-100">
+    <div className="bg-gray-900 text-white">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
@@ -117,7 +117,7 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Enter problem name"
                 required
-                className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
@@ -129,7 +129,7 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Enter problem description"
                 rows={3}
-                className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
               />
             </div>
 
@@ -137,13 +137,13 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
               <div>
                 <Label htmlFor="difficulty" className="text-gray-200 font-medium">Difficulty</Label>
                 <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
-                  <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-100 focus:border-blue-500">
+                  <SelectTrigger className="bg-gray-800 border-gray-600 text-white focus:border-blue-500">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-900 border-gray-700">
-                    <SelectItem value="easy" className="text-gray-100 hover:bg-gray-800">Easy</SelectItem>
-                    <SelectItem value="medium" className="text-gray-100 hover:bg-gray-800">Medium</SelectItem>
-                    <SelectItem value="hard" className="text-gray-100 hover:bg-gray-800">Hard</SelectItem>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="easy" className="text-white hover:bg-gray-700">Easy</SelectItem>
+                    <SelectItem value="medium" className="text-white hover:bg-gray-700">Medium</SelectItem>
+                    <SelectItem value="hard" className="text-white hover:bg-gray-700">Hard</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -156,7 +156,7 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                   value={formData.estimated_time_minutes}
                   onChange={(e) => setFormData({ ...formData, estimated_time_minutes: parseInt(e.target.value) || 0 })}
                   min="0"
-                  className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -174,7 +174,7 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                 value={formData.article_content}
                 onChange={(e) => setFormData({ ...formData, article_content: e.target.value })}
                 placeholder="Enter article URL"
-                className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
@@ -188,7 +188,7 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                 value={formData.video_url}
                 onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
                 placeholder="Enter video URL"
-                className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
@@ -202,11 +202,11 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
                 value={formData.practice_link}
                 onChange={(e) => setFormData({ ...formData, practice_link: e.target.value })}
                 placeholder="Enter practice URL"
-                className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
+            <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
               <div className="flex items-center space-x-3">
                 <Bookmark className="w-4 h-4 text-yellow-400" />
                 <Switch
@@ -224,16 +224,16 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
         </div>
 
         {/* Status Selection */}
-        <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
+        <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg border border-gray-700">
           <div>
             <Label htmlFor="status" className="text-gray-200 font-medium">Status</Label>
             <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-              <SelectTrigger className="bg-gray-800 border-gray-700 text-gray-100 focus:border-blue-500 mt-2 w-40">
+              <SelectTrigger className="bg-gray-700 border-gray-600 text-white focus:border-blue-500 mt-2 w-40">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                <SelectItem value="draft" className="text-gray-100 hover:bg-gray-800">Draft</SelectItem>
-                <SelectItem value="published" className="text-gray-100 hover:bg-gray-800">Published</SelectItem>
+              <SelectContent className="bg-gray-800 border-gray-600">
+                <SelectItem value="draft" className="text-white hover:bg-gray-700">Draft</SelectItem>
+                <SelectItem value="published" className="text-white hover:bg-gray-700">Published</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -248,7 +248,7 @@ const ProblemForm = ({ content, chapterId, moduleId, courseId, onClose }: Proble
             type="button" 
             variant="outline" 
             onClick={onClose} 
-            className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800 transition-colors"
+            className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
           >
             Cancel
           </Button>

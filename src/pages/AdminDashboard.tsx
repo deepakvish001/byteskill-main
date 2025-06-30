@@ -57,19 +57,19 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-[#1B1C2D] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#1B1C2D] flex items-center justify-center">
         <div className="text-center">
           <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
-          <p className="text-gray-400">You don't have permission to access this page.</p>
+          <h1 className="text-2xl font-bold text-[#E2E8F0] mb-2">Access Denied</h1>
+          <p className="text-[#8F9BAA]">You don't have permission to access this page.</p>
         </div>
       </div>
     );
@@ -150,15 +150,17 @@ const AdminDashboard = () => {
             {/* Admin Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {adminStats.map((stat, index) => (
-                <Card key={index} className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-colors">
+                <Card key={index} className="bg-[#2A2B3D] border-[#3A3B4D] hover:border-[#4A4B5D] transition-all duration-300 shadow-lg">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-400">
+                    <CardTitle className="text-sm font-medium text-[#8F9BAA]">
                       {stat.title}
                     </CardTitle>
-                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                    <div className="p-2 bg-opacity-20 rounded-lg" style={{ backgroundColor: stat.color.replace('text-', '') + '33' }}>
+                      <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-white">{stat.value}</div>
+                    <div className="text-3xl font-bold text-[#E2E8F0]">{stat.value}</div>
                     <p className="text-xs text-green-400 mt-1 flex items-center">
                       <span className="mr-1">↗</span>
                       {stat.trend}
@@ -169,10 +171,10 @@ const AdminDashboard = () => {
             </div>
 
             {/* Quick Actions */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-[#2A2B3D] border-[#3A3B4D] shadow-lg">
               <CardHeader>
-                <CardTitle className="text-white text-xl">Quick Actions</CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardTitle className="text-[#E2E8F0] text-xl">Quick Actions</CardTitle>
+                <CardDescription className="text-[#8F9BAA]">
                   Manage your platform content efficiently
                 </CardDescription>
               </CardHeader>
@@ -180,45 +182,45 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Button 
                     variant="outline" 
-                    className="h-20 flex flex-col space-y-2 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-orange-500 transition-all"
+                    className="h-20 flex flex-col space-y-2 bg-[#1E1E2F] border-[#3A3B4D] hover:bg-[#2E2F41] hover:border-orange-500 transition-all duration-300 text-[#B0B8C1] hover:text-white"
                     onClick={() => setActiveSection('courses')}
                   >
                     <GraduationCap className="w-8 h-8 text-orange-400" />
-                    <span className="text-white font-medium">Add Course</span>
+                    <span className="font-medium">Add Course</span>
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="h-20 flex flex-col space-y-2 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-blue-500 transition-all"
+                    className="h-20 flex flex-col space-y-2 bg-[#1E1E2F] border-[#3A3B4D] hover:bg-[#2E2F41] hover:border-blue-500 transition-all duration-300 text-[#B0B8C1] hover:text-white"
                     onClick={() => setActiveSection('dsa-sheets')}
                   >
                     <FileText className="w-8 h-8 text-blue-400" />
-                    <span className="text-white font-medium">Add DSA Sheet</span>
+                    <span className="font-medium">Add DSA Sheet</span>
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="h-20 flex flex-col space-y-2 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-green-500 transition-all"
+                    className="h-20 flex flex-col space-y-2 bg-[#1E1E2F] border-[#3A3B4D] hover:bg-[#2E2F41] hover:border-green-500 transition-all duration-300 text-[#B0B8C1] hover:text-white"
                     onClick={() => setActiveSection('interview-prep')}
                   >
                     <Target className="w-8 h-8 text-green-400" />
-                    <span className="text-white font-medium">Add Interview Prep</span>
+                    <span className="font-medium">Add Interview Prep</span>
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="h-20 flex flex-col space-y-2 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-purple-500 transition-all"
+                    className="h-20 flex flex-col space-y-2 bg-[#1E1E2F] border-[#3A3B4D] hover:bg-[#2E2F41] hover:border-purple-500 transition-all duration-300 text-[#B0B8C1] hover:text-white"
                     onClick={() => setActiveSection('core-cs')}
                   >
                     <Cpu className="w-8 h-8 text-purple-400" />
-                    <span className="text-white font-medium">Add Core CS</span>
+                    <span className="font-medium">Add Core CS</span>
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
             {/* Recent Activity */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="bg-[#2A2B3D] border-[#3A3B4D] shadow-lg">
               <CardHeader>
-                <CardTitle className="text-white text-xl">Recent Activity</CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardTitle className="text-[#E2E8F0] text-xl">Recent Activity</CardTitle>
+                <CardDescription className="text-[#8F9BAA]">
                   Latest updates and changes to your platform
                 </CardDescription>
               </CardHeader>
@@ -230,17 +232,17 @@ const AdminDashboard = () => {
                     { action: 'DSA Sheet "Binary Trees" updated', user: 'admin', time: '3 hours ago', type: 'sheet' },
                     { action: 'Interview prep questions added', user: 'admin', time: '1 day ago', type: 'interview' }
                   ].map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-3 bg-gray-800 rounded-lg">
+                    <div key={index} className="flex items-center space-x-4 p-3 bg-[#1E1E2F] rounded-lg border border-[#3A3B4D] hover:border-[#4A4B5D] transition-colors">
                       <div className={`w-2 h-2 rounded-full ${
                         activity.type === 'user' ? 'bg-blue-400' :
                         activity.type === 'course' ? 'bg-green-400' :
                         activity.type === 'sheet' ? 'bg-purple-400' : 'bg-orange-400'
                       }`} />
                       <div className="flex-1">
-                        <p className="text-white text-sm font-medium">{activity.action}</p>
-                        <p className="text-gray-400 text-xs">by {activity.user}</p>
+                        <p className="text-[#E2E8F0] text-sm font-medium">{activity.action}</p>
+                        <p className="text-[#8F9BAA] text-xs">by {activity.user}</p>
                       </div>
-                      <span className="text-gray-500 text-xs">{activity.time}</span>
+                      <span className="text-[#8F9BAA] text-xs">{activity.time}</span>
                     </div>
                   ))}
                 </div>
@@ -259,12 +261,12 @@ const AdminDashboard = () => {
       case 'users':
         return (
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-900 border-gray-800">
-              <TabsTrigger value="users" className="text-gray-400 data-[state=active]:text-white">
+            <TabsList className="grid w-full grid-cols-2 bg-[#2A2B3D] border-[#3A3B4D] rounded-xl">
+              <TabsTrigger value="users" className="text-[#8F9BAA] data-[state=active]:text-white data-[state=active]:bg-blue-500 rounded-lg">
                 <Users className="w-4 h-4 mr-2" />
                 Users
               </TabsTrigger>
-              <TabsTrigger value="roles" className="text-gray-400 data-[state=active]:text-white">
+              <TabsTrigger value="roles" className="text-[#8F9BAA] data-[state=active]:text-white data-[state=active]:bg-blue-500 rounded-lg">
                 <Shield className="w-4 h-4 mr-2" />
                 Roles
               </TabsTrigger>
@@ -281,11 +283,11 @@ const AdminDashboard = () => {
         return <AuditTrail searchQuery={searchQuery} />;
       case 'settings':
         return (
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-[#2A2B3D] border-[#3A3B4D] shadow-lg">
             <CardHeader>
-              <CardTitle className="text-white">System Settings</CardTitle>
+              <CardTitle className="text-[#E2E8F0]">System Settings</CardTitle>
             </CardHeader>
-            <CardContent className="text-gray-400">
+            <CardContent className="text-[#8F9BAA]">
               <p>System configuration and maintenance tools will be available here.</p>
             </CardContent>
           </Card>
@@ -296,19 +298,19 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex">
+    <div className="min-h-screen bg-[#1B1C2D] flex">
       {/* Admin Sidebar */}
       <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${
         sidebarCollapsed ? 'w-20' : 'w-72'
-      } bg-black border-r border-gray-900`}>
+      } bg-[#1B1C2D] border-r border-[#3A3B4D] shadow-xl`}>
         {/* Admin Header */}
-        <div className="p-4 border-b border-gray-900">
+        <div className="p-4 border-b border-[#3A3B4D]">
           <div className="flex items-center justify-center">
             {sidebarCollapsed ? (
               <div className="flex flex-col items-center space-y-3 w-full">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl blur-sm opacity-50"></div>
-                  <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl">
+                  <div className="relative bg-gradient-to-r from-orange-500 to-red-500 p-2 rounded-xl shadow-lg">
                     <Shield className="w-6 h-6 text-white" />
                   </div>
                 </div>
@@ -350,23 +352,23 @@ const AdminDashboard = () => {
                     setActiveSection(item.id);
                   }
                 }}
-                className={`w-full flex items-center p-3 rounded-xl text-left hover:bg-gray-900 transition-all duration-200 group ${
-                  activeSection === item.id ? 'bg-gray-900 border border-gray-800' : ''
+                className={`w-full flex items-center p-3 rounded-xl text-left hover:bg-[#2A2B3D] transition-all duration-200 group ${
+                  activeSection === item.id ? 'bg-[#2A2B3D] border border-[#3A3B4D] shadow-md' : ''
                 } ${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}
               >
                 <item.icon className={`${
                   sidebarCollapsed ? 'w-7 h-7' : 'w-5 h-5'
                 } ${
-                  activeSection === item.id ? 'text-orange-400' : 'text-gray-400 group-hover:text-white'
+                  activeSection === item.id ? 'text-blue-400' : 'text-[#8F9BAA] group-hover:text-[#B0B8C1]'
                 } transition-colors`} />
                 {!sidebarCollapsed && (
                   <div className="ml-3">
                     <span className={`text-sm font-medium transition-colors ${
-                      activeSection === item.id ? 'text-white' : 'text-gray-300 group-hover:text-white'
+                      activeSection === item.id ? 'text-[#E2E8F0]' : 'text-[#B0B8C1] group-hover:text-[#E2E8F0]'
                     }`}>
                       {item.label}
                     </span>
-                    <div className="text-xs text-gray-500 mt-0.5">
+                    <div className="text-xs text-[#8F9BAA] mt-0.5">
                       {item.description}
                     </div>
                   </div>
@@ -382,7 +384,7 @@ const AdminDashboard = () => {
         sidebarCollapsed ? 'ml-20' : 'ml-72'
       }`}>
         {/* Fixed Header */}
-        <div className="fixed top-0 right-0 z-30 h-16 bg-black border-b border-gray-800" style={{
+        <div className="fixed top-0 right-0 z-30 h-16 bg-[#1B1C2D] border-b border-[#3A3B4D]" style={{
           left: sidebarCollapsed ? '5rem' : '18rem',
         }}>
           <div className="flex items-center justify-between h-full px-4">
@@ -397,19 +399,19 @@ const AdminDashboard = () => {
         </div>
         
         {/* Main Content */}
-        <main className="pt-16 p-6 bg-black min-h-screen">
+        <main className="pt-16 p-6 bg-[#1B1C2D] min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Admin Dashboard Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
                   <Shield className="w-8 h-8 text-orange-400" />
-                  <h1 className="text-4xl font-bold text-white">Admin Dashboard</h1>
-                  <Badge className="bg-orange-900 text-orange-400 border-orange-800 px-3 py-1">
+                  <h1 className="text-4xl font-bold text-[#E2E8F0]">Admin Dashboard</h1>
+                  <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0 px-3 py-1 shadow-lg">
                     Administrator
                   </Badge>
                 </div>
-                <p className="text-gray-400 text-lg">
+                <p className="text-[#8F9BAA] text-lg">
                   {adminMenuItems.find(item => item.id === activeSection)?.description || 'Manage platform content and users'}
                 </p>
               </div>

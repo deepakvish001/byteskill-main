@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -149,9 +148,9 @@ const ModuleForm = ({ module, courseId, onClose }: ModuleFormProps) => {
   };
 
   return (
-    <div className="bg-black text-gray-100 p-6 rounded-lg">
+    <div className="bg-[#2A2B3D] text-[#E2E8F0] p-6 rounded-xl border border-[#3A3B4D] shadow-xl">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-gray-100">
+        <h3 className="text-2xl font-bold text-[#E2E8F0]">
           {module ? 'Edit Module' : 'Create Module'}
         </h3>
         <div className="flex items-center gap-2">
@@ -159,7 +158,7 @@ const ModuleForm = ({ module, courseId, onClose }: ModuleFormProps) => {
             type="button"
             variant="outline"
             onClick={handleReset}
-            className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
+            className="border-[#3A3B4D] text-[#B0B8C1] hover:bg-[#1E1E2F] hover:text-[#E2E8F0] hover:border-[#4A4B5D] transition-all duration-200"
           >
             <RotateCcw className="w-4 h-4 mr-1" />
             Reset
@@ -167,7 +166,7 @@ const ModuleForm = ({ module, courseId, onClose }: ModuleFormProps) => {
           <Button
             onClick={handleSubmit}
             disabled={mutation.isPending}
-            className="bg-orange-600 hover:bg-orange-700 text-white"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 shadow-lg transition-all duration-200"
           >
             <Save className="w-4 h-4 mr-1" />
             {mutation.isPending ? 'Saving...' : (module ? 'Update' : 'Create')}
@@ -176,7 +175,7 @@ const ModuleForm = ({ module, courseId, onClose }: ModuleFormProps) => {
       </div>
 
       {validationErrors.length > 0 && (
-        <div className="bg-red-900/20 border border-red-500 rounded-lg p-4 mb-6">
+        <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle className="w-5 h-5 text-red-400" />
             <h4 className="text-red-400 font-medium">Validation Errors:</h4>
@@ -192,7 +191,7 @@ const ModuleForm = ({ module, courseId, onClose }: ModuleFormProps) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="title" className="text-gray-200 font-medium">Module Title *</Label>
+            <Label htmlFor="title" className="text-[#E2E8F0] font-medium">Module Title *</Label>
             <Input
               id="title"
               value={formData.title}
@@ -200,12 +199,12 @@ const ModuleForm = ({ module, courseId, onClose }: ModuleFormProps) => {
               placeholder="Enter module title"
               required
               maxLength={200}
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+              className="bg-[#1E1E2F] border-[#3A3B4D] text-[#E2E8F0] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 mt-2 placeholder-[#8F9BAA] rounded-lg transition-all duration-200"
             />
           </div>
 
           <div>
-            <Label htmlFor="description" className="text-gray-200 font-medium">Description</Label>
+            <Label htmlFor="description" className="text-[#E2E8F0] font-medium">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -213,12 +212,12 @@ const ModuleForm = ({ module, courseId, onClose }: ModuleFormProps) => {
               placeholder="Enter module description"
               rows={4}
               maxLength={1000}
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+              className="bg-[#1E1E2F] border-[#3A3B4D] text-[#E2E8F0] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 mt-2 placeholder-[#8F9BAA] rounded-lg transition-all duration-200"
             />
           </div>
 
           <div>
-            <Label htmlFor="estimated_hours" className="text-gray-200 font-medium">Estimated Hours</Label>
+            <Label htmlFor="estimated_hours" className="text-[#E2E8F0] font-medium">Estimated Hours</Label>
             <Input
               id="estimated_hours"
               type="number"
@@ -226,35 +225,36 @@ const ModuleForm = ({ module, courseId, onClose }: ModuleFormProps) => {
               onChange={(e) => setFormData({ ...formData, estimated_hours: parseInt(e.target.value) || 0 })}
               min="0"
               max="1000"
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 mt-2"
+              className="bg-[#1E1E2F] border-[#3A3B4D] text-[#E2E8F0] focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 mt-2 rounded-lg transition-all duration-200"
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-700">
+          <div className="flex items-center justify-between p-4 bg-[#1E1E2F] rounded-lg border border-[#3A3B4D]">
             <div className="flex items-center space-x-3">
               <Switch
                 id="is_published"
                 checked={formData.is_published}
                 onCheckedChange={(checked) => setFormData({ ...formData, is_published: checked })}
+                className="data-[state=checked]:bg-blue-500"
               />
-              <Label htmlFor="is_published" className="text-gray-200 font-medium">Published</Label>
+              <Label htmlFor="is_published" className="text-[#E2E8F0] font-medium">Published</Label>
             </div>
             <div className={`px-3 py-1 rounded-full text-xs font-medium ${
               formData.is_published 
-                ? 'bg-green-900/50 text-green-300 border border-green-700'
-                : 'bg-gray-700 text-gray-300 border border-gray-600'
+                ? 'bg-green-500/20 text-green-300 border border-green-500/50'
+                : 'bg-gray-500/20 text-[#8F9BAA] border border-gray-500/50'
             }`}>
               {formData.is_published ? 'Published' : 'Draft'}
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-700">
+        <div className="flex justify-end space-x-3 pt-6 border-t border-[#3A3B4D]">
           <Button 
             type="button" 
             variant="outline" 
             onClick={onClose}
-            className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
+            className="border-[#3A3B4D] text-[#B0B8C1] hover:bg-[#1E1E2F] hover:text-[#E2E8F0] hover:border-[#4A4B5D] transition-all duration-200"
           >
             Cancel
           </Button>

@@ -149,132 +149,132 @@ const ContentForm = ({ content, chapterId, moduleId, courseId, onClose }: Conten
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto bg-black text-gray-100">
+    <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto">
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="title" className="text-gray-200">Content Title</Label>
+            <Label htmlFor="title" className="text-white">Content Title</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Enter content title"
               required
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+              className="bg-gray-800 border-gray-700 text-white"
             />
           </div>
 
           <div>
-            <Label htmlFor="content_type" className="text-gray-200">Content Type</Label>
+            <Label htmlFor="content_type" className="text-white">Content Type</Label>
             <Select value={formData.content_type} onValueChange={(value) => setFormData({ ...formData, content_type: value })}>
-              <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-100">
+              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                <SelectItem value="lecture" className="text-gray-100 hover:bg-gray-800">Lecture</SelectItem>
-                <SelectItem value="article" className="text-gray-100 hover:bg-gray-800">Article</SelectItem>
-                <SelectItem value="problem" className="text-gray-100 hover:bg-gray-800">Problem</SelectItem>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="lecture">Lecture</SelectItem>
+                <SelectItem value="article">Article</SelectItem>
+                <SelectItem value="problem">Problem</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
         <div>
-          <Label htmlFor="description" className="text-gray-200">Description</Label>
+          <Label htmlFor="description" className="text-white">Description</Label>
           <Textarea
             id="description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Enter content description"
             rows={2}
-            className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+            className="bg-gray-800 border-gray-700 text-white"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="difficulty" className="text-gray-200">Difficulty</Label>
+            <Label htmlFor="difficulty" className="text-white">Difficulty</Label>
             <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
-              <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-100">
+              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                <SelectItem value="easy" className="text-gray-100 hover:bg-gray-800">Easy</SelectItem>
-                <SelectItem value="medium" className="text-gray-100 hover:bg-gray-800">Medium</SelectItem>
-                <SelectItem value="hard" className="text-gray-100 hover:bg-gray-800">Hard</SelectItem>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="easy">Easy</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="hard">Hard</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="estimated_time_minutes" className="text-gray-200">Estimated Time (minutes)</Label>
+            <Label htmlFor="estimated_time_minutes" className="text-white">Estimated Time (minutes)</Label>
             <Input
               id="estimated_time_minutes"
               type="number"
               value={formData.estimated_time_minutes}
               onChange={(e) => setFormData({ ...formData, estimated_time_minutes: parseInt(e.target.value) || 0 })}
               min="0"
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+              className="bg-gray-800 border-gray-700 text-white"
             />
           </div>
         </div>
 
         {formData.content_type === 'article' && (
           <div>
-            <Label htmlFor="article_content" className="text-gray-200">Article Content</Label>
+            <Label htmlFor="article_content" className="text-white">Article Content</Label>
             <Textarea
               id="article_content"
               value={formData.article_content}
               onChange={(e) => setFormData({ ...formData, article_content: e.target.value })}
               placeholder="Enter article content (supports markdown)"
               rows={8}
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+              className="bg-gray-800 border-gray-700 text-white"
             />
           </div>
         )}
 
         {formData.content_type === 'lecture' && (
           <div>
-            <Label htmlFor="video_url" className="text-gray-200">Video URL</Label>
+            <Label htmlFor="video_url" className="text-white">Video URL</Label>
             <Input
               id="video_url"
               value={formData.video_url}
               onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
               placeholder="Enter video URL (YouTube, Vimeo, etc.)"
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+              className="bg-gray-800 border-gray-700 text-white"
             />
           </div>
         )}
 
         <div>
-          <Label htmlFor="practice_link" className="text-gray-200">Practice Link</Label>
+          <Label htmlFor="practice_link" className="text-white">Practice Link</Label>
           <Input
             id="practice_link"
             value={formData.practice_link}
             onChange={(e) => setFormData({ ...formData, practice_link: e.target.value })}
             placeholder="Enter practice/exercise link"
-            className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+            className="bg-gray-800 border-gray-700 text-white"
           />
         </div>
 
         {/* Topics */}
         <div>
-          <Label className="text-gray-200">Topics</Label>
+          <Label className="text-white">Topics</Label>
           <div className="flex gap-2 mb-2">
             <Input
               value={newTopic}
               onChange={(e) => setNewTopic(e.target.value)}
               placeholder="Add a topic"
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+              className="bg-gray-800 border-gray-700 text-white"
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTopic())}
             />
-            <Button type="button" onClick={addTopic} className="bg-blue-600 hover:bg-blue-700">Add</Button>
+            <Button type="button" onClick={addTopic}>Add</Button>
           </div>
           <div className="flex flex-wrap gap-2">
             {formData.topics.map((topic, index) => (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-gray-800 text-gray-200 border-gray-600">
+              <Badge key={index} variant="secondary" className="flex items-center gap-1">
                 {topic}
-                <X className="w-3 h-3 cursor-pointer hover:text-red-400" onClick={() => removeTopic(topic)} />
+                <X className="w-3 h-3 cursor-pointer" onClick={() => removeTopic(topic)} />
               </Badge>
             ))}
           </div>
@@ -282,22 +282,22 @@ const ContentForm = ({ content, chapterId, moduleId, courseId, onClose }: Conten
 
         {/* Tags */}
         <div>
-          <Label className="text-gray-200">Tags</Label>
+          <Label className="text-white">Tags</Label>
           <div className="flex gap-2 mb-2">
             <Input
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               placeholder="Add a tag"
-              className="bg-gray-900 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20"
+              className="bg-gray-800 border-gray-700 text-white"
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
             />
-            <Button type="button" onClick={addTag} className="bg-blue-600 hover:bg-blue-700">Add</Button>
+            <Button type="button" onClick={addTag}>Add</Button>
           </div>
           <div className="flex flex-wrap gap-2">
             {formData.tags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="flex items-center gap-1 bg-gray-800 text-gray-200 border-gray-600">
+              <Badge key={index} variant="outline" className="flex items-center gap-1">
                 {tag}
-                <X className="w-3 h-3 cursor-pointer hover:text-red-400" onClick={() => removeTag(tag)} />
+                <X className="w-3 h-3 cursor-pointer" onClick={() => removeTag(tag)} />
               </Badge>
             ))}
           </div>
@@ -305,28 +305,28 @@ const ContentForm = ({ content, chapterId, moduleId, courseId, onClose }: Conten
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="status" className="text-gray-200">Status</Label>
+            <Label htmlFor="status" className="text-white">Status</Label>
             <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-              <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-100">
+              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-gray-700">
-                <SelectItem value="draft" className="text-gray-100 hover:bg-gray-800">Draft</SelectItem>
-                <SelectItem value="published" className="text-gray-100 hover:bg-gray-800">Published</SelectItem>
-                <SelectItem value="archived" className="text-gray-100 hover:bg-gray-800">Archived</SelectItem>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        <div className="flex space-x-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
+        <div className="flex space-x-6">
           <div className="flex items-center space-x-2">
             <Switch
               id="is_bookmarkable"
               checked={formData.is_bookmarkable}
               onCheckedChange={(checked) => setFormData({ ...formData, is_bookmarkable: checked })}
             />
-            <Label htmlFor="is_bookmarkable" className="text-gray-200">Bookmarkable</Label>
+            <Label htmlFor="is_bookmarkable" className="text-white">Bookmarkable</Label>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -335,25 +335,16 @@ const ContentForm = ({ content, chapterId, moduleId, courseId, onClose }: Conten
               checked={formData.is_practice_available}
               onCheckedChange={(checked) => setFormData({ ...formData, is_practice_available: checked })}
             />
-            <Label htmlFor="is_practice_available" className="text-gray-200">Practice Available</Label>
+            <Label htmlFor="is_practice_available" className="text-white">Practice Available</Label>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4 border-t border-gray-700">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={onClose}
-          className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-gray-100 bg-gray-800"
-        >
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button 
-          type="submit" 
-          disabled={mutation.isPending}
-          className="bg-orange-600 hover:bg-orange-700 text-white"
-        >
+        <Button type="submit" disabled={mutation.isPending}>
           {mutation.isPending ? 'Saving...' : (content ? 'Update Content' : 'Create Content')}
         </Button>
       </div>
