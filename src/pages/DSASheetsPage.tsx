@@ -3,20 +3,17 @@ import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import UserMenu from '@/components/UserMenu';
-import CourseContent from '@/components/CourseContent';
+import ProblemTable from '@/components/ProblemTable';
 import AdvancedFilter from '@/components/AdvancedFilter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, BookOpen, Trophy, Target, Code, Play, Star, Clock, Users, ArrowLeft } from 'lucide-react';
+import { Search, Filter, BookOpen, Trophy, Target, Code, Play, Star, Clock, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/contexts/AuthContext';
 
 const DSASheetsPage = () => {
-  const { user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
-  const [selectedSheet, setSelectedSheet] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     difficulty: 'all',
     status: 'all',
@@ -28,7 +25,7 @@ const DSASheetsPage = () => {
 
   const sheets = [
     {
-      id: "striver-a2z-dsa",
+      id: 1,
       title: "Striver's A2Z DSA Sheet",
       description: "Master Data Structures and Algorithms from zero to hero.",
       problems: 456,
@@ -41,7 +38,7 @@ const DSASheetsPage = () => {
       color: "from-orange-500 to-red-500"
     },
     {
-      id: "blind-75-leetcode",
+      id: 2,
       title: "Blind 75 LeetCode",
       description: "Essential coding interview problems for FAANG companies.",
       problems: 75,
@@ -54,7 +51,7 @@ const DSASheetsPage = () => {
       color: "from-red-500 to-pink-500"
     },
     {
-      id: "neetcode-150",
+      id: 3,
       title: "NeetCode 150",
       description: "Comprehensive coding interview preparation course.",
       problems: 150,
@@ -67,7 +64,7 @@ const DSASheetsPage = () => {
       color: "from-orange-400 to-yellow-500"
     },
     {
-      id: "dsa-fundamentals",
+      id: 4,
       title: "DSA Fundamentals",
       description: "Master the fundamentals of Data Structures and Algorithms.",
       problems: 200,
@@ -80,7 +77,7 @@ const DSASheetsPage = () => {
       color: "from-pink-500 to-purple-500"
     },
     {
-      id: "advanced-algorithms",
+      id: 5,
       title: "Advanced Algorithms",
       description: "Advanced algorithmic concepts and problem-solving techniques.",
       problems: 180,
@@ -93,7 +90,7 @@ const DSASheetsPage = () => {
       color: "from-purple-500 to-indigo-500"
     },
     {
-      id: "system-design-prep",
+      id: 6,
       title: "System Design Prep",
       description: "System design problems and solutions for interviews.",
       problems: 120,
@@ -106,7 +103,7 @@ const DSASheetsPage = () => {
       color: "from-blue-500 to-cyan-500"
     },
     {
-      id: "dynamic-programming",
+      id: 7,
       title: "Dynamic Programming",
       description: "Master dynamic programming with comprehensive problems.",
       problems: 100,
@@ -120,15 +117,23 @@ const DSASheetsPage = () => {
     }
   ];
 
-  const handleSheetClick = (sheetId: string) => {
-    setSelectedSheet(sheetId);
+  // Mock problem table props with correct types
+  const mockProblemTableProps = {
+    steps: [],
+    expandedSteps: [],
+    expandedLectures: [],
+    problemStatuses: {},
+    bookmarkedProblems: [],
+    problemNotes: {},
+    onToggleStep: () => {},
+    onToggleLecture: () => {},
+    onToggleProblemStatus: () => {},
+    onToggleBookmark: () => {},
+    onOpenNoteDialog: () => {},
+    applyAdvancedFilters: (problems: any[]) => problems,
+    calculateStepProgress: () => 0,
+    calculateLectureProgress: () => 0
   };
-
-  const handleBackToSheets = () => {
-    setSelectedSheet(null);
-  };
-
-  const currentSheet = sheets.find(sheet => sheet.id === selectedSheet);
 
   return (
     <div className="min-h-screen bg-black flex">
@@ -165,186 +170,132 @@ const DSASheetsPage = () => {
         {/* Main Content */}
         <main className="pt-16 p-6 bg-black min-h-screen">
           <div className="max-w-7xl mx-auto space-y-8">
-            {selectedSheet && currentSheet ? (
-              // Individual Sheet View
-              <>
-                {/* Back Button */}
-                <div className="flex items-center space-x-4 mb-6">
+            {/* Page Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+                All DSA Sheets
+              </h1>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
+                Explore our comprehensive collection of Data Structures and Algorithms practice sheets
+              </p>
+
+              {/* Search Bar */}
+              <div className="max-w-2xl mx-auto">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                    placeholder="Search courses, topics, or technologies..."
+                    className="pl-12 pr-12 h-12 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl text-base"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                   <Button
-                    onClick={handleBackToSheets}
                     variant="ghost"
-                    className="text-gray-400 hover:text-white hover:bg-gray-800"
+                    size="sm"
+                    onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg"
                   >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to DSA Sheets
+                    <Filter className="w-4 h-4" />
                   </Button>
                 </div>
+              </div>
+            </div>
 
-                {/* Sheet Header */}
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{currentSheet.title}</h1>
-                      <p className="text-gray-400 text-lg mb-4">{currentSheet.description}</p>
-                      <div className="flex items-center space-x-4">
-                        <Badge className={`${currentSheet.badgeColor} text-white font-bold px-3 py-1 rounded-full`}>
-                          {currentSheet.badge}
-                        </Badge>
-                        <div className="flex items-center space-x-1 text-gray-400">
-                          <BookOpen className="w-4 h-4" />
-                          <span>{currentSheet.topics} topics</span>
+            {/* Advanced Filter */}
+            {showAdvancedFilter && (
+              <div className="max-w-4xl mx-auto">
+                <AdvancedFilter 
+                  filters={filters} 
+                  onFiltersChange={setFilters} 
+                />
+              </div>
+            )}
+
+            {/* DSA Sheets Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {sheets.map((sheet) => (
+                <div
+                  key={sheet.id}
+                  className="relative bg-gradient-to-br group hover:scale-105 transition-all duration-300 cursor-pointer rounded-2xl overflow-hidden"
+                  style={{
+                    background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
+                  }}
+                >
+                  {/* Gradient Background */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${sheet.color} opacity-90`}></div>
+                  
+                  {/* Content */}
+                  <div className="relative z-10 p-6 text-white h-full flex flex-col">
+                    {/* Badge */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                        <BookOpen className="w-6 h-6 text-white" />
+                      </div>
+                      <Badge className={`${sheet.badgeColor} text-white font-bold px-3 py-1 rounded-full`}>
+                        {sheet.badge}
+                      </Badge>
+                    </div>
+                    
+                    {/* Title and Description */}
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold mb-3 leading-tight">
+                        {sheet.title}
+                      </h3>
+                      
+                      <p className="text-white/80 text-sm mb-4 leading-relaxed">
+                        {sheet.description}
+                      </p>
+                    </div>
+                    
+                    {/* Stats */}
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center space-x-1">
+                          <BookOpen className="w-3 h-3" />
+                          <span>{sheet.topics} topics</span>
                         </div>
-                        <div className="flex items-center space-x-1 text-gray-400">
-                          <Clock className="w-4 h-4" />
-                          <span>{currentSheet.estimatedTime}</span>
-                        </div>
-                        <div className="flex items-center space-x-1 text-gray-400">
-                          <Code className="w-4 h-4" />
-                          <span>{currentSheet.problems} problems</span>
-                        </div>
-                        <div className="flex items-center space-x-1 text-gray-400">
-                          <Star className="w-4 h-4 fill-current text-yellow-400" />
-                          <span>{currentSheet.rating}</span>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{sheet.estimatedTime}</span>
                         </div>
                       </div>
+                      
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center space-x-1">
+                          <Code className="w-3 h-3" />
+                          <span>{sheet.problems} problems</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          <span>{sheet.rating}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs bg-white/10 rounded-full px-3 py-1 text-center backdrop-blur-sm">
+                        {sheet.difficulty.toUpperCase()}
+                      </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Course Content */}
-                <CourseContent 
-                  selectedSheet={selectedSheet} 
-                  searchQuery={searchQuery} 
-                  isEnrolled={true}
-                />
-              </>
-            ) : (
-              // Sheets Grid View
-              <>
-                {/* Page Header */}
-                <div className="text-center mb-8">
-                  <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-                    All DSA Sheets
-                  </h1>
-                  <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
-                    Explore our comprehensive collection of Data Structures and Algorithms practice sheets
-                  </p>
-
-                  {/* Search Bar */}
-                  <div className="max-w-2xl mx-auto">
-                    <div className="relative">
-                      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Input
-                        placeholder="Search courses, topics, or technologies..."
-                        className="pl-12 pr-12 h-12 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 focus:border-orange-400 focus:ring-orange-400/20 rounded-xl text-base"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg"
-                      >
-                        <Filter className="w-4 h-4" />
+                    
+                    {/* Buttons */}
+                    <div className="space-y-2">
+                      <Button className="w-full bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm transition-all duration-200">
+                        <Play className="w-4 h-4 mr-2" />
+                        View Course
+                      </Button>
+                      <Button className="w-full bg-white text-black hover:bg-gray-100 font-semibold transition-all duration-200">
+                        <Play className="w-4 h-4 mr-2" />
+                        Start Now
                       </Button>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
 
-                {/* Advanced Filter */}
-                {showAdvancedFilter && (
-                  <div className="max-w-4xl mx-auto">
-                    <AdvancedFilter 
-                      filters={filters} 
-                      onFiltersChange={setFilters} 
-                    />
-                  </div>
-                )}
-
-                {/* DSA Sheets Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {sheets.map((sheet) => (
-                    <div
-                      key={sheet.id}
-                      className="relative bg-gradient-to-br group hover:scale-105 transition-all duration-300 cursor-pointer rounded-2xl overflow-hidden"
-                      onClick={() => handleSheetClick(sheet.id)}
-                      style={{
-                        background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                      }}
-                    >
-                      {/* Gradient Background */}
-                      <div className={`absolute inset-0 bg-gradient-to-br ${sheet.color} opacity-90`}></div>
-                      
-                      {/* Content */}
-                      <div className="relative z-10 p-6 text-white h-full flex flex-col">
-                        {/* Badge */}
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                            <BookOpen className="w-6 h-6 text-white" />
-                          </div>
-                          <Badge className={`${sheet.badgeColor} text-white font-bold px-3 py-1 rounded-full`}>
-                            {sheet.badge}
-                          </Badge>
-                        </div>
-                        
-                        {/* Title and Description */}
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold mb-3 leading-tight">
-                            {sheet.title}
-                          </h3>
-                          
-                          <p className="text-white/80 text-sm mb-4 leading-relaxed">
-                            {sheet.description}
-                          </p>
-                        </div>
-                        
-                        {/* Stats */}
-                        <div className="space-y-3 mb-6">
-                          <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center space-x-1">
-                              <BookOpen className="w-3 h-3" />
-                              <span>{sheet.topics} topics</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Clock className="w-3 h-3" />
-                              <span>{sheet.estimatedTime}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center space-x-1">
-                              <Code className="w-3 h-3" />
-                              <span>{sheet.problems} problems</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-3 h-3 fill-current" />
-                              <span>{sheet.rating}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="text-xs bg-white/10 rounded-full px-3 py-1 text-center backdrop-blur-sm">
-                            {sheet.difficulty.toUpperCase()}
-                          </div>
-                        </div>
-                        
-                        {/* Buttons */}
-                        <div className="space-y-2">
-                          <Button className="w-full bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm transition-all duration-200">
-                            <Play className="w-4 h-4 mr-2" />
-                            View Sheet
-                          </Button>
-                          <Button className="w-full bg-white text-black hover:bg-gray-100 font-semibold transition-all duration-200">
-                            <Play className="w-4 h-4 mr-2" />
-                            Start Now
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+            {/* Problem Table */}
+            <div className="mt-12">
+              <ProblemTable {...mockProblemTableProps} />
+            </div>
           </div>
         </main>
       </div>
